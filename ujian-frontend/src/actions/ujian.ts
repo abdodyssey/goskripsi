@@ -1,0 +1,30 @@
+import { UjianResponse } from "@/types/Ujian";
+
+export async function getJadwalUjianByMahasiswaIdByHasil(mahasiswaId: number) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  try {
+    const response = await fetch(`${apiUrl}/ujian`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch ujian by mahasiswa");
+    }
+
+    const data: UjianResponse = await response.json();
+    if (!data?.data?.length) return [];
+
+    const filteredData = data.data.filter(
+      (ujian) =>
+        Number(ujian.mahasiswa?.id) === Number(mahasiswaId) &&
+        ujian.pendaftaranUjian?.status === "selesai" &&
+        ujian.hasil === "lulus"
+    );
+
+    return filteredData;
+  } catch (error) {
+    console.error("Error fetching ujian by mahasiswa:", error);
+    return [];
+  }
+}
+

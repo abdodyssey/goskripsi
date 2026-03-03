@@ -1,0 +1,83 @@
+"use server";
+export async function postPenilaian(data: {
+  ujianId: number;
+  dosenId: number;
+  komponenNilai: { komponenId: number; nilai: number }[];
+}) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  // Format sesuai kebutuhan backend
+  const payload = {
+    data: data.komponenNilai.map((k) => ({
+      ujianId: data.ujianId,
+      dosenId: data.dosenId,
+      komponenPenilaianId: k.komponenId,
+      nilai: k.nilai,
+    })),
+  };
+  const response = await fetch(`${apiUrl}/penilaian`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    let errorText = "Gagal menyimpan penilaian";
+    try {
+      const errorData = await response.json();
+      if (errorData?.message) errorText += ": " + errorData.message;
+      else if (typeof errorData === "string") errorText += ": " + errorData;
+    } catch {
+      // fallback jika bukan json
+      errorText += ": " + response.statusText;
+    }
+    throw new Error(errorText);
+  }
+  return response.json();
+}
+
+export async function getPenilaianByUjianId(ujianId: number) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  try {
+    const response = await fetch(`${apiUrl}/penilaian`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch penilaian by ujianId");
+    }
+
+    const data = await response.json();
+
+    const filteredData = data.data.filter(
+      (penilaian: { ujianId: number }) => penilaian.ujianId === ujianId
+    );
+    return filteredData;
+  } catch (error) {
+    console.error("Error fetching penilaian by ujianId:", error);
+    return [];
+  }
+}
+
+export async function getAllPenilaian() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  try {
+    const response = await fetch(`${apiUrl}/penilaian`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch all penilaian");
+    }
+
+    const data = await response.json();
+    return data.data; // Assumes structure { data: [...] }
+  } catch (error) {
+    console.error("Error fetching all penilaian:", error);
+    return [];
+  }
+}
