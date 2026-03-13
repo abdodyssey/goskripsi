@@ -8,7 +8,7 @@ class MahasiswaService {
         const whereClause = userId
             ? { id: Number(userId) }
             : {};
-        return await prisma_1.prisma.mahasiswa.findMany({
+        const list = await prisma_1.prisma.mahasiswa.findMany({
             where: whereClause,
             include: {
                 prodi: true,
@@ -16,12 +16,16 @@ class MahasiswaService {
                 user: { select: { id: true, email: true, nama: true } },
                 pembimbing1Rel: {
                     select: { id: true, user: { select: { nama: true } } },
-                }, // Equivalent of pembimbing1
+                },
                 pembimbing2Rel: {
                     select: { id: true, user: { select: { nama: true } } },
-                }, // Equivalent of pembimbing2
+                },
+                dosenPaRel: {
+                    select: { id: true, user: { select: { nama: true } } },
+                },
             },
         });
+        return list.map((m) => this.transformMahasiswa(m));
     }
     async getById(id) {
         const mahasiswa = await prisma_1.prisma.mahasiswa.findUnique({
@@ -36,14 +40,17 @@ class MahasiswaService {
                 pembimbing2Rel: {
                     select: { id: true, user: { select: { nama: true } } },
                 },
+                dosenPaRel: {
+                    select: { id: true, user: { select: { nama: true } } },
+                },
             },
         });
         if (!mahasiswa)
             throw new Error("Mahasiswa not found");
-        return mahasiswa;
+        return this.transformMahasiswa(mahasiswa);
     }
     async create(payload) {
-        return await prisma_1.prisma.mahasiswa.create({
+        const result = await prisma_1.prisma.mahasiswa.create({
             data: {
                 nim: payload.nim,
                 noHp: payload.no_hp,
@@ -60,6 +67,7 @@ class MahasiswaService {
                 id: Number(payload.user_id),
             },
         });
+        return this.transformMahasiswa(result);
     }
     async update(id, payload, fileUrl) {
         const dataToUpdate = {};
@@ -97,14 +105,97 @@ class MahasiswaService {
             dataToUpdate.ipk = new client_1.Prisma.Decimal(payload.ipk);
         if (fileUrl)
             dataToUpdate.foto = fileUrl;
-        return await prisma_1.prisma.mahasiswa.update({
+        const result = await prisma_1.prisma.mahasiswa.update({
             where: { id: Number(id) },
             data: dataToUpdate,
-            include: { prodi: true, peminatan: true },
+            include: {
+                prodi: true,
+                peminatan: true,
+                user: { select: { id: true, email: true, nama: true } },
+                pembimbing1Rel: {
+                    select: { id: true, user: { select: { nama: true } } },
+                },
+                pembimbing2Rel: {
+                    select: { id: true, user: { select: { nama: true } } },
+                },
+                dosenPaRel: {
+                    select: { id: true, user: { select: { nama: true } } },
+                },
+            },
         });
+        return this.transformMahasiswa(result);
     }
     async delete(id) {
         return await prisma_1.prisma.mahasiswa.delete({ where: { id: Number(id) } });
+    }
+    transformMahasiswa(m) {
+        if (!m)
+            return null;
+        return {
+            id: m.id,
+            nim: m.nim,
+            nama: m.user?.nama,
+            email: m.user?.email,
+            noHp: m.noHp,
+            alamat: m.alamat,
+            prodiId: m.prodiId,
+            prodi: this.transformProdi(m.prodi),
+            peminatanId: m.peminatanId,
+            peminatan: this.transformPeminatan(m.peminatan),
+            semester: m.semester,
+            ipk: m.ipk ? Number(m.ipk) : 0,
+            dosenPa: m.dosenPaRel
+                ? { id: m.dosenPaRel.id, nama: m.dosenPaRel.user?.nama }
+                : null,
+            pembimbing1: m.pembimbing1Rel
+                ? { id: m.pembimbing1Rel.id, nama: m.pembimbing1Rel.user?.nama }
+                : null,
+            pembimbing2: m.pembimbing2Rel
+                ? { id: m.pembimbing2Rel.id, nama: m.pembimbing2Rel.user?.nama }
+                : null,
+            status: m.status,
+            angkatan: m.angkatan,
+            foto: m.foto,
+            urlTtd: m.urlTtd,
+            // legacy support
+            no_hp: m.noHp,
+            prodi_id: m.prodiId,
+            peminatan_id: m.peminatanId,
+            dosen_pa: m.dosenPaRel
+                ? { id: m.dosenPaRel.id, nama: m.dosenPaRel.user?.nama }
+                : null,
+            pembimbing_1: m.pembimbing1Rel
+                ? { id: m.pembimbing1Rel.id, nama: m.pembimbing1Rel.user?.nama }
+                : null,
+            pembimbing_2: m.pembimbing2Rel
+                ? { id: m.pembimbing2Rel.id, nama: m.pembimbing2Rel.user?.nama }
+                : null,
+            url_ttd: m.urlTtd,
+        };
+    }
+    transformProdi(p) {
+        if (!p)
+            return null;
+        return {
+            id: p.id,
+            namaProdi: p.namaProdi,
+            fakultasId: p.fakultasId,
+            // legacy
+            nama_prodi: p.namaProdi,
+            fakultas_id: p.fakultasId,
+        };
+    }
+    transformPeminatan(p) {
+        if (!p)
+            return null;
+        return {
+            id: p.id,
+            namaPeminatan: p.namaPeminatan,
+            prodiId: p.prodiId,
+            // legacy
+            nama_peminatan: p.namaPeminatan,
+            prodi_id: p.prodiId,
+        };
     }
 }
 exports.MahasiswaService = MahasiswaService;

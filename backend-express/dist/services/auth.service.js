@@ -108,9 +108,9 @@ class AuthService {
         });
         const roleName = user.role.name;
         if (roleName === "mahasiswa") {
-            await prisma_1.prisma.mahasiswa.update({
+            await prisma_1.prisma.mahasiswa.upsert({
                 where: { id: user.id },
-                data: {
+                update: {
                     noHp: payload.no_hp,
                     alamat: payload.alamat,
                     urlTtd: payload.url_ttd,
@@ -121,14 +121,32 @@ class AuthService {
                         ? payload.semester
                         : undefined,
                 },
+                create: {
+                    id: user.id,
+                    nim: user.username, // Fallback NIM to username
+                    prodiId: 1, // Default or find actual prodi
+                    noHp: payload.no_hp,
+                    alamat: payload.alamat,
+                    urlTtd: payload.url_ttd,
+                    ipk: payload.ipk || 0,
+                    semester: payload.semester || 1,
+                },
             });
         }
         if (roleName === "dosen" ||
             roleName === "kaprodi" ||
             roleName === "sekprodi") {
-            await prisma_1.prisma.dosen.update({
+            await prisma_1.prisma.dosen.upsert({
                 where: { id: user.id },
-                data: {
+                update: {
+                    noHp: payload.no_hp,
+                    alamat: payload.alamat,
+                    urlTtd: payload.url_ttd,
+                    foto: payload.foto,
+                },
+                create: {
+                    id: user.id,
+                    prodiId: 1, // Default prodi for new records
                     noHp: payload.no_hp,
                     alamat: payload.alamat,
                     urlTtd: payload.url_ttd,
@@ -159,25 +177,27 @@ class AuthService {
                     nim: mahasiswa.nim,
                     nama: user.nama,
                     email: user.email,
-                    noHp: mahasiswa.noHp,
+                    no_hp: mahasiswa.noHp,
                     alamat: mahasiswa.alamat,
                     semester: mahasiswa.semester,
-                    ipk: mahasiswa.ipk?.toNumber(),
-                    prodi: mahasiswa.prodi,
-                    peminatan: mahasiswa.peminatan,
+                    ipk: mahasiswa.ipk ? mahasiswa.ipk.toNumber() : 0,
+                    prodi_id: mahasiswa.prodiId,
+                    prodi: this.transformProdi(mahasiswa.prodi),
+                    peminatan_id: mahasiswa.peminatanId,
+                    peminatan: this.transformPeminatan(mahasiswa.peminatan),
                     dosen_pa: mahasiswa.dosenPaRel
                         ? {
                             id: mahasiswa.dosenPaRel.id.toString(),
                             nama: mahasiswa.dosenPaRel.user?.nama || "",
                         }
                         : null,
-                    pembimbing1: mahasiswa.pembimbing1Rel
+                    pembimbing_1: mahasiswa.pembimbing1Rel
                         ? {
                             id: mahasiswa.pembimbing1Rel.id.toString(),
                             nama: mahasiswa.pembimbing1Rel.user?.nama || "",
                         }
                         : null,
-                    pembimbing2: mahasiswa.pembimbing2Rel
+                    pembimbing_2: mahasiswa.pembimbing2Rel
                         ? {
                             id: mahasiswa.pembimbing2Rel.id.toString(),
                             nama: mahasiswa.pembimbing2Rel.user?.nama || "",
@@ -185,7 +205,20 @@ class AuthService {
                         : null,
                     status: mahasiswa.status,
                     angkatan: mahasiswa.angkatan,
-                    urlTtd: mahasiswa.urlTtd,
+                    url_ttd: mahasiswa.urlTtd,
+                    // Add info about passed exams for sequential validation
+                    passed_exams: (await prisma_1.prisma.ujian.findMany({
+                        where: {
+                            pendaftaranUjian: { mahasiswaId: user.id },
+                            hasil: "lulus",
+                        },
+                        select: { pendaftaranUjian: { select: { jenisUjianId: true } } },
+                    })).map((u) => u.pendaftaranUjian.jenisUjianId),
+                    // Add info about current pendaftaran to avoid double registration
+                    active_pendaftaran: (await prisma_1.prisma.pendaftaranUjian.findMany({
+                        where: { mahasiswaId: user.id },
+                        select: { jenisUjianId: true, status: true },
+                    })).map((p) => ({ jenis_id: p.jenisUjianId, status: p.status })),
                 };
             }
         }
@@ -202,10 +235,11 @@ class AuthService {
                     nip: dosen.nip,
                     nama: dosen.user?.nama || "",
                     email: user.email,
-                    noHp: dosen.noHp,
+                    no_hp: dosen.noHp,
                     alamat: dosen.alamat,
-                    prodi: dosen.prodi,
-                    urlTtd: dosen.urlTtd,
+                    prodi_id: dosen.prodiId,
+                    prodi: this.transformProdi(dosen.prodi),
+                    url_ttd: dosen.urlTtd,
                 };
             }
         }
@@ -215,6 +249,24 @@ class AuthService {
             nama: user.nama,
             email: user.email,
             prodi: null,
+        };
+    }
+    transformProdi(p) {
+        if (!p)
+            return null;
+        return {
+            id: p.id,
+            nama_prodi: p.namaProdi,
+            fakultas_id: p.fakultasId,
+        };
+    }
+    transformPeminatan(p) {
+        if (!p)
+            return null;
+        return {
+            id: p.id,
+            nama_peminatan: p.namaPeminatan,
+            prodi_id: p.prodiId,
         };
     }
 }

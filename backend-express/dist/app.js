@@ -25,26 +25,37 @@ const komponen_penilaian_routes_1 = __importDefault(require("./api/routes/kompon
 const syarat_routes_1 = __importDefault(require("./api/routes/syarat.routes"));
 const upload_routes_1 = __importDefault(require("./api/routes/upload.routes"));
 const pemenuhan_syarat_routes_1 = __importDefault(require("./api/routes/pemenuhan-syarat.routes"));
+const keputusan_routes_1 = __importDefault(require("./api/routes/keputusan.routes"));
 // BigInt JSON Serialization patch
 BigInt.prototype.toJSON = function () {
     return this.toString();
 };
 const app = (0, express_1.default)();
-const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+];
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
-        // allow requests with no origin (like mobile apps or curl requests)
+        // Izinkan semua origin selama development agar tidak terblokir
+        // Mirror back the incoming origin to allow credentials
         if (!origin)
             return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = "The CORS policy for this site does not allow access from the specified Origin.";
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
+        callback(null, origin);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Accept",
+        "Origin",
+    ],
+    preflightContinue: false,
+    optionsSuccessStatus: 200,
 }));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
@@ -66,6 +77,7 @@ app.use("/api/pendaftaran-ujian", pendaftaran_ujian_routes_1.default);
 app.use("/api/ujian", ujian_routes_1.default);
 app.use("/api/penilaian", penilaian_routes_1.default);
 app.use("/api/upload", upload_routes_1.default);
+app.use("/api/keputusan", keputusan_routes_1.default);
 // Routing Endpoint
 app.get("/api/health", (req, res) => {
     res.status(200).json({

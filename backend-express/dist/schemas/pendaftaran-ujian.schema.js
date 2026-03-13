@@ -33,16 +33,9 @@ exports.updatePendaftaranUjianSchema = zod_1.z.object({
         ranpel_id: zod_1.z.coerce.number().optional().openapi({ example: 1 }),
         jenis_ujian_id: zod_1.z.coerce.number().optional().openapi({ example: 1 }),
         status: zod_1.z
-            .enum([
-            "menunggu",
-            "belum_dijadwalkan",
-            "dijadwalkan",
-            "selesai",
-            "ditolak",
-            "batal",
-        ])
+            .enum(["draft", "menunggu", "revisi", "diterima", "ditolak"])
             .optional()
-            .openapi({ example: "dijadwalkan" }),
+            .openapi({ example: "menunggu" }),
         keterangan: zod_1.z
             .string()
             .optional()

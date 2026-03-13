@@ -66,12 +66,19 @@ exports.updatePengajuanRanpelSchema = zod_1.z.object({
         status: zod_1.z
             .enum(["menunggu", "diverifikasi", "diterima", "ditolak"])
             .optional()
-            .openapi({ example: "diterima" }),
+            .openapi({ example: "diterima" }), // legacy support
+        status_dosen_pa: zod_1.z
+            .enum(["menunggu", "diverifikasi", "diterima", "ditolak"])
+            .optional(),
+        status_kaprodi: zod_1.z
+            .enum(["menunggu", "diverifikasi", "diterima", "ditolak"])
+            .optional(),
         keterangan: zod_1.z
             .string()
             .optional()
             .nullable()
-            .openapi({ example: "Lanjutkan ke tahap berikutnya" }),
+            .openapi({ example: "Lanjutkan ke tahap berikutnya" }), // legacy/dosen_pa
+        catatan_dosen_pa: zod_1.z.string().optional().nullable(),
         catatan_kaprodi: zod_1.z
             .string()
             .optional()

@@ -7,13 +7,14 @@ class DosenService {
         const whereClause = userId
             ? { id: Number(userId) }
             : {};
-        return await prisma_1.prisma.dosen.findMany({
+        const list = await prisma_1.prisma.dosen.findMany({
             where: whereClause,
             include: {
                 prodi: true,
                 user: { select: { id: true, email: true, nama: true } },
             },
         });
+        return list.map((d) => this.transformDosen(d));
     }
     async getById(id) {
         const dosen = await prisma_1.prisma.dosen.findUnique({
@@ -25,7 +26,7 @@ class DosenService {
         });
         if (!dosen)
             throw new Error("Dosen not found");
-        return dosen;
+        return this.transformDosen(dosen);
     }
     async create(payload) {
         const statusMap = {
@@ -34,7 +35,7 @@ class DosenService {
             "tidak aktif": "tidak aktif",
         };
         const mappedStatus = statusMap[payload.status] || "aktif";
-        return await prisma_1.prisma.dosen.create({
+        const result = await prisma_1.prisma.dosen.create({
             data: {
                 nidn: payload.nidn,
                 nip: payload.nip,
@@ -50,6 +51,7 @@ class DosenService {
                 id: payload.user_id ? Number(payload.user_id) : undefined,
             },
         });
+        return this.transformDosen(result);
     }
     async update(id, payload, ttdUrl) {
         const statusMap = {
@@ -84,14 +86,57 @@ class DosenService {
         }
         if (ttdUrl)
             dataToUpdate.urlTtd = ttdUrl;
-        return await prisma_1.prisma.dosen.update({
+        const result = await prisma_1.prisma.dosen.update({
             where: { id: Number(id) },
             data: dataToUpdate,
-            include: { prodi: true },
+            include: {
+                prodi: true,
+                user: { select: { id: true, email: true, nama: true } },
+            },
         });
+        return this.transformDosen(result);
     }
     async delete(id) {
         return await prisma_1.prisma.dosen.delete({ where: { id: Number(id) } });
+    }
+    transformDosen(d) {
+        if (!d)
+            return null;
+        return {
+            id: d.id,
+            nidn: d.nidn,
+            nip: d.nip,
+            nama: d.user?.nama,
+            email: d.user?.email || d.email,
+            noHp: d.noHp,
+            alamat: d.alamat,
+            tempatTanggalLahir: d.tempatTanggalLahir,
+            pangkat: d.pangkat,
+            golongan: d.golongan,
+            jabatan: d.jabatan,
+            status: d.status,
+            prodiId: d.prodiId,
+            prodi: this.transformProdi(d.prodi),
+            urlTtd: d.urlTtd,
+            foto: d.foto,
+            // legacy support
+            no_hp: d.noHp,
+            tempat_tanggal_lahir: d.tempatTanggalLahir,
+            prodi_id: d.prodiId,
+            url_ttd: d.urlTtd,
+        };
+    }
+    transformProdi(p) {
+        if (!p)
+            return null;
+        return {
+            id: p.id,
+            namaProdi: p.namaProdi,
+            fakultasId: p.fakultasId,
+            // legacy
+            nama_prodi: p.namaProdi,
+            fakultas_id: p.fakultasId,
+        };
     }
 }
 exports.DosenService = DosenService;

@@ -13,7 +13,7 @@ class AuthController {
             res.cookie("auth_token", access_token, {
                 httpOnly: true,
                 secure: isProduction,
-                sameSite: "strict",
+                sameSite: "lax",
                 maxAge: 24 * 60 * 60 * 1000, // 1 Day
             });
             res.status(200).json({ ...userData, access_token });
@@ -32,7 +32,7 @@ class AuthController {
             res.clearCookie("auth_token", {
                 httpOnly: true,
                 secure: isProduction,
-                sameSite: "strict",
+                sameSite: "lax",
             });
             res
                 .status(200)
@@ -71,6 +71,10 @@ class AuthController {
             res.status(200).json(profile);
         }
         catch (error) {
+            if (error instanceof Error && error.message === "User tidak ditemukan") {
+                res.status(401).json({ message: error.message, success: false });
+                return;
+            }
             next(error);
         }
     }

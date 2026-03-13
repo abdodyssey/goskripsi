@@ -62,6 +62,56 @@ class PendaftaranUjianController {
             next(error);
         }
     }
+    async submit(req, res, next) {
+        try {
+            const id = req.params.id;
+            const data = await pendaftaran_ujian_service_1.pendaftaranUjianService.submit(id);
+            res
+                .status(200)
+                .json({
+                data,
+                success: true,
+                message: "Pendaftaran berhasil di-submit",
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async review(req, res, next) {
+        try {
+            const id = req.params.id;
+            const { status, keterangan } = req.body;
+            const data = await pendaftaran_ujian_service_1.pendaftaranUjianService.review(id, status, keterangan);
+            res
+                .status(200)
+                .json({
+                data,
+                success: true,
+                message: `Pendaftaran berhasil di-${status}`,
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async uploadRevisi(req, res, next) {
+        try {
+            const id = req.params.id;
+            const files = req.files || [];
+            const data = await pendaftaran_ujian_service_1.pendaftaranUjianService.uploadRevisi(id, files);
+            res
+                .status(200)
+                .json({
+                data,
+                success: true,
+                message: "Berkas revisi berhasil di-upload",
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
     // Relations Lookups
     async getByMahasiswa(req, res, next) {
         try {

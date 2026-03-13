@@ -14,7 +14,7 @@ class ProdiService {
             data: {
                 namaProdi: payload.nama_prodi,
                 fakultasId: Number(payload.fakultas_id),
-            }
+            },
         });
     }
     async update(id, payload) {
@@ -22,10 +22,12 @@ class ProdiService {
         if (payload.nama_prodi !== undefined)
             dataUpdate.namaProdi = payload.nama_prodi;
         if (payload.fakultas_id !== undefined)
-            dataUpdate.fakultas_id = payload.fakultas_id ? Number(payload.fakultas_id) : null;
+            dataUpdate.fakultasId = payload.fakultas_id
+                ? Number(payload.fakultas_id)
+                : null;
         return await prisma_1.prisma.prodi.update({
             where: { id: Number(id) },
-            data: dataUpdate
+            data: dataUpdate,
         });
     }
     async delete(id) {
