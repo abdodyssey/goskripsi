@@ -1,0 +1,146 @@
+.root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--mantine-color-body);
+  position: relative;
+  overflow: hidden;
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.imageWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 200px;
+}
+
+.blob {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  background-color: var(--mantine-color-indigo-1);
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  animation: morph 8s linear infinite alternate;
+  z-index: -1;
+}
+
+:global([data-mantine-color-scheme="dark"]) .blob {
+  background-color: rgba(var(--mantine-color-indigo-9-rgb), 0.1);
+}
+
+.mainIcon {
+  box-shadow: 0 10px 30px rgba(var(--mantine-color-indigo-filled-rgb), 0.15);
+  transition: transform 0.3s ease;
+}
+
+.mainIcon:hover {
+  transform: translateY(-5px);
+}
+
+.label {
+  font-weight: 800;
+  font-size: rem(100px);
+  color: var(--mantine-color-indigo-9);
+  line-height: 1;
+  margin-bottom: rem(10px);
+  letter-spacing: -2px;
+}
+
+.title {
+  font-family: var(--mantine-font-family-title);
+  font-weight: 900;
+  font-size: rem(34px);
+  color: var(--mantine-color-text);
+  margin: 0;
+}
+
+.description {
+  max-width: 500px;
+  margin-top: rem(15px);
+  color: var(--mantine-color-dimmed);
+}
+
+.controls {
+  margin-top: rem(30px);
+}
+
+.control {
+  font-weight: 600;
+}
+
+/* Background Decorators */
+.decorator1,
+.decorator2 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 1;
+  opacity: 0.15;
+}
+
+.decorator1 {
+  width: 300px;
+  height: 300px;
+  background-color: var(--mantine-color-indigo-5);
+  top: -100px;
+  right: -50px;
+}
+
+.decorator2 {
+  width: 400px;
+  height: 400px;
+  background-color: var(--mantine-color-blue-3);
+  bottom: -150px;
+  left: -80px;
+}
+
+@keyframes morph {
+  0% {
+    border-radius: 40% 60% 70% 30% / 40% 40% 60% 50%;
+  }
+  34% {
+    border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%;
+  }
+  67% {
+    border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%;
+  }
+  100% {
+    border-radius: 40% 60% 70% 30% / 40% 40% 60% 50%;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 48em) {
+  .label {
+    font-size: rem(80px);
+  }
+  .title {
+    font-size: rem(26px);
+  }
+  .controls {
+    flex-direction: column;
+    width: 100%;
+  }
+  .control {
+    width: 100%;
+  }
+}

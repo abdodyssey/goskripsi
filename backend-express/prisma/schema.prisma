@@ -1,0 +1,421 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============== MASTER / REFERENSI ==============
+
+model Fakultas {
+  id           Int    @id @default(autoincrement())
+  namaFakultas String @unique @map("nama_fakultas")
+
+  prodis Prodi[]
+
+  @@map("fakultas")
+}
+
+model Prodi {
+  id         Int    @id @default(autoincrement())
+  namaProdi  String @unique @map("nama_prodi")
+  fakultasId Int    @map("fakultas_id")
+
+  fakultas   Fakultas    @relation(fields: [fakultasId], references: [id])
+  peminatans Peminatan[]
+  ruangans   Ruangan[]
+  dosens     Dosen[]
+  mahasiswas Mahasiswa[]
+
+  @@map("prodi")
+}
+
+model Peminatan {
+  id            Int    @id @default(autoincrement())
+  namaPeminatan String @unique @map("nama_peminatan")
+  prodiId       Int    @map("prodi_id")
+
+  prodi      Prodi       @relation(fields: [prodiId], references: [id])
+  mahasiswas Mahasiswa[]
+
+  @@map("peminatan")
+}
+
+model Ruangan {
+  id          Int     @id @default(autoincrement())
+  namaRuangan String  @map("nama_ruangan")
+  deskripsi   String?
+  prodiId     Int     @map("prodi_id")
+
+  prodi  Prodi   @relation(fields: [prodiId], references: [id])
+  ujians Ujian[]
+
+  @@map("ruangan")
+}
+
+model Keputusan {
+  id            Int    @id @default(autoincrement())
+  kode          String @unique
+  namaKeputusan String @map("nama_keputusan")
+  jenisUjianId  Int?   @map("jenis_ujian_id") // nullable = berlaku semua jenis
+  aktif         Boolean @default(true)
+
+  jenisUjian JenisUjian? @relation(fields: [jenisUjianId], references: [id])
+  ujians Ujian[]
+
+  @@map("keputusan")
+}
+
+// ============== USER MANAGEMENT ==============
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  users User[]
+
+  @@map("role")
+}
+
+model User {
+  id       Int        @id @default(autoincrement())
+  username String     @unique
+  nama     String
+  email    String     @unique
+  password String
+  roleId   Int        @map("role_id")
+  status   StatusAkun @default(aktif)
+
+  role      Role       @relation(fields: [roleId], references: [id])
+  dosen     Dosen?
+  mahasiswa Mahasiswa?
+
+  @@map("user")
+}
+
+model Dosen {
+  id                 Int         @id
+  nidn               String?     @unique
+  nip                String?     @unique
+  email              String?     @unique
+  noHp               String?     @map("no_hp")
+  alamat             String?
+  tempatTanggalLahir String?     @map("tempat_tanggal_lahir")
+  pangkat            String?
+  golongan           String?
+  jabatan            String?
+  foto               String?
+  urlTtd             String?     @map("url_ttd")
+  status             StatusDosen @default(aktif)
+  prodiId            Int         @map("prodi_id")
+
+  user  User  @relation(fields: [id], references: [id])
+  prodi Prodi @relation(fields: [prodiId], references: [id])
+
+  mahasiswaDosenPa Mahasiswa[] @relation("DosenPaRelation")
+  mahasiswaPemb1   Mahasiswa[] @relation("Pembimbing1Relation")
+  mahasiswaPemb2   Mahasiswa[] @relation("Pembimbing2Relation")
+
+  pengujiUjians PengujiUjian[]
+  penilaians    Penilaian[]
+
+  @@map("dosen")
+}
+
+model Mahasiswa {
+  id          Int        @id
+  nim         String     @unique
+  noHp        String?    @map("no_hp")
+  alamat      String?
+  angkatan    String?
+  semester    Int        @default(1)
+  ipk         Decimal    @default(0.00)
+  foto        String?
+  urlTtd      String?    @map("url_ttd")
+  status      StatusAkun @default(aktif)
+  prodiId     Int        @map("prodi_id")
+  peminatanId Int?       @map("peminatan_id")
+  dosenPa     Int?       @map("dosen_pa")
+  pembimbing1 Int?       @map("pembimbing_1")
+  pembimbing2 Int?       @map("pembimbing_2")
+
+  user           User       @relation(fields: [id], references: [id])
+  prodi          Prodi      @relation(fields: [prodiId], references: [id])
+  peminatan      Peminatan? @relation(fields: [peminatanId], references: [id])
+  dosenPaRel     Dosen?     @relation("DosenPaRelation", fields: [dosenPa], references: [id])
+  pembimbing1Rel Dosen?     @relation("Pembimbing1Relation", fields: [pembimbing1], references: [id])
+  pembimbing2Rel Dosen?     @relation("Pembimbing2Relation", fields: [pembimbing2], references: [id])
+
+  rancanganPenelitians          RancanganPenelitian[]
+  pengajuanRancanganPenelitians PengajuanRancanganPenelitian[]
+  pendaftaranUjians             PendaftaranUjian[]
+  dokumens                      DokumenMahasiswa[]
+
+  @@map("mahasiswa")
+}
+
+model DokumenMahasiswa {
+  id          Int          @id @default(autoincrement())
+  mahasiswaId Int          @map("mahasiswa_id")
+  jenis       JenisDokumen
+  fileUrl     String       @map("file_url")
+  uploadedAt  DateTime     @default(now()) @map("uploaded_at")
+
+  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [id])
+
+  @@unique([mahasiswaId, jenis])
+  @@map("dokumen_mahasiswa")
+}
+
+enum JenisDokumen {
+  KTM
+  TRANSKRIP_NILAI
+  SERTIFIKAT_BTA
+  SERTIFIKAT_KKN
+  SERTIFIKAT_TOEFL
+}
+
+// ============== ALUR RANPEL ==============
+
+model RancanganPenelitian {
+  id                  Int     @id @default(autoincrement())
+  mahasiswaId         Int     @map("mahasiswa_id")
+  judulPenelitian     String  @map("judul_penelitian")
+  masalahDanPenyebab  String? @map("masalah_dan_penyebab")
+  alternatifSolusi    String? @map("alternatif_solusi")
+  metodePenelitian    String? @map("metode_penelitian")
+  hasilYangDiharapkan String? @map("hasil_yang_diharapkan")
+  kebutuhanData       String? @map("kebutuhan_data")
+  jurnalReferensi     String? @map("jurnal_referensi")
+
+  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [id])
+
+  pengajuanRancanganPenelitians PengajuanRancanganPenelitian[]
+  pendaftaranUjians             PendaftaranUjian[]
+
+  @@map("rancangan_penelitian")
+}
+
+model PengajuanRancanganPenelitian {
+  id                    Int             @id @default(autoincrement())
+  rancanganPenelitianId Int             @map("rancangan_penelitian_id")
+  mahasiswaId           Int             @map("mahasiswa_id")
+  tanggalPengajuan      DateTime        @default(now()) @map("tanggal_pengajuan")
+  statusDosenPa         StatusPengajuan @default(menunggu) @map("status_dosen_pa")
+  catatanDosenPa        String?         @map("catatan_dosen_pa")
+  tanggalReviewPa       DateTime?       @map("tanggal_review_pa")
+  statusKaprodi         StatusPengajuan @default(menunggu) @map("status_kaprodi")
+  catatanKaprodi        String?         @map("catatan_kaprodi")
+  tanggalReviewKaprodi  DateTime?       @map("tanggal_review_kaprodi")
+
+  rancanganPenelitian RancanganPenelitian @relation(fields: [rancanganPenelitianId], references: [id])
+  mahasiswa           Mahasiswa           @relation(fields: [mahasiswaId], references: [id])
+
+  @@map("pengajuan_rancangan_penelitian")
+}
+
+// ============== ALUR UJIAN ==============
+
+model JenisUjian {
+  id        Int     @id @default(autoincrement())
+  namaJenis String  @map("nama_jenis")
+  deskripsi String?
+  aktif     Boolean @default(true)
+
+  syarats            Syarat[]
+  komponenPenilaians KomponenPenilaian[]
+  pendaftaranUjians  PendaftaranUjian[]
+  keputusans         Keputusan[]
+
+  @@map("jenis_ujian")
+}
+
+model Syarat {
+  id           Int     @id @default(autoincrement())
+  jenisUjianId Int     @map("jenis_ujian_id")
+  namaSyarat   String  @map("nama_syarat")
+  deskripsi    String?
+  wajib        Boolean @default(true)
+
+  jenisUjian       JenisUjian        @relation(fields: [jenisUjianId], references: [id])
+  pemenuhanSyarats PemenuhanSyarat[]
+
+  @@map("syarat")
+}
+
+model KomponenPenilaian {
+  id                 Int     @id @default(autoincrement())
+  jenisUjianId       Int     @map("jenis_ujian_id")
+  kriteria           String
+  indikatorPenilaian String? @map("indikator_penilaian")
+
+  jenisUjian JenisUjian @relation(fields: [jenisUjianId], references: [id])
+
+  bobotKomponenPerans BobotKomponenPeran[]
+  penilaians          Penilaian[]
+
+  @@map("komponen_penilaian")
+}
+
+model BobotKomponenPeran {
+  id                  Int          @id @default(autoincrement())
+  komponenPenilaianId Int          @map("komponen_penilaian_id")
+  peran               PengujiPeran
+  bobot               Int
+
+  komponenPenilaian KomponenPenilaian @relation(fields: [komponenPenilaianId], references: [id])
+
+  @@unique([komponenPenilaianId, peran])
+  @@map("bobot_komponen_peran")
+}
+
+model PendaftaranUjian {
+  id                    Int               @id @default(autoincrement())
+  mahasiswaId           Int               @map("mahasiswa_id")
+  rancanganPenelitianId Int               @map("rancangan_penelitian_id")
+  jenisUjianId          Int               @map("jenis_ujian_id")
+  tanggalPendaftaran    DateTime          @default(now()) @map("tanggal_pendaftaran")
+  tanggalDisetujui      DateTime?         @map("tanggal_disetujui")
+  status                StatusPendaftaran @default(draft)
+  keterangan            String?
+
+  mahasiswa           Mahasiswa           @relation(fields: [mahasiswaId], references: [id])
+  rancanganPenelitian RancanganPenelitian @relation(fields: [rancanganPenelitianId], references: [id])
+  jenisUjian          JenisUjian          @relation(fields: [jenisUjianId], references: [id])
+
+  pemenuhanSyarats PemenuhanSyarat[]
+  ujian            Ujian?
+
+  @@map("pendaftaran_ujian")
+}
+
+model PemenuhanSyarat {
+  id                 Int     @id @default(autoincrement())
+  pendaftaranUjianId Int     @map("pendaftaran_ujian_id")
+  syaratId           Int     @map("syarat_id")
+  fileBukti          String? @map("file_bukti")
+  terpenuhi          Boolean @default(false)
+  keterangan         String?
+
+  pendaftaranUjian PendaftaranUjian @relation(fields: [pendaftaranUjianId], references: [id])
+  syarat           Syarat           @relation(fields: [syaratId], references: [id])
+
+  @@unique([pendaftaranUjianId, syaratId])
+  @@map("pemenuhan_syarat")
+}
+
+model Ujian {
+  id                 Int         @id @default(autoincrement())
+  pendaftaranUjianId Int         @unique @map("pendaftaran_ujian_id")
+  hariUjian          HariUjian?  @map("hari_ujian")
+  jadwalUjian        DateTime?   @map("jadwal_ujian")
+  waktuMulai         DateTime?   @map("waktu_mulai")
+  waktuSelesai       DateTime?   @map("waktu_selesai")
+  ruanganId          Int?        @map("ruangan_id")
+  status             StatusUjian @default(belum_dijadwalkan)
+  hasil              HasilUjian?
+  nilaiAkhir         Decimal?    @map("nilai_akhir")
+  nilaiHuruf         String?     @map("nilai_huruf")
+  catatanRevisi      String?     @map("catatan_revisi")
+  keputusanId        Int?        @map("keputusan_id")
+  nilaiDifinalisasi  Boolean     @default(false) @map("nilai_difinalisasi")
+  tanggalFinalisasi  DateTime?   @map("tanggal_finalisasi")
+  finalisasiOleh     Int?        @map("finalisasi_oleh") // FK → dosen.id
+
+  pendaftaranUjian PendaftaranUjian @relation(fields: [pendaftaranUjianId], references: [id])
+  ruangan          Ruangan?         @relation(fields: [ruanganId], references: [id])
+  keputusan        Keputusan?       @relation(fields: [keputusanId], references: [id])
+
+  pengujiUjians PengujiUjian[]
+  penilaians    Penilaian[]
+
+  @@map("ujian")
+}
+
+model PengujiUjian {
+  id           Int          @id @default(autoincrement())
+  ujianId      Int          @map("ujian_id")
+  dosenId      Int          @map("dosen_id")
+  peran        PengujiPeran
+  hadir        Boolean      @default(false)
+  tanggalAbsen DateTime?    @map("tanggal_absen")
+
+  ujian Ujian @relation(fields: [ujianId], references: [id])
+  dosen Dosen @relation(fields: [dosenId], references: [id])
+
+  @@unique([ujianId, dosenId])
+  @@map("penguji_ujian")
+}
+
+model Penilaian {
+  ujianId             Int       @map("ujian_id")
+  dosenId             Int       @map("dosen_id")
+  komponenPenilaianId Int       @map("komponen_penilaian_id")
+  nilai               Decimal?
+  komentar            String?
+  sudahSubmit         Boolean   @default(false) @map("sudah_submit")
+  submittedAt         DateTime? @map("submitted_at")
+
+  ujian             Ujian             @relation(fields: [ujianId], references: [id])
+  dosen             Dosen             @relation(fields: [dosenId], references: [id])
+  komponenPenilaian KomponenPenilaian @relation(fields: [komponenPenilaianId], references: [id])
+
+  @@id([ujianId, dosenId, komponenPenilaianId])
+  @@map("penilaian")
+}
+
+// ============== ENUMS ==============
+
+enum StatusAkun {
+  aktif
+  tidak_aktif
+}
+
+enum StatusDosen {
+  aktif
+  tidak_aktif
+}
+
+enum StatusPengajuan {
+  menunggu
+  diterima
+  ditolak
+}
+
+enum StatusPendaftaran {
+  draft
+  menunggu
+  revisi
+  diterima
+  ditolak
+}
+
+enum StatusUjian {
+  belum_dijadwalkan
+  dijadwalkan
+  selesai
+}
+
+enum HasilUjian {
+  lulus
+  tidak_lulus
+}
+
+enum PengujiPeran {
+  ketua_penguji
+  sekretaris_penguji
+  penguji_1
+  penguji_2
+}
+
+enum HariUjian {
+  Senin
+  Selasa
+  Rabu
+  Kamis
+  Jumat
+  Sabtu
+  Minggu
+}

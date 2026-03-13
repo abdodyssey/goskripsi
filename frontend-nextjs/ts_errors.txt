@@ -1,0 +1,82 @@
+src/features/pendaftaran-ujian/components/pendaftaran-ujian-list.tsx(41,24): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/pendaftaran-ujian/components/pendaftaran-ujian-list.tsx(43,25): error TS2339: Property 'ranpel_id' does not exist on type 'PengajuanRanpel'.
+src/features/pendaftaran-ujian/components/pendaftaran-ujian-list.tsx(44,18): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(183,13): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(184,13): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(185,13): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(193,13): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(211,43): error TS2339: Property 'toLowerCase' does not exist on type '{}'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(235,15): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(248,16): error TS2339: Property 'tanggal_diverifikasi' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(249,28): error TS2339: Property 'tanggal_diverifikasi' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(263,22): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(269,18): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(278,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(279,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(280,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(281,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(293,18): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(355,22): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(389,23): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(389,52): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(477,9): error TS2322: Type 'unknown' is not assignable to type 'string | undefined'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(486,78): error TS2339: Property 'id' does not exist on type '{}'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(490,78): error TS2339: Property 'id' does not exist on type '{}'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(110,22): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(117,18): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(126,16): error TS2551: Property 'tanggal_pengajuan' does not exist on type 'PengajuanRanpel'. Did you mean 'tanggalPengajuan'?
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(127,28): error TS2551: Property 'tanggal_pengajuan' does not exist on type 'PengajuanRanpel'. Did you mean 'tanggalPengajuan'?
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(139,31): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(142,18): error TS2339: Property 'keterangan' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(159,24): error TS2339: Property 'keterangan' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(163,18): error TS2551: Property 'catatan_kaprodi' does not exist on type 'PengajuanRanpel'. Did you mean 'catatanKaprodi'?
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(180,24): error TS2551: Property 'catatan_kaprodi' does not exist on type 'PengajuanRanpel'. Did you mean 'catatanKaprodi'?
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(184,19): error TS2339: Property 'keterangan' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(184,38): error TS2551: Property 'catatan_kaprodi' does not exist on type 'PengajuanRanpel'. Did you mean 'catatanKaprodi'?
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(197,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(198,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(199,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(200,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(201,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(213,18): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(251,21): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(251,50): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(266,29): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-form-modal.tsx(64,32): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-form-modal.tsx(66,38): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-form-modal.tsx(67,42): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-form-modal.tsx(68,39): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-form-modal.tsx(69,39): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-form-modal.tsx(70,43): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-form-modal.tsx(71,36): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-form-modal.tsx(72,38): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-form-modal.tsx(82,32): error TS2339: Property 'ranpel_id' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-form-modal.tsx(83,49): error TS2339: Property 'ranpel_id' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-preview-modal.tsx(35,32): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-preview-modal.tsx(37,26): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-preview-modal.tsx(294,33): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-preview-modal.tsx(295,33): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/ranpel-preview-modal.tsx(299,31): error TS2339: Property 'url_ttd' does not exist on type '{}'.
+src/features/ranpel/components/ranpel-preview-modal.tsx(313,25): error TS2339: Property 'nama' does not exist on type '{}'.
+src/features/ranpel/components/ranpel-preview-modal.tsx(318,25): error TS2339: Property 'nip' does not exist on type '{}'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(198,15): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(212,22): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(219,18): error TS2339: Property 'ranpel' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(228,16): error TS2551: Property 'tanggal_pengajuan' does not exist on type 'PengajuanRanpel'. Did you mean 'tanggalPengajuan'?
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(229,28): error TS2551: Property 'tanggal_pengajuan' does not exist on type 'PengajuanRanpel'. Did you mean 'tanggalPengajuan'?
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(244,18): error TS2339: Property 'tanggal_diterima' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(246,16): error TS2339: Property 'tanggal_diterima' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(247,28): error TS2339: Property 'tanggal_diterima' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(260,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(261,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(262,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(263,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(275,18): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(297,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(298,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(299,17): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(322,22): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(352,23): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(352,56): error TS2339: Property 'status' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(353,24): error TS2339: Property 'tanggal_diterima' does not exist on type 'PengajuanRanpel'.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(400,9): error TS2322: Type 'unknown' is not assignable to type 'string | undefined'.

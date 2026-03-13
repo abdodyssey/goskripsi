@@ -1,0 +1,619 @@
+"use client";
+import Link from "next/link";
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import {
+  Container,
+  Text,
+  Badge,
+  Group,
+  Stack,
+  Modal,
+  ActionIcon,
+  Tooltip,
+  Grid,
+  Tabs,
+  Paper,
+  Button,
+} from "@mantine/core";
+import { PageHeader } from "@/components/PageHeader/PageHeader";
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api-client";
+import { useDisclosure } from "@mantine/hooks";
+import { useState, useMemo } from "react";
+import {
+  IconEye,
+  IconCalendarEvent,
+  IconPlayerPlay,
+  IconPrinter,
+} from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
+
+// ---- Types ----
+interface PengujiItem {
+  dosenId: string;
+  peran: string;
+  dosen?: {
+    id: string;
+    nama: string;
+    nidn?: string;
+    user?: { nama: string };
+  };
+}
+
+interface UjianItem {
+  id: string;
+  pendaftaranUjianId: string;
+  hariUjian: string | null;
+  jadwalUjian: string | null;
+  waktuMulai: string | null;
+  waktuSelesai: string | null;
+  ruanganId: string | null;
+  catatan: string | null;
+  ruangan?: { namaRuangan: string } | null;
+  pengujiUjians?: PengujiItem[];
+  pendaftaranUjian?: {
+    mahasiswa?: { user?: { nama: string }; nim: string };
+    jenisUjian?: { namaJenis: string };
+    rancanganPenelitian?: { judulPenelitian: string };
+  };
+  keputusan?: { namaKeputusan: string } | null;
+}
+
+const PERAN_LABELS: Record<string, string> = {
+  ketua_penguji: "Ketua Penguji",
+  sekretaris_penguji: "Sekretaris",
+  penguji_1: "Penguji 1",
+  penguji_2: "Penguji 2",
+};
+
+export default function JadwalUjianDosenPage() {
+  const { userResponse, isLoadingProfile, isAuthenticated } = useAuth();
+
+  const user = userResponse?.user;
+  const roles = user?.roles || userResponse?.roles || [];
+  const rolesLower = roles.map((r) => r.toLowerCase());
+  const isDosen = rolesLower.includes("dosen");
+  const isSekprodi = rolesLower.includes("sekprodi");
+  const isKaprodi = rolesLower.includes("kaprodi");
+  const isAdmin =
+    rolesLower.includes("admin") || rolesLower.includes("superadmin");
+  const isAdminProdi = rolesLower.includes("admin_prodi");
+  const canViewAll = isSekprodi || isKaprodi || isAdmin || isAdminProdi;
+
+  const userId = user?.id;
+
+  // Default tab logic: Administrative roles default to "Semua Ujian"
+  const defaultTab = canViewAll ? "semua" : "saya";
+
+  // Detail modal
+  const [detailOpened, { open: openDetail, close: closeDetail }] =
+    useDisclosure(false);
+  const [selectedUjian, setSelectedUjian] = useState<UjianItem | null>(null);
+
+  // ---- Fetch all ujian ----
+  const {
+    data: allUjian,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["all-ujian-dosen"],
+    queryFn: async () => {
+      const res = await apiClient.get("/ujian");
+      return (res.data?.data || []) as UjianItem[];
+    },
+    enabled: isAuthenticated && (isDosen || canViewAll),
+  });
+
+  // ---- Derived data ----
+  const myUjian = useMemo(() => {
+    if (!allUjian || !userId) return [];
+    return allUjian.filter((u) =>
+      u.pengujiUjians?.some((p) => String(p.dosenId) === String(userId)),
+    );
+  }, [allUjian, userId]);
+
+  // Find my role in a given ujian
+  const getMyRole = (ujian: UjianItem): string => {
+    if (!userId) return "-";
+    const penguji = ujian.pengujiUjians?.find(
+      (p) => String(p.dosenId) === String(userId),
+    );
+    return penguji ? PERAN_LABELS[penguji.peran] || penguji.peran : "-";
+  };
+
+  const handleViewDetail = (ujian: UjianItem) => {
+    setSelectedUjian(ujian);
+    openDetail();
+  };
+
+  // ---- Common columns ----
+  const baseColumns: DataTableColumn<UjianItem>[] = [
+    {
+      header: "Mahasiswa",
+      render: (row) => (
+        <Stack gap={2}>
+          <Text size="sm" fw={500}>
+            {row.pendaftaranUjian?.mahasiswa?.user?.nama || "-"}
+          </Text>
+          <Text size="xs" c="dimmed">
+            {row.pendaftaranUjian?.mahasiswa?.nim || ""}
+          </Text>
+        </Stack>
+      ),
+    },
+    {
+      header: "Jenis Ujian",
+      render: (row) => (
+        <Text size="sm">
+          {row.pendaftaranUjian?.jenisUjian?.namaJenis || "-"}
+        </Text>
+      ),
+    },
+    {
+      header: "Hari",
+      render: (row) => <Text size="sm">{row.hariUjian || "-"}</Text>,
+    },
+    {
+      header: "Tanggal",
+      render: (row) => (
+        <Text size="sm">
+          {row.jadwalUjian
+            ? new Date(row.jadwalUjian).toLocaleDateString("id-ID")
+            : "-"}
+        </Text>
+      ),
+    },
+    {
+      header: "Waktu",
+      render: (row) => {
+        if (!row.waktuMulai) return <Text size="sm">-</Text>;
+        const mulai = new Date(row.waktuMulai).toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const selesai = row.waktuSelesai
+          ? new Date(row.waktuSelesai).toLocaleTimeString("id-ID", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "?";
+        return (
+          <Text size="sm">
+            {mulai} - {selesai}
+          </Text>
+        );
+      },
+    },
+    {
+      header: "Ruangan",
+      render: (row) => <Text size="sm">{row.ruangan?.namaRuangan || "-"}</Text>,
+    },
+  ];
+
+  // ---- My ujian columns (with my role) ----
+  const myColumns: DataTableColumn<UjianItem>[] = [
+    ...baseColumns,
+    {
+      header: "Peran Saya",
+      render: (row) => (
+        <Badge variant="light" color="indigo" size="sm">
+          {getMyRole(row)}
+        </Badge>
+      ),
+    },
+    {
+      header: "Aksi",
+      textAlign: "right",
+      width: 140,
+      render: (row) => (
+        <Group gap="xs" justify="flex-end">
+          <Tooltip label="Ekseskusi Ujian">
+            <ActionIcon
+              variant="light"
+              color="indigo"
+              size="sm"
+              component={Link}
+              href={`/dashboard/penguji/ujian/${row.id}`}
+            >
+              <IconPlayerPlay size={14} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Detail">
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="sm"
+              onClick={() => handleViewDetail(row)}
+            >
+              <IconEye size={14} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
+      ),
+    },
+  ];
+
+  // ---- All ujian columns ----
+  const allColumns: DataTableColumn<UjianItem>[] = [
+    ...baseColumns,
+    {
+      header: "Aksi",
+      textAlign: "right",
+      width: 140,
+      render: (row) => (
+        <Group gap="xs" justify="flex-end">
+          <Tooltip label="Ekseskusi Ujian">
+            <ActionIcon
+              variant="light"
+              color="indigo"
+              size="sm"
+              component={Link}
+              href={`/dashboard/penguji/ujian/${row.id}`}
+            >
+              <IconPlayerPlay size={14} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Detail">
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="sm"
+              onClick={() => handleViewDetail(row)}
+            >
+              <IconEye size={14} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
+      ),
+    },
+  ];
+
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    setDownloading(true);
+    try {
+      const response = await apiClient.get("/ujian/pdf/jadwal", {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "Jadwal_Ujian.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (err) {
+      console.error("Download error:", err);
+      notifications.show({
+        title: "Gagal",
+        message: "Gagal mendownload PDF jadwal",
+        color: "red",
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  if (isLoadingProfile || !isAuthenticated) return null;
+  if (!isDosen && !canViewAll) {
+    return (
+      <Container size="xl" pt="md">
+        <Text c="red">
+          Hanya Dosen atau Staf Administrasi yang memiliki akses ke halaman ini.
+        </Text>
+      </Container>
+    );
+  }
+
+  return (
+    <Container size="xl" pt="md">
+      <PageHeader
+        title="Jadwal Ujian"
+        items={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Jadwal Ujian" },
+        ]}
+        description="Lihat dan pantau jadwal ujian skripsi yang telah ditetapkan"
+        icon={IconCalendarEvent}
+        rightSection={
+          canViewAll && (
+            <Group>
+              <Button
+                variant="light"
+                color="indigo"
+                leftSection={<IconPrinter size={16} />}
+                onClick={handleDownloadPdf}
+                loading={downloading}
+              >
+                Cetak Jadwal (PDF)
+              </Button>
+            </Group>
+          )
+        }
+      />
+
+      <Paper withBorder radius="lg" p={0} style={{ overflow: "hidden" }}>
+        <Tabs defaultValue={defaultTab}>
+          <Tabs.List px="md" pt="md">
+            {/* Hanya tampil untuk Dosen biasa */}
+            {isDosen && !isKaprodi && !isSekprodi && (
+              <Tabs.Tab
+                value="saya"
+                rightSection={
+                  myUjian.length ? (
+                    <Badge
+                      size="sm"
+                      color="indigo"
+                      variant="light"
+                      radius="xl"
+                      px={8}
+                    >
+                      {myUjian.length}
+                    </Badge>
+                  ) : null
+                }
+              >
+                Ujian Saya
+              </Tabs.Tab>
+            )}
+
+            {/* Tampil untuk peran administratif */}
+            {canViewAll && (
+              <Tabs.Tab
+                value="semua"
+                rightSection={
+                  allUjian?.length ? (
+                    <Badge
+                      size="sm"
+                      color="gray"
+                      variant="light"
+                      radius="xl"
+                      px={8}
+                    >
+                      {allUjian.length}
+                    </Badge>
+                  ) : null
+                }
+              >
+                Semua Ujian
+              </Tabs.Tab>
+            )}
+          </Tabs.List>
+
+          {isDosen && !isKaprodi && !isSekprodi && (
+            <Tabs.Panel value="saya" p={0}>
+              <DataTable<UjianItem>
+                data={myUjian}
+                columns={myColumns}
+                loading={isLoading}
+                error={error ? "Gagal memuat data ujian" : null}
+                noCard
+              />
+            </Tabs.Panel>
+          )}
+
+          {canViewAll && (
+            <Tabs.Panel value="semua" p={0}>
+              <DataTable<UjianItem>
+                data={allUjian || []}
+                columns={allColumns}
+                loading={isLoading}
+                error={error ? "Gagal memuat data ujian" : null}
+                noCard
+              />
+            </Tabs.Panel>
+          )}
+        </Tabs>
+      </Paper>
+
+      {/* ---- Detail Modal ---- */}
+      <Modal
+        opened={detailOpened}
+        onClose={() => {
+          closeDetail();
+          setSelectedUjian(null);
+        }}
+        title={
+          <Text fw={700} size="lg">
+            Detail Informasi Ujian
+          </Text>
+        }
+        size="lg"
+        centered
+        radius="lg"
+        styles={{
+          header: {
+            borderBottom: "1px solid var(--mantine-color-default-border)",
+            paddingBottom: "var(--mantine-spacing-md)",
+            marginBottom: "var(--mantine-spacing-md)",
+          },
+          body: {
+            paddingTop: 0,
+          },
+        }}
+      >
+        {selectedUjian && (
+          <Stack gap="lg">
+            <Paper
+              withBorder
+              radius="md"
+              p="md"
+              mb="lg"
+              bg="gray.0"
+              className="dark:bg-slate-900/40"
+            >
+              <Stack gap="lg">
+                <Group justify="space-between" align="flex-start">
+                  <Stack gap={4}>
+                    <Text
+                      size="xs"
+                      c="dimmed"
+                      tt="uppercase"
+                      fw={800}
+                      lts={0.5}
+                    >
+                      Mahasiswa
+                    </Text>
+                    <Text size="sm" fw={700}>
+                      {selectedUjian.pendaftaranUjian?.mahasiswa?.user?.nama ||
+                        "-"}
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      NIM:{" "}
+                      {selectedUjian.pendaftaranUjian?.mahasiswa?.nim || "-"}
+                    </Text>
+                  </Stack>
+                  <Badge color="indigo" variant="filled" size="md">
+                    {selectedUjian.pendaftaranUjian?.jenisUjian?.namaJenis ||
+                      "-"}
+                  </Badge>
+                </Group>
+
+                <Stack gap={4}>
+                  <Text size="xs" c="dimmed" tt="uppercase" fw={800} lts={0.5}>
+                    Judul Penelitian
+                  </Text>
+                  <Text size="sm" fw={600} style={{ fontStyle: "italic" }}>
+                    &quot;
+                    {selectedUjian.pendaftaranUjian?.rancanganPenelitian
+                      ?.judulPenelitian || "-"}
+                    &quot;
+                  </Text>
+                </Stack>
+              </Stack>
+            </Paper>
+
+            <Paper withBorder radius="md" p="md" mb="lg">
+              <Text
+                size="sm"
+                fw={700}
+                mb="md"
+                c="indigo.7"
+                lts={0.5}
+                tt="uppercase"
+              >
+                Jadwal & Lokasi
+              </Text>
+              <Grid gutter="md">
+                <Grid.Col span={4}>
+                  <Stack gap={2}>
+                    <Text size="xs" fw={700} c="dimmed" tt="uppercase">
+                      Hari
+                    </Text>
+                    <Text size="sm" fw={600}>
+                      {selectedUjian.hariUjian || "-"}
+                    </Text>
+                  </Stack>
+                </Grid.Col>
+                <Grid.Col span={4}>
+                  <Stack gap={2}>
+                    <Text size="xs" fw={700} c="dimmed" tt="uppercase">
+                      Tanggal
+                    </Text>
+                    <Text size="sm" fw={600}>
+                      {selectedUjian.jadwalUjian
+                        ? new Date(
+                            selectedUjian.jadwalUjian,
+                          ).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })
+                        : "-"}
+                    </Text>
+                  </Stack>
+                </Grid.Col>
+                <Grid.Col span={4}>
+                  <Stack gap={2}>
+                    <Text size="xs" fw={700} c="dimmed" tt="uppercase">
+                      Waktu
+                    </Text>
+                    <Text size="sm" fw={600}>
+                      {selectedUjian.waktuMulai
+                        ? `${new Date(selectedUjian.waktuMulai).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} - ${selectedUjian.waktuSelesai ? new Date(selectedUjian.waktuSelesai).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "?"}`
+                        : "-"}
+                    </Text>
+                  </Stack>
+                </Grid.Col>
+                {selectedUjian.ruangan && (
+                  <Grid.Col span={12}>
+                    <Group gap="xs">
+                      <Text size="xs" fw={700} c="dimmed" tt="uppercase">
+                        Ruangan:
+                      </Text>
+                      <Badge variant="dot" color="indigo" size="sm">
+                        {selectedUjian.ruangan.namaRuangan}
+                      </Badge>
+                    </Group>
+                  </Grid.Col>
+                )}
+              </Grid>
+            </Paper>
+
+            {/* Dewan Penguji */}
+            {selectedUjian.pengujiUjians &&
+              selectedUjian.pengujiUjians.length > 0 && (
+                <Stack gap="xs">
+                  <Text
+                    size="sm"
+                    fw={700}
+                    c="indigo.7"
+                    lts={0.5}
+                    tt="uppercase"
+                  >
+                    Dewan Penguji
+                  </Text>
+                  <Grid gutter="sm">
+                    {selectedUjian.pengujiUjians.map((p, i) => (
+                      <Grid.Col span={6} key={i}>
+                        <Paper
+                          p="sm"
+                          radius="md"
+                          withBorder
+                          className="dark:bg-slate-900/40"
+                        >
+                          <Text
+                            size="xs"
+                            c="dimmed"
+                            tt="uppercase"
+                            fw={800}
+                            lts={0.5}
+                          >
+                            {PERAN_LABELS[p.peran] || p.peran}
+                          </Text>
+                          <Text size="sm" fw={600}>
+                            {p.dosen?.user?.nama || p.dosen?.nama || "-"}
+                          </Text>
+                        </Paper>
+                      </Grid.Col>
+                    ))}
+                  </Grid>
+                </Stack>
+              )}
+
+            {/* Catatan */}
+            {selectedUjian.catatan && (
+              <Paper withBorder radius="md" p="md">
+                <Text
+                  size="sm"
+                  fw={700}
+                  mb="xs"
+                  c="orange.7"
+                  lts={0.5}
+                  tt="uppercase"
+                >
+                  Catatan
+                </Text>
+                <Text size="sm" lh={1.6}>
+                  {selectedUjian.catatan}
+                </Text>
+              </Paper>
+            )}
+          </Stack>
+        )}
+      </Modal>
+    </Container>
+  );
+}

@@ -13,7 +13,7 @@ class JenisUjianSeeder extends Seeder
     public function run(): void
     {
         $jenisUjian = [
-            ['nama_jenis' => 'Ujian Proposal'],
+            ['nama_jenis' => 'Seminar Proposal'],
             ['nama_jenis' => 'Ujian Hasil'],
             ['nama_jenis' => 'Ujian Skripsi'],
         ];

@@ -1,0 +1,35 @@
+@baseUrl = http://localhost:3000/api
+@nipNim = 123456789
+@password = password123
+
+### 1. Health Target
+GET {{baseUrl}}/health
+Accept: application/json
+
+### 2. Login
+# Pastikan data nipNim dan password sesuai database mariadb kamu
+# Hasil login ini akan memasukkan cookie session secara otomatis jika ekstensi VS Code (REST Client) / Postman digunakan.
+# @name loginRequest
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "nip_nim": "{{nipNim}}",
+  "password": "{{password}}"
+}
+
+### 3. Cek Profil / Data Me
+# Akan error 401 Unauthorized jika tidak login terlebih dahulu
+GET {{baseUrl}}/me
+# Uncomment header di bawah jika tidak pakai http-only cookie melainkan bearer token
+# Authorization: Bearer {token-dari-hasil-login}
+
+
+### 4. Tes Get All Fakultas (Butuh Auth)
+GET {{baseUrl}}/fakultas
+
+### 5. Tes Get Skripsi (Butuh Auth)
+GET {{baseUrl}}/skripsi
+
+### 6. Tes Get Ranpel via Mahasiswa (Butuh Auth, ganti "1" dengan ID mahasiswa)
+GET {{baseUrl}}/mahasiswa/1/ranpel

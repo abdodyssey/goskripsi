@@ -1,0 +1,21 @@
+src/services/daftar-kehadiran.service.ts(15,16): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'daftar_kehadiranWhereUniqueInput'.
+src/services/daftar-kehadiran.service.ts(44,16): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'daftar_kehadiranWhereUniqueInput'.
+src/services/daftar-kehadiran.service.ts(50,60): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'daftar_kehadiranWhereUniqueInput'.
+src/services/pemenuhan-syarat.service.ts(15,16): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'pemenuhan_syaratWhereUniqueInput'.
+src/services/pemenuhan-syarat.service.ts(62,16): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'pemenuhan_syaratWhereUniqueInput'.
+src/services/pemenuhan-syarat.service.ts(68,60): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'pemenuhan_syaratWhereUniqueInput'.
+src/services/penilaian.service.ts(12,9): error TS2353: Object literal may only specify known properties, and 'ujian' does not exist in type 'penilaianInclude<DefaultArgs>'.
+src/services/penilaian.service.ts(21,16): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'penilaianWhereUniqueInput'.
+src/services/penilaian.service.ts(23,9): error TS2353: Object literal may only specify known properties, and 'ujian' does not exist in type 'penilaianInclude<DefaultArgs>'.
+src/services/penilaian.service.ts(90,22): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'penilaianWhereUniqueInput'.
+src/services/penilaian.service.ts(115,18): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'penilaianWhereUniqueInput'.
+src/services/penilaian.service.ts(127,18): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'penilaianWhereUniqueInput'.
+src/services/penilaian.service.ts(133,44): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'penilaianWhereUniqueInput'.
+src/services/ujian.service.ts(9,9): error TS2353: Object literal may only specify known properties, and 'jenis_ujian' does not exist in type 'ujianInclude<DefaultArgs>'.
+src/services/ujian.service.ts(24,9): error TS2353: Object literal may only specify known properties, and 'jenis_ujian' does not exist in type 'ujianInclude<DefaultArgs>'.
+src/services/ujian.service.ts(37,9): error TS2353: Object literal may only specify known properties, and 'mahasiswa_id' does not exist in type 'ujianWhereInput'.
+src/services/ujian.service.ts(46,9): error TS2353: Object literal may only specify known properties, and 'jenis_ujian' does not exist in type 'ujianInclude<DefaultArgs>'.
+src/services/ujian.service.ts(68,11): error TS2353: Object literal may only specify known properties, and 'mahasiswa_id' does not exist in type 'Without<ujianCreateInput, ujianUncheckedCreateInput> & ujianUncheckedCreateInput'.
+src/services/ujian.service.ts(167,11): error TS2353: Object literal may only specify known properties, and 'mahasiswa' does not exist in type 'ujianInclude<DefaultArgs>'.
+src/services/ujian.service.ts(182,20): error TS2353: Object literal may only specify known properties, and 'jenis_ujian' does not exist in type 'ujianInclude<DefaultArgs>'.
+src/services/ujian.service.ts(229,32): error TS2339: Property 'jenis_ujian' does not exist on type '{ id: bigint; pendaftaran_ujian_id: bigint; created_at: Date | null; updated_at: Date | null; hari_ujian: ujian_hari_ujian | null; jadwal_ujian: Date | null; ... 6 more ...; catatan: string | null; }'.

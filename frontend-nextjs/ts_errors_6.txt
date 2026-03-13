@@ -1,0 +1,14 @@
+src/features/pendaftaran-ujian/components/pendaftaran-ujian-form-modal.tsx(127,58): error TS2551: Property 'nama_syarat' does not exist on type 'Syarat'. Did you mean 'namaSyarat'?
+src/features/pendaftaran-ujian/components/pendaftaran-ujian-form-modal.tsx(224,36): error TS2551: Property 'nama_syarat' does not exist on type 'Syarat'. Did you mean 'namaSyarat'?
+src/features/pendaftaran-ujian/components/pendaftaran-ujian-form-modal.tsx(229,48): error TS2339: Property 'kategori' does not exist on type 'Syarat'.
+src/features/pendaftaran-ujian/components/pendaftaran-ujian-form-modal.tsx(231,25): error TS2339: Property 'kategori' does not exist on type 'Syarat'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(477,9): error TS2322: Type 'unknown' is not assignable to type 'string | undefined'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(486,78): error TS2339: Property 'id' does not exist on type '{}'.
+src/features/ranpel/components/manajemen-ranpel-list.tsx(490,78): error TS2339: Property 'id' does not exist on type '{}'.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(200,85): error TS2367: This comparison appears to be unintentional because the types '"menunggu"' and '"diterima"' have no overlap.
+src/features/ranpel/components/pengajuan-ranpel-list.tsx(251,125): error TS2367: This comparison appears to be unintentional because the types '"menunggu"' and '"diterima"' have no overlap.
+src/features/ranpel/components/ranpel-preview-modal.tsx(299,31): error TS2339: Property 'url_ttd' does not exist on type '{}'.
+src/features/ranpel/components/ranpel-preview-modal.tsx(313,25): error TS2339: Property 'nama' does not exist on type '{}'.
+src/features/ranpel/components/ranpel-preview-modal.tsx(317,43): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/features/ranpel/components/verifikasi-ranpel-list.tsx(400,9): error TS2322: Type 'unknown' is not assignable to type 'string | undefined'.
