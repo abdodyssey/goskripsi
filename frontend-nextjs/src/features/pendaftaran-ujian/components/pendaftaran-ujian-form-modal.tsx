@@ -74,7 +74,8 @@ export function PendaftaranUjianFormModal({
 
   const isIpkEligible = ipkValue >= 2;
   const isSemesterEligible = semesterValue >= 6;
-  const isEligible = isIpkEligible && isSemesterEligible;
+  const isRanpelEligible = ranpelList.length > 0;
+  const isEligible = isIpkEligible && isSemesterEligible && isRanpelEligible;
   // Map syarat_id -> File for per-syarat uploads
   const [syaratFiles, setSyaratFiles] = useState<Record<string, File | null>>(
     {},
@@ -465,6 +466,26 @@ export function PendaftaranUjianFormModal({
                 </Badge>
               </Group>
 
+              <Group justify="space-between">
+                <Group gap="xs">
+                  {isRanpelEligible ? (
+                    <IconCheck size={16} color="var(--mantine-color-green-7)" />
+                  ) : (
+                    <IconX size={16} color="var(--mantine-color-red-7)" />
+                  )}
+                  <Text size="xs" fw={isRanpelEligible ? 500 : 700}>
+                    Ranpel di-ACC Kaprodi
+                  </Text>
+                </Group>
+                <Badge
+                  color={isRanpelEligible ? "green" : "red"}
+                  size="xs"
+                  variant="filled"
+                >
+                  {isRanpelEligible ? "SUDAH" : "BELUM"}
+                </Badge>
+              </Group>
+
               {!isEligible && (
                 <Alert
                   color="red"
@@ -473,8 +494,9 @@ export function PendaftaranUjianFormModal({
                   mt="xs"
                 >
                   <Text size="xs">
-                    Maaf, Anda belum memenuhi syarat untuk mendaftar ujian.
-                    Pastikan IPK dan Semester Anda sudah sesuai.
+                    {!isRanpelEligible
+                      ? "Maaf, Anda belum bisa mendaftar ujian karena Rancangan Penelitian (Ranpel) Anda belum disetujui oleh Kaprodi atau Anda belum mengajukan Ranpel."
+                      : "Maaf, Anda belum memenuhi syarat untuk mendaftar ujian. Pastikan IPK dan Semester Anda sudah sesuai."}
                   </Text>
                 </Alert>
               )}

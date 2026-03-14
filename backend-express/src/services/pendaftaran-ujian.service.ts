@@ -106,6 +106,22 @@ export class PendaftaranUjianService {
       );
     }
 
+    // Ranpel approval check
+    const approvedRanpel = await prisma.pengajuanRancanganPenelitian.findFirst({
+      where: {
+        rancanganPenelitianId: Number(payload.ranpel_id),
+        mahasiswaId: Number(payload.mahasiswa_id),
+        statusKaprodi: "diterima",
+      },
+    });
+
+    if (!approvedRanpel) {
+      throw new HttpError(
+        400,
+        "Rancangan Penelitian (Ranpel) Anda belum disetujui oleh Kaprodi. Pastikan Ranpel sudah di-ACC sebelum mendaftar ujian.",
+      );
+    }
+
     // Sequence check:
     // 2 (Ujian Hasil) needs 1 (Seminar Proposal) Lulus
     // 3 (Ujian Skripsi) needs 2 (Ujian Hasil) Lulus
@@ -258,8 +274,23 @@ export class PendaftaranUjianService {
     return await prisma.$transaction(async (tx) => {
       const dataUpdate: any = { ...payload };
 
-      if (payload.ranpel_id)
+      if (payload.ranpel_id) {
+        const approvedRanpel = await tx.pengajuanRancanganPenelitian.findFirst({
+          where: {
+            rancanganPenelitianId: Number(payload.ranpel_id),
+            mahasiswaId: pendaftaran.mahasiswaId,
+            statusKaprodi: "diterima",
+          },
+        });
+
+        if (!approvedRanpel) {
+          throw new HttpError(
+            400,
+            "Rancangan Penelitian (Ranpel) yang dipilih belum disetujui oleh Kaprodi.",
+          );
+        }
         dataUpdate.rancanganPenelitianId = Number(payload.ranpel_id);
+      }
       if (payload.jenis_ujian_id)
         dataUpdate.jenisUjianId = Number(payload.jenis_ujian_id);
 
