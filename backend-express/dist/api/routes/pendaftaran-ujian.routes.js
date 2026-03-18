@@ -160,4 +160,7 @@ openapi_generator_1.registry.registerPath({
     },
 });
 router.delete("/:id", auth_middleware_1.requireAuth, pendaftaran_ujian_controller_1.pendaftaranUjianController.destroy);
+router.post("/:id/submit", auth_middleware_1.requireAuth, pendaftaran_ujian_controller_1.pendaftaranUjianController.submit);
+router.post("/:id/review", auth_middleware_1.requireAuth, pendaftaran_ujian_controller_1.pendaftaranUjianController.review);
+router.post("/:id/upload-revisi", auth_middleware_1.requireAuth, upload.array("berkas", 25), pendaftaran_ujian_controller_1.pendaftaranUjianController.uploadRevisi);
 exports.default = router;

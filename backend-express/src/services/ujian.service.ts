@@ -275,16 +275,24 @@ export class UjianService {
       // Ketentuan: Lulus jika minimal C (nilai akhir >= 60)
       const lulusByGrade = ["A", "B", "C"].includes(nilaiHuruf);
 
-      // Threshold check: No single component score < 60
-      const hasLowScore = penilaian.some((p: any) => {
-        // Only check components that have weight for this examiner role
-        const peran = pengujiRolesMap.get(p.dosenId);
-        const bobot =
-          p.komponenPenilaian.bobotKomponenPerans.find(
-            (b: any) => b.peran === peran,
-          )?.bobot || 0;
-        return bobot > 0 && Number(p.nilai) < 60;
-      });
+      // Aturan Tambahan: Jika ada salah satu nilai < 60, maka TIDAK LULUS
+      // Berlaku untuk: Seminar Proposal, Ujian Hasil, Ujian Skripsi
+      const namaJenis =
+        ujian.pendaftaranUjian.jenisUjian.namaJenis?.toLowerCase() ?? "";
+      const targetExams = ["proposal", "hasil", "skripsi"];
+      const isTargetExam = targetExams.some((t) => namaJenis.includes(t));
+
+      const hasLowScore =
+        isTargetExam &&
+        penilaian.some((p: any) => {
+          // Only check components that have weight for this examiner role
+          const peran = pengujiRolesMap.get(p.dosenId);
+          const bobot =
+            p.komponenPenilaian.bobotKomponenPerans.find(
+              (b: any) => b.peran === peran,
+            )?.bobot || 0;
+          return bobot > 0 && Number(p.nilai) < 60;
+        });
 
       const isLulus = lulusByGrade && !hasLowScore;
 
@@ -550,8 +558,20 @@ export class UjianService {
 
     // Ketentuan: Lulus jika minimal C (nilai akhir >= 60)
     const lulusByGrade = ["A", "B", "C"].includes(nilaiHuruf);
+
+    // Aturan Tambahan: Jika ada salah satu nilai < 60, maka TIDAK LULUS
+    // Berlaku untuk: Seminar Proposal, Ujian Hasil, Ujian Skripsi
+    const namaJenisFinalisasi =
+      ujian.pendaftaranUjian?.jenisUjian?.namaJenis?.toLowerCase() ?? "";
+    const targetExamsFinalisasi = ["proposal", "hasil", "skripsi"];
+    const isTargetExamFinalisasi = targetExamsFinalisasi.some((t) =>
+      namaJenisFinalisasi.includes(t),
+    );
+
     const hasilFinal =
-      lulusByGrade && !anyScoreUnder60 ? "lulus" : "tidak_lulus";
+      lulusByGrade && !(isTargetExamFinalisasi && anyScoreUnder60)
+        ? "lulus"
+        : "tidak_lulus";
 
     return await prisma.ujian.update({
       where: { id: ujianId },

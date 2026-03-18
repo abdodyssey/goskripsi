@@ -56,6 +56,17 @@ class UploadController {
                     .toLowerCase();
                 storagePath = `submissions/${nim}/${sanitizedFilename}`;
             }
+            else if (type === "mahasiswa_doc") {
+                // Path: skripsi_docs/mahasiswa/documents/{{nim}}/{{jenis}}{{ext}}
+                const nim = user.nip_nim;
+                const { jenis } = req.body;
+                if (!jenis) {
+                    return res
+                        .status(400)
+                        .json({ message: "Jenis dokumen is required", success: false });
+                }
+                storagePath = `mahasiswa/documents/${nim}/${jenis}${path_1.default.extname(file.originalname)}`;
+            }
             else {
                 return res
                     .status(400)
@@ -72,12 +83,15 @@ class UploadController {
                 throw error;
             }
             // 4. Return success metadata
+            const { data: publicUrlData } = supabase_1.supabaseAdmin.storage
+                .from(bucket)
+                .getPublicUrl(data.path);
             res.status(200).json({
                 message: "File uploaded successfully",
                 success: true,
                 data: {
                     path: data.path,
-                    fullUrl: `${process.env.SUPABASE_URL}/storage/v1/object/authenticated/${bucket}/${data.path}`,
+                    fullUrl: publicUrlData.publicUrl,
                 },
             });
         }

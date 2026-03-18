@@ -137,7 +137,7 @@ class RanpelController {
             let dosenPaSignatureUrl = null;
             if (pengajuan.statusDosenPa !== "menunggu" ||
                 pengajuan.statusKaprodi !== "menunggu") {
-                const dosen = pengajuan.mahasiswa?.dosenPaRel;
+                const dosen = pengajuan.mahasiswa?.dosenPa;
                 if (dosen && dosen.url_ttd) {
                     // Extract path from Supabase URL
                     // Format: ...authenticated/skripsi_docs/signatures/19800101/ttd_official.png
@@ -170,18 +170,23 @@ class RanpelController {
                 }
             }
             const dataToPdf = {
-                studentName: pengajuan.mahasiswa?.user?.nama,
+                studentName: pengajuan.mahasiswa?.nama,
                 studentNim: pengajuan.mahasiswa?.nim,
-                judulPenelitian: pengajuan.rancanganPenelitian?.judulPenelitian,
-                masalahDanPenyebab: pengajuan.rancanganPenelitian?.masalahDanPenyebab,
-                alternatifSolusi: pengajuan.rancanganPenelitian?.alternatifSolusi,
-                hasilYangDiharapkan: pengajuan.rancanganPenelitian?.hasilYangDiharapkan,
+                judulPenelitian: pengajuan.rancanganPenelitian
+                    ?.judulPenelitian,
+                masalahDanPenyebab: pengajuan.rancanganPenelitian
+                    ?.masalahDanPenyebab,
+                alternatifSolusi: pengajuan.rancanganPenelitian
+                    ?.alternatifSolusi,
+                hasilYangDiharapkan: pengajuan.rancanganPenelitian
+                    ?.hasilYangDiharapkan,
                 kebutuhanData: pengajuan.rancanganPenelitian?.kebutuhanData,
-                metodePenelitian: pengajuan.rancanganPenelitian?.metodePenelitian,
-                jurnalReferensi: pengajuan.rancanganPenelitian?.jurnalReferensi,
-                dosenPaNama: pengajuan.mahasiswa?.dosenPaRel?.user?.nama,
-                dosenPaNip: pengajuan.mahasiswa?.dosenPaRel?.nip ||
-                    ".........................",
+                metodePenelitian: pengajuan.rancanganPenelitian
+                    ?.metodePenelitian,
+                jurnalReferensi: pengajuan.rancanganPenelitian
+                    ?.jurnalReferensi,
+                dosenPaNama: pengajuan.mahasiswa?.dosenPa?.nama,
+                dosenPaNip: pengajuan.mahasiswa?.dosenPa?.nip || ".........................",
                 dosenPaSignatureUrl,
                 studentSignatureUrl,
                 tanggal: new Date().toLocaleDateString("id-ID", { dateStyle: "long" }),

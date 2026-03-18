@@ -7,6 +7,7 @@ exports.errorHandler = exports.logger = void 0;
 const zod_1 = require("zod");
 const client_1 = require("@prisma/client");
 const winston_1 = __importDefault(require("winston"));
+const http_error_1 = require("../utils/http-error");
 exports.logger = winston_1.default.createLogger({
     level: "info",
     format: winston_1.default.format.combine(winston_1.default.format.timestamp(), winston_1.default.format.json()),
@@ -14,11 +15,19 @@ exports.logger = winston_1.default.createLogger({
         new winston_1.default.transports.Console({
             format: winston_1.default.format.combine(winston_1.default.format.colorize(), winston_1.default.format.simple()),
         }),
+        new winston_1.default.transports.File({ filename: "error.log", level: "error" }),
     ],
 });
 const errorHandler = (err, req, res, next) => {
     console.error("Unhandled Error:", err);
     exports.logger.error(err.message, { stack: err.stack });
+    if (err instanceof http_error_1.HttpError) {
+        res.status(err.statusCode).json({
+            status: "error",
+            message: err.message,
+        });
+        return;
+    }
     if (err instanceof zod_1.ZodError) {
         res.status(400).json({
             status: "error",

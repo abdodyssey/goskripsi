@@ -7,16 +7,17 @@ class SyaratService {
         return await prisma_1.prisma.syarat.findMany({ include: { jenisUjian: true } });
     }
     async getByJenisUjian(jenisUjianId) {
-        return await prisma_1.prisma.syarat.findMany({
+        const list = await prisma_1.prisma.syarat.findMany({
             where: { jenisUjianId: Number(jenisUjianId) },
             orderBy: [{ wajib: "desc" }, { id: "asc" }],
         });
+        return list.map((s) => this.transformSyarat(s));
     }
     async getById(id) {
         return await prisma_1.prisma.syarat.findUnique({ where: { id: Number(id) } });
     }
     async store(payload) {
-        return await prisma_1.prisma.syarat.create({
+        const result = await prisma_1.prisma.syarat.create({
             data: {
                 jenisUjianId: Number(payload.jenis_ujian_id),
                 namaSyarat: payload.nama_syarat,
@@ -24,6 +25,7 @@ class SyaratService {
                 wajib: payload.wajib !== undefined ? payload.wajib : true,
             },
         });
+        return this.transformSyarat(result);
     }
     async update(id, payload) {
         const dataUpdate = {};
@@ -37,13 +39,25 @@ class SyaratService {
             dataUpdate.deskripsi = payload.deskripsi;
         if (payload.wajib !== undefined)
             dataUpdate.wajib = payload.wajib;
-        return await prisma_1.prisma.syarat.update({
+        const result = await prisma_1.prisma.syarat.update({
             where: { id: Number(id) },
             data: dataUpdate,
         });
+        return this.transformSyarat(result);
     }
     async delete(id) {
         return await prisma_1.prisma.syarat.delete({ where: { id: Number(id) } });
+    }
+    transformSyarat(s) {
+        if (!s)
+            return null;
+        return {
+            id: s.id,
+            jenisUjianId: s.jenisUjianId,
+            namaSyarat: s.namaSyarat,
+            deskripsi: s.deskripsi,
+            wajib: s.wajib,
+        };
     }
 }
 exports.SyaratService = SyaratService;

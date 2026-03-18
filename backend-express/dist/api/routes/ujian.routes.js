@@ -146,4 +146,68 @@ openapi_generator_1.registry.registerPath({
     },
 });
 router.delete("/:id", auth_middleware_1.requireAuth, ujian_controller_1.ujianController.destroy);
+openapi_generator_1.registry.registerPath({
+    method: "get",
+    path: "/api/ujian/scheduling/{pendaftaranId}/form",
+    tags: ["Ujian"],
+    summary: "Get scheduling form data",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+        {
+            name: "pendaftaranId",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+        },
+    ],
+    responses: {
+        200: {
+            description: "Form data",
+            content: { "application/json": { schema: zod_1.z.any() } },
+        },
+    },
+});
+router.get("/scheduling/:pendaftaranId/form", auth_middleware_1.requireAuth, (0, auth_middleware_1.requireRole)(["sekprodi", "admin"]), ujian_controller_1.ujianController.getSchedulingForm);
+openapi_generator_1.registry.registerPath({
+    method: "post",
+    path: "/api/ujian/scheduling",
+    tags: ["Ujian"],
+    summary: "Create exam scheduling",
+    security: [{ bearerAuth: [] }],
+    responses: {
+        201: {
+            description: "Scheduled",
+            content: { "application/json": { schema: zod_1.z.any() } },
+        },
+    },
+});
+router.post("/scheduling", auth_middleware_1.requireAuth, (0, auth_middleware_1.requireRole)(["sekprodi", "admin"]), ujian_controller_1.ujianController.createScheduling);
+openapi_generator_1.registry.registerPath({
+    method: "put",
+    path: "/api/ujian/scheduling/{id}",
+    tags: ["Ujian"],
+    summary: "Update exam scheduling",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string" } },
+    ],
+    responses: {
+        200: {
+            description: "Updated",
+            content: { "application/json": { schema: zod_1.z.any() } },
+        },
+    },
+});
+router.put("/scheduling/:id", auth_middleware_1.requireAuth, (0, auth_middleware_1.requireRole)(["sekprodi", "admin"]), ujian_controller_1.ujianController.updateScheduling);
+// --- Execution Routes ---
+router.post("/:id/absensi", auth_middleware_1.requireAuth, ujian_controller_1.ujianController.submitAbsensi);
+router.get("/:id/form-penilaian", auth_middleware_1.requireAuth, ujian_controller_1.ujianController.getFormInputNilai);
+router.post("/:id/nilai-draft", auth_middleware_1.requireAuth, ujian_controller_1.ujianController.simpanDraftNilai);
+router.post("/:id/nilai-final", auth_middleware_1.requireAuth, ujian_controller_1.ujianController.submitNilaiFinal);
+router.post("/:id/finalisasi", auth_middleware_1.requireAuth, ujian_controller_1.ujianController.finalisasiNilai);
+router.get("/:id/keputusan-options", auth_middleware_1.requireAuth, ujian_controller_1.ujianController.getDataKeputusan);
+router.post("/:id/keputusan", auth_middleware_1.requireAuth, ujian_controller_1.ujianController.submitKeputusan);
+router.get("/:id/print", auth_middleware_1.requireAuth, ujian_controller_1.ujianController.generateBulkPdf);
+router.get("/:id/pdf/bulk", auth_middleware_1.requireAuth, ujian_controller_1.ujianController.generateBulkPdf);
+router.get("/pdf/jadwal", auth_middleware_1.requireAuth, ujian_controller_1.ujianController.printJadwal);
 exports.default = router;
