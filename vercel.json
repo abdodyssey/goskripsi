@@ -1,7 +1,0 @@
-{
-  "name": "goskripsi-frontend",
-  "buildCommand": "cd client && npm run build",
-  "installCommand": "npm install",
-  "rootDirectory": "client",
-  "framework": "nextjs"
-}
