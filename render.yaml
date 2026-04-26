@@ -9,7 +9,7 @@ services:
       - key: NODE_VERSION
         value: 22.0.0
       - key: DATABASE_URL
-        placeholder: "Ambil dari Supabase (postgresql://...)"
+        sync: false
       - key: PORT
         value: 4000
       - key: JWT_SECRET
