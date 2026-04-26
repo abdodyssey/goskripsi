@@ -128,14 +128,13 @@ class PdfService {
       <html lang="id">
       <head>
           <meta charset="UTF-8">
-          <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
           <style>
               @page {
                 size: A4;
                 margin: 30mm 30mm 30mm 40mm; /* Strict Academic Margins */
               }
               body {
-                  font-family: 'Plus Jakarta Sans', sans-serif;
+                  font-family: 'Calibri', 'Candara', 'Segoe UI', 'Optima', 'Arial', sans-serif;
                   line-height: 1.6;
                   color: #000;
                   font-size: 12pt;
@@ -148,6 +147,7 @@ class PdfService {
                   margin-top: 0; /* Align with top margin of page */
               }
               .doc-header h1 {
+                  font-family: 'Cambria', 'Georgia', 'Times New Roman', serif;
                   font-size: 24pt;
                   font-weight: normal;
                   margin: 0;
@@ -165,6 +165,7 @@ class PdfService {
                   margin: 30px 0;
               }
               .centered-info .judul {
+                  font-family: 'Cambria', 'Georgia', 'Times New Roman', serif;
                   font-style: italic;
                   font-weight: 500;
                   margin-bottom: 5px;
