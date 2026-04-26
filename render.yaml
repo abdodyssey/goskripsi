@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: goskripsi-backend
+    env: node
+    plan: free
+    buildCommand: cd server && npm run build-render
+    startCommand: cd server && npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 22.0.0
+      - key: DATABASE_URL
+        placeholder: "Ambil dari Supabase (postgresql://...)"
+      - key: PORT
+        value: 4000
+      - key: JWT_SECRET
+        generateValue: true
+
