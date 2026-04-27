@@ -399,7 +399,7 @@ export class UjianService {
         where: {
           user: {
             role: {
-              name: { in: ["dosen", "kaprodi", "sekprodi"] },
+              name: { in: ["dosen", "kaprodi"] },
             },
           },
         },
