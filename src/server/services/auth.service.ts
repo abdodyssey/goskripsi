@@ -41,8 +41,6 @@ export class AuthService {
             }
           }
         },
-        // @ts-ignore
-        relationLoadStrategy: 'join',
       });
 
       if (!user) throw new Error("User tidak ditemukan");
@@ -123,8 +121,6 @@ export class AuthService {
             },
           },
         },
-        // @ts-ignore
-        relationLoadStrategy: 'join',
       });
 
       if (!user) return null;
