@@ -618,22 +618,16 @@ async function main() {
   // 8. Setup Mahasiswa
   console.log("Seeding students from external data...");
 
-  // Assume data files are relative to current project space. The initial setup used:
-  // ../../ujian-backend/database/data/dosen_pa_initial.csv
-  // From logic: backend is at 'server', and ujian-backend might be parallel. Let's make paths robust.
+  // Data files are stored in prisma/data/ directory
   const csvPath = path.join(
     process.cwd(),
-    "..",
-    "ujian-backend",
-    "database",
+    "prisma",
     "data",
     "dosen_pa_initial.csv",
   );
   const jsonPath = path.join(
     process.cwd(),
-    "..",
-    "ujian-backend",
-    "database",
+    "prisma",
     "data",
     "Mahasiswa_Per_Angkatan_2019-2025.json",
   );

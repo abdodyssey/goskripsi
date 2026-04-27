@@ -13,8 +13,6 @@ export class PenilaianService {
         dosen: true,
         komponenPenilaian: true,
       },
-      // @ts-ignore
-      relationLoadStrategy: 'join'
     });
   }
 
@@ -36,8 +34,6 @@ export class PenilaianService {
         dosen: true,
         komponenPenilaian: true,
       },
-      // @ts-ignore
-      relationLoadStrategy: 'join'
     });
   }
 

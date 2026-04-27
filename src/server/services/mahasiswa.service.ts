@@ -71,8 +71,6 @@ export class MahasiswaService {
         take,
         select: MAHASISWA_SELECT,
         orderBy: { id: "desc" },
-        // @ts-ignore
-        relationLoadStrategy: 'join',
       }),
       prisma.mahasiswa.count({ where: whereClause }),
     ]);
@@ -89,8 +87,6 @@ export class MahasiswaService {
     const mahasiswa = await prisma.mahasiswa.findUnique({
       where: { id: Number(id) },
       select: MAHASISWA_SELECT,
-      // @ts-ignore
-      relationLoadStrategy: 'join',
     });
 
     if (!mahasiswa) throw new Error("Mahasiswa not found");

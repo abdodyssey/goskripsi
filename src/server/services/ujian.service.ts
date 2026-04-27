@@ -97,8 +97,6 @@ export class UjianService {
           take,
           select: UJIAN_SELECT,
           orderBy: { id: "desc" },
-          // @ts-ignore
-          relationLoadStrategy: 'join',
         }),
         prisma.ujian.count({ where }),
       ]);
@@ -145,8 +143,6 @@ export class UjianService {
             },
           },
         },
-        // @ts-ignore
-        relationLoadStrategy: 'join',
       });
       if (!ujian) return null;
       return this.transformUjian(ujian);
@@ -181,8 +177,6 @@ export class UjianService {
         take,
         select: UJIAN_SELECT,
         orderBy: { id: "desc" },
-        // @ts-ignore
-        relationLoadStrategy: 'join',
       }),
       prisma.ujian.count({ where }),
     ]);

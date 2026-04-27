@@ -16,8 +16,6 @@ export class PerbaikanJudulService {
             }
           }
         },
-        // @ts-ignore
-        relationLoadStrategy: 'join',
         orderBy: { tanggalPengajuan: 'desc' }
       }),
       prisma.perbaikanJudul.count()
@@ -50,8 +48,6 @@ export class PerbaikanJudulService {
             }
           }
         },
-        // @ts-ignore
-        relationLoadStrategy: 'join',
         orderBy: { tanggalPengajuan: 'desc' }
       }),
       prisma.perbaikanJudul.count({ where })

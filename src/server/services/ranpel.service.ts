@@ -58,8 +58,6 @@ const PENGAJUAN_RANPEL_SELECT = {
 export class RanpelService {
   async getAllRanpel() {
     const list = await prisma.rancanganPenelitian.findMany({
-        // @ts-ignore
-        relationLoadStrategy: 'join'
     });
     return list.map((r) => this.transformRanpel(r));
   }
@@ -91,8 +89,6 @@ export class RanpelService {
         take,
         select: PENGAJUAN_RANPEL_SELECT,
         orderBy: { tanggalPengajuan: "desc" },
-        // @ts-ignore
-        relationLoadStrategy: 'join'
       }),
       prisma.pengajuanRancanganPenelitian.count({ where }),
     ]);
@@ -331,8 +327,6 @@ export class RanpelService {
         take,
         select: PENGAJUAN_RANPEL_SELECT,
         orderBy: { id: "desc" },
-        // @ts-ignore
-        relationLoadStrategy: 'join'
       }),
       prisma.pengajuanRancanganPenelitian.count({ where }),
     ]);
@@ -349,8 +343,6 @@ export class RanpelService {
     const p = await prisma.pengajuanRancanganPenelitian.findUnique({
       where: { id: Number(id) },
       select: PENGAJUAN_RANPEL_SELECT,
-      // @ts-ignore
-      relationLoadStrategy: 'join'
     });
     return this.transformPengajuan(p);
   }

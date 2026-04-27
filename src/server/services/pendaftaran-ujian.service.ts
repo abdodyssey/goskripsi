@@ -39,12 +39,6 @@ const PENDAFTARAN_SELECT = {
       id: true,
       mahasiswaId: true,
       judulPenelitian: true,
-      masalahDanPenyebab: true,
-      alternatifSolusi: true,
-      metodePenelitian: true,
-      hasilYangDiharapkan: true,
-      kebutuhanData: true,
-      jurnalReferensi: true,
     },
   },
   pemenuhanSyarats: {
@@ -132,8 +126,6 @@ export class PendaftaranUjianService {
         take,
         select: PENDAFTARAN_SELECT,
         orderBy: { id: "desc" },
-        // @ts-ignore
-        relationLoadStrategy: 'join',
       }),
       prisma.pendaftaranUjian.count(),
     ]);
@@ -150,8 +142,6 @@ export class PendaftaranUjianService {
     const p = await prisma.pendaftaranUjian.findUnique({
       where: { id: Number(id) },
       select: PENDAFTARAN_SELECT,
-      // @ts-ignore
-      relationLoadStrategy: 'join',
     });
     return this.transformPendaftaran(p);
   }
@@ -383,8 +373,6 @@ export class PendaftaranUjianService {
     const [list, total] = await Promise.all([
       prisma.pendaftaranUjian.findMany({ 
         where, skip, take, select: PENDAFTARAN_SELECT, orderBy: { id: "desc" },
-        // @ts-ignore
-        relationLoadStrategy: 'join' 
       }),
       prisma.pendaftaranUjian.count({ where }),
     ]);
