@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import fs from "fs";
 import path from "path";
 
-import { prisma } from "../src/utils/prisma";
+import { prisma } from "../src/lib/prisma";
 
 async function main() {
   console.log("Start seeding...");

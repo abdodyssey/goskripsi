@@ -46,7 +46,6 @@ export class UserService {
         email: u.email,
         role: u.role.name,
         roleId: u.roleId,
-        createdAt: u.createdAt,
       })),
       meta: createPaginationMeta(total, Math.floor(skip / take) + 1, take),
     };

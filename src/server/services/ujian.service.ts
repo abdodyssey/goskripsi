@@ -202,7 +202,7 @@ export class UjianService {
         waktuMulai: payload.waktu_mulai,
         waktuSelesai: payload.waktu_selesai,
         ruanganId: payload.ruangan_id ? Number(payload.ruangan_id) : null,
-        status: payload.status || "dijadwalkan",
+        status: (payload.status as any) || "dijadwalkan",
       },
       select: UJIAN_SELECT,
     });
@@ -219,7 +219,7 @@ export class UjianService {
         waktuMulai: new Date(payload.waktuMulai),
         waktuSelesai: new Date(payload.waktuSelesai),
         ruanganId: Number(payload.ruanganId),
-        status: "dijadwalkan",
+        status: "dijadwalkan" as any,
       };
 
       const ujian = await tx.ujian.upsert({
@@ -887,7 +887,7 @@ export class UjianService {
         keputusanId: payload.keputusanId,
         hasil: payload.hasil,
         catatanRevisi: payload.catatanRevisi || null,
-        status: "selesai",
+        status: "selesai" as any,
       },
     });
   }

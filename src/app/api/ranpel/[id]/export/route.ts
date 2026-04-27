@@ -65,7 +65,7 @@ export async function GET(
         margin: { top: "30mm", right: "30mm", bottom: "30mm", left: "40mm" }
     });
 
-    return new Response(pdfBuffer, {
+    return new Response(pdfBuffer as any, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename=RANPEL_${pengajuan.mahasiswa?.nim}.pdf`,

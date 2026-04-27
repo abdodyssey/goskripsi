@@ -5,12 +5,12 @@ export async function generatePdf(htmlContent: string, options: any = {}) {
   const isLocal = process.env.NODE_ENV === "development";
 
   const browser = await puppeteer.launch({
-    args: isLocal ? [] : chromium.args,
-    defaultViewport: chromium.defaultViewport,
+    args: isLocal ? [] : (chromium as any).args,
+    defaultViewport: (chromium as any).defaultViewport,
     executablePath: isLocal
       ? "/usr/bin/google-chrome" // Path to chrome on local linux
-      : await chromium.executablePath(),
-    headless: isLocal ? true : chromium.headless,
+      : await (chromium as any).executablePath(),
+    headless: isLocal ? true : (chromium as any).headless,
   });
 
   try {

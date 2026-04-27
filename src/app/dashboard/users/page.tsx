@@ -199,7 +199,7 @@ export default function UserManagementPage() {
       header: "Email",
       render: (row) => (
         <Group gap={4}>
-          <IconMail size={14} c="dimmed" />
+          <IconMail size={14} color="gray" />
           <Text size="sm">{row.email}</Text>
         </Group>
       ),

@@ -7,12 +7,12 @@ export class PdfService {
   private async _launchBrowser() {
     const isLocal = process.env.NODE_ENV === "development";
     return await puppeteer.launch({
-      args: isLocal ? [] : chromium.args,
-      defaultViewport: chromium.defaultViewport,
+      args: isLocal ? [] : (chromium as any).args,
+      defaultViewport: (chromium as any).defaultViewport,
       executablePath: isLocal
         ? "/usr/bin/google-chrome"
-        : await chromium.executablePath(),
-      headless: isLocal ? true : (chromium.headless as any),
+        : await (chromium as any).executablePath(),
+      headless: isLocal ? true : (chromium as any).headless,
     });
   }
 
@@ -60,10 +60,7 @@ export class PdfService {
   }
 
   async generateBeritaAcaraPdf(data: any) {
-    const isLocal = process.env.NODE_ENV === "development"; const chromium = require("@sparticuz/chromium"); const browser = await puppeteer.launch({ executablePath: isLocal ? "/usr/bin/google-chrome" : await chromium.executablePath(),
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+    const browser = await this._launchBrowser();
 
     try {
       const page = await browser.newPage();
@@ -94,10 +91,7 @@ export class PdfService {
   }
 
   async generateJadwalUjianPdf(data: any) {
-    const isLocal = process.env.NODE_ENV === "development"; const chromium = require("@sparticuz/chromium"); const browser = await puppeteer.launch({ executablePath: isLocal ? "/usr/bin/google-chrome" : await chromium.executablePath(),
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+    const browser = await this._launchBrowser();
 
     try {
       const page = await browser.newPage();
@@ -350,10 +344,7 @@ export class PdfService {
   }
 
   async generateBulkPdf(data: any) {
-    const isLocal = process.env.NODE_ENV === "development"; const chromium = require("@sparticuz/chromium"); const browser = await puppeteer.launch({ executablePath: isLocal ? "/usr/bin/google-chrome" : await chromium.executablePath(),
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+    const browser = await this._launchBrowser();
 
     try {
       const page = await browser.newPage();

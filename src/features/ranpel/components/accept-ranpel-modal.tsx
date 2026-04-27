@@ -26,7 +26,7 @@ interface AcceptRanpelModalProps {
   onClose: () => void;
   pengajuan: PengajuanRancanganPenelitian | null;
   onSuccess: () => void;
-  updatePengajuan: (params: { id: string; data: any }) => Promise<void>;
+  updatePengajuan: (params: { id: string; data: any }) => Promise<any>;
 }
 
 export function AcceptRanpelModal({

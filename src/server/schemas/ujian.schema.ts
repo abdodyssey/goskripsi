@@ -59,6 +59,10 @@ export const createUjianSchema = z.object({
         .optional()
         .nullable()
         .openapi({ example: "Jadwal tentatif" }),
+      status: z
+        .enum(["belum_dijadwalkan", "dijadwalkan", "selesai"])
+        .optional()
+        .openapi({ example: "dijadwalkan" }),
       penguji: z
         .array(
           z.object({
@@ -77,6 +81,7 @@ registry.register("CreateUjianRequest", createUjianSchema.shape.body);
 export const updateUjianSchema = z.object({
   body: z
     .object({
+      pendaftaran_ujian_id: z.coerce.number().optional().nullable(),
       hari_ujian: z
         .enum(["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"])
         .optional()
@@ -122,6 +127,10 @@ export const updateUjianSchema = z.object({
         .optional()
         .nullable()
         .openapi({ example: "Lulus dengan revisi" }),
+      status: z
+        .enum(["belum_dijadwalkan", "dijadwalkan", "selesai"])
+        .optional()
+        .openapi({ example: "selesai" }),
       penguji: z
         .array(
           z.object({

@@ -53,6 +53,7 @@ interface UjianItem {
   waktuSelesai: string | null;
   ruanganId: string | null;
   catatan: string | null;
+  catatanRevisi?: string | null;
   ruangan?: { namaRuangan: string } | null;
   pengujiUjians?: PengujiItem[];
   pendaftaranUjian?: {

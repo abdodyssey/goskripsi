@@ -1,3 +1,4 @@
+import { prisma } from "@/lib/prisma";
 import { CreateDosenInput, UpdateDosenInput } from "../schemas/dosen.schema";
 import { Prisma } from "@prisma/client";
 import { createPaginationMeta } from "@/utils/pagination";

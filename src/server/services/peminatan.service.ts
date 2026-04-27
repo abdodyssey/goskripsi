@@ -5,8 +5,10 @@ import {
 } from "../schemas/peminatan.schema";
 
 export class PeminatanService {
-  async getAll() {
-    return await prisma.peminatan.findMany();
+  async getAll(prodiId?: string) {
+    return await prisma.peminatan.findMany({
+      where: prodiId ? { prodiId: Number(prodiId) } : {},
+    });
   }
 
   async getById(id: string) {

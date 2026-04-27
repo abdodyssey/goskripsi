@@ -82,7 +82,7 @@ export async function GET(
 
     const pdfBuffer = await pdfService.generateBeritaAcaraPdf(pdfData);
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="Berita_Acara_Ujian_${id}.pdf"`,

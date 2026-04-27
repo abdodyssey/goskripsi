@@ -147,6 +147,59 @@ export class MailService {
       console.error("[MailService] Unexpected Error (Exam Scheduled):", error);
     }
   }
+
+  /**
+   * Mengirim notifikasi ke Mahasiswa saat Ranpel mereka direview (Diterima/Ditolak)
+   */
+  async sendRanpelReviewNotification(
+    studentEmail: string,
+    studentNama: string,
+    reviewerNama: string,
+    status: string,
+    catatan?: string,
+    judul?: string
+  ) {
+    if (!process.env.RESEND_API_KEY) return;
+
+    try {
+      console.log(`[MailService] Sending Ranpel Review notification to student: ${studentEmail}`);
+      const { data, error } = await resend.emails.send({
+        from: this.from,
+        to: studentEmail,
+        subject: `[GoSkripsi] Status Review Ranpel: ${status.toUpperCase()}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <h2 style="color: #4f46e5;">Halo ${studentNama},</h2>
+            <p>Rancangan Penelitian Anda telah direview oleh <strong>${reviewerNama}</strong> dengan status:</p>
+            <div style="text-align: center; margin: 20px 0;">
+              <span style="background-color: ${status === "diterima" ? "#dcfce7" : "#fee2e2"}; color: ${status === "diterima" ? "#166534" : "#991b1b"}; padding: 8px 16px; border-radius: 9999px; font-weight: bold; text-transform: uppercase;">
+                ${status}
+              </span>
+            </div>
+            <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px; margin: 20px 0;">
+              ${judul ? `<p><strong>Judul:</strong> "${judul}"</p>` : ""}
+              ${catatan ? `
+              <p><strong>Catatan:</strong></p>
+              <p>${catatan}</p>
+              ` : ""}
+            </div>
+            <p>Silakan login ke dashboard untuk melihat rincian lebih lanjut.</p>
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Buka Dashboard</a>
+            </div>
+          </div>
+        `,
+      });
+
+      if (error) {
+        console.error("[MailService] Resend Error (Review):", error);
+      } else {
+        console.log(`[MailService] Review notification sent. ID: ${data?.id}`);
+      }
+    } catch (error) {
+      console.error("[MailService] Unexpected Error (Review):", error);
+    }
+  }
 }
 
 export const mailService = new MailService();
