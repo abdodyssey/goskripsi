@@ -392,7 +392,7 @@ export class UjianService {
     });
 
     if (!pendaftaran) throw new HttpError(404, "Pendaftaran tidak ditemukan");
-
+    
     const [rooms, lecturers] = await Promise.all([
       prisma.ruangan.findMany({ orderBy: { namaRuangan: "asc" } }),
       prisma.dosen.findMany({
@@ -408,18 +408,38 @@ export class UjianService {
       }),
     ]);
 
+    let defaultExaminers: { dosenId: number | string; peran: string }[] = [];
+
+    if (pendaftaran.ujian?.pengujiUjians && pendaftaran.ujian.pengujiUjians.length > 0) {
+      defaultExaminers = pendaftaran.ujian.pengujiUjians.map((p) => ({
+        dosenId: p.dosenId,
+        peran: p.peran,
+      }));
+    } else {
+      // Default to Supervisors if not scheduled yet
+      if (pendaftaran.mahasiswa?.pembimbing1) {
+        defaultExaminers.push({
+          dosenId: pendaftaran.mahasiswa.pembimbing1,
+          peran: "ketua_penguji",
+        });
+      }
+      if (pendaftaran.mahasiswa?.pembimbing2) {
+        defaultExaminers.push({
+          dosenId: pendaftaran.mahasiswa.pembimbing2,
+          peran: "sekretaris_penguji",
+        });
+      }
+    }
+
     return {
       pendaftaranUjian: pendaftaran,
       rooms,
-      lecturers: lecturers.map(l => ({
+      lecturers: lecturers.map((l) => ({
         id: l.id,
         nama: l.user.nama,
-        user: { nama: l.user.nama }
+        user: { nama: l.user.nama },
       })),
-      defaultExaminers: pendaftaran.ujian?.pengujiUjians.map(p => ({
-        dosenId: p.dosenId,
-        peran: p.peran
-      }))
+      defaultExaminers,
     };
   }
 

@@ -142,10 +142,12 @@ export default function PenjadwalanUjianPage() {
       setSchedulingFormData(res.data);
 
       if (!editingUjianId && res.data.defaultExaminers) {
-        setFormKetuaPenguji(
-          String(res.data.defaultExaminers[0]?.dosenId || ""),
-        );
-        setFormSekretaris(String(res.data.defaultExaminers[1]?.dosenId || ""));
+        const defaults = res.data.defaultExaminers as { dosenId: any; peran: string }[];
+        const ketua = defaults.find(d => d.peran === "ketua_penguji")?.dosenId;
+        const sekretaris = defaults.find(d => d.peran === "sekretaris_penguji")?.dosenId;
+        
+        if (ketua) setFormKetuaPenguji(String(ketua));
+        if (sekretaris) setFormSekretaris(String(sekretaris));
       }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
