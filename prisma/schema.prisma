@@ -136,8 +136,8 @@ model Mahasiswa {
   prodi                         Prodi                          @relation(fields: [prodiId], references: [id])
   pendaftaranUjians             PendaftaranUjian[]
   pengajuanRancanganPenelitians PengajuanRancanganPenelitian[]
-  rancanganPenelitians          RancanganPenelitian[]
   perbaikanJuduls               PerbaikanJudul[]
+  rancanganPenelitians          RancanganPenelitian[]
 
   @@map("mahasiswa")
 }
@@ -148,6 +148,7 @@ model DokumenMahasiswa {
   jenis       JenisDokumen
   fileUrl     String       @map("file_url")
   uploadedAt  DateTime     @default(now()) @map("uploaded_at")
+  file_path   String?
   mahasiswa   Mahasiswa    @relation(fields: [mahasiswaId], references: [id])
 
   @@unique([mahasiswaId, jenis])
@@ -172,31 +173,26 @@ model RancanganPenelitian {
 }
 
 model PengajuanRancanganPenelitian {
-  id                    Int             @id @default(autoincrement())
-  rancanganPenelitianId Int             @map("rancangan_penelitian_id")
-  mahasiswaId           Int             @map("mahasiswa_id")
-  tanggalPengajuan      DateTime        @default(now()) @map("tanggal_pengajuan")
-  
-  // Review Dosen PA
-  statusDosenPa         StatusPengajuan @default(menunggu) @map("status_dosen_pa")
-  catatanDosenPa        String?         @map("catatan_dosen_pa")
-  komenPaMasalah        String?         @map("komen_pa_masalah")
-  komenPaSolusi         String?         @map("komen_pa_solusi")
-  komenPaHasil          String?         @map("komen_pa_hasil")
-  komenPaData           String?         @map("komen_pa_data")
-  komenPaMetode         String?         @map("komen_pa_metode")
-  tanggalReviewPa       DateTime?       @map("tanggal_review_pa")
-  
-  // Review Kaprodi
-  statusKaprodi         StatusPengajuan @default(menunggu) @map("status_kaprodi")
-  catatanKaprodi        String?         @map("catatan_kaprodi")
-  komenKprMasalah       String?         @map("komen_kpr_masalah")
-  komenKprSolusi        String?         @map("komen_kpr_solusi")
-  komenKprHasil         String?         @map("komen_kpr_hasil")
-  komenKprData          String?         @map("komen_kpr_data")
-  komenKprMetode        String?         @map("komen_kpr_metode")
-  tanggalReviewKaprodi  DateTime?       @map("tanggal_review_kaprodi")
-
+  id                    Int                 @id @default(autoincrement())
+  rancanganPenelitianId Int                 @map("rancangan_penelitian_id")
+  mahasiswaId           Int                 @map("mahasiswa_id")
+  tanggalPengajuan      DateTime            @default(now()) @map("tanggal_pengajuan")
+  statusDosenPa         StatusPengajuan     @default(menunggu) @map("status_dosen_pa")
+  catatanDosenPa        String?             @map("catatan_dosen_pa")
+  tanggalReviewPa       DateTime?           @map("tanggal_review_pa")
+  statusKaprodi         StatusPengajuan     @default(menunggu) @map("status_kaprodi")
+  catatanKaprodi        String?             @map("catatan_kaprodi")
+  tanggalReviewKaprodi  DateTime?           @map("tanggal_review_kaprodi")
+  komenKprData          String?             @map("komen_kpr_data")
+  komenKprHasil         String?             @map("komen_kpr_hasil")
+  komenKprMasalah       String?             @map("komen_kpr_masalah")
+  komenKprMetode        String?             @map("komen_kpr_metode")
+  komenKprSolusi        String?             @map("komen_kpr_solusi")
+  komenPaData           String?             @map("komen_pa_data")
+  komenPaHasil          String?             @map("komen_pa_hasil")
+  komenPaMasalah        String?             @map("komen_pa_masalah")
+  komenPaMetode         String?             @map("komen_pa_metode")
+  komenPaSolusi         String?             @map("komen_pa_solusi")
   mahasiswa             Mahasiswa           @relation(fields: [mahasiswaId], references: [id])
   rancanganPenelitian   RancanganPenelitian @relation(fields: [rancanganPenelitianId], references: [id])
 
@@ -339,6 +335,21 @@ model Penilaian {
   @@map("penilaian")
 }
 
+model PerbaikanJudul {
+  id               Int             @id @default(autoincrement())
+  mahasiswaId      Int             @map("mahasiswa_id")
+  judulLama        String          @map("judul_lama")
+  judulBaru        String          @map("judul_baru")
+  fileSurat        String          @map("file_surat")
+  status           StatusPengajuan @default(menunggu)
+  catatanSekprodi  String?         @map("catatan_sekprodi")
+  tanggalPengajuan DateTime        @default(now()) @map("tanggal_pengajuan")
+  tanggalReview    DateTime?       @map("tanggal_review")
+  mahasiswa        Mahasiswa       @relation(fields: [mahasiswaId], references: [id])
+
+  @@map("perbaikan_judul")
+}
+
 enum JenisDokumen {
   KTM
   TRANSKRIP_NILAI
@@ -396,20 +407,4 @@ enum HariUjian {
   Jumat
   Sabtu
   Minggu
-}
-
-model PerbaikanJudul {
-  id               Int             @id @default(autoincrement())
-  mahasiswaId      Int             @map("mahasiswa_id")
-  judulLama        String          @map("judul_lama")
-  judulBaru        String          @map("judul_baru")
-  fileSurat        String          @map("file_surat")
-  status           StatusPengajuan @default(menunggu)
-  catatanSekprodi  String?         @map("catatan_sekprodi")
-  tanggalPengajuan DateTime        @default(now()) @map("tanggal_pengajuan")
-  tanggalReview    DateTime?       @map("tanggal_review")
-
-  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [id])
-
-  @@map("perbaikan_judul")
 }

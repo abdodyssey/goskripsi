@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { createPaginationMeta } from "@/utils/pagination";
 
 export class UserService {
