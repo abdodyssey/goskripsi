@@ -1,6 +1,6 @@
 "use client";
 
-import { Modal, Stack, TextInput, NumberInput, PasswordInput, Button, Text, Title, Alert, Group, Divider } from "@mantine/core";
+import { Modal, Stack, TextInput, NumberInput, PasswordInput, Button, Text, Title, Alert, Group, Divider, Box, Center, ThemeIcon, Grid } from "@mantine/core";
 import { useAuth } from "../hooks/use-auth";
 import { useState, useEffect } from "react";
 import { IconAlertCircle, IconCheck, IconLock, IconMail, IconChartBar, IconNumber } from "@tabler/icons-react";
@@ -228,6 +228,3 @@ export function ProfileCompletionModal() {
     </Modal>
   );
 }
-
-// Helper component for centering
-import { Center, ThemeIcon, Grid } from "@mantine/core";
