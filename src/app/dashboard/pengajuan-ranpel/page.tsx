@@ -36,19 +36,6 @@ export default function PengajuanRanpelPage() {
         icon={IconFileDescription}
       />
 
-      <Alert
-        variant="light"
-        color="orange"
-        title="Penting: Notifikasi Email"
-        icon={<IconMail size={18} />}
-        mb="md"
-        radius="md"
-      >
-        <Text size="sm">
-          Pastikan email yang terdaftar di profil adalah <b>Gmail aktif</b>. Sistem akan mengirim notifikasi otomatis ke Dosen PA dan Kaprodi saat Anda melakukan pengajuan.
-        </Text>
-      </Alert>
-
       <PengajuanRanpelList
         mahasiswaId={(user as unknown as Record<string, unknown>).id as string}
         studentName={user?.nama}

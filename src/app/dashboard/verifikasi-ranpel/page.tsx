@@ -42,19 +42,6 @@ export default function VerifikasiRanpelPage() {
         icon={IconFileCheck}
       />
 
-      <Alert
-        variant="light"
-        color="indigo"
-        title="Penting: Notifikasi Email"
-        icon={<IconMail size={18} />}
-        mb="md"
-        radius="md"
-      >
-        <Text size="sm">
-          Setiap tindakan verifikasi (Setujui/Tolak) akan mengirimkan notifikasi otomatis ke <b>email Mahasiswa</b> yang bersangkutan. Pastikan Anda juga memeriksa email Anda secara berkala untuk pengajuan baru.
-        </Text>
-      </Alert>
-
       <VerifikasiRanpelList />
     </Container>
   );

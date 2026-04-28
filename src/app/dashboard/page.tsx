@@ -407,17 +407,6 @@ export default function DashboardPage() {
       />
 
       <Stack gap="xl">
-        <Alert
-          variant="light"
-          color="indigo"
-          title="Notifikasi Email Aktif"
-          icon={<IconMail size={18} />}
-          radius="md"
-        >
-          <Text size="sm">
-            Sistem akan mengirimkan setiap update progres skripsi ke email Anda. Pastikan Anda menggunakan <b>alamat Gmail yang valid</b> dan periksa folder <b>Spam</b> secara berkala.
-          </Text>
-        </Alert>
         {/* Kaprodi Section */}
         {isKaprodi && (
           <Box>

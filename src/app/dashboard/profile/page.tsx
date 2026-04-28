@@ -30,7 +30,6 @@ import {
 import { PageHeader } from "@/components/PageHeader/PageHeader";
 import { useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import { SignatureUpload } from "@/components/SignatureUpload";
 import { MyDocuments } from "@/components/MyDocuments";
 import { notifications } from "@mantine/notifications";
 import axios from "axios";
@@ -427,16 +426,6 @@ export default function ProfilePage() {
 
         {roles.includes("mahasiswa") && <MyDocuments />}
 
-        {(isDosenOrKaprodi || roles.includes("mahasiswa")) && (
-          <SignatureUpload
-            currentUrl={user?.url_ttd}
-            nip={nimNip}
-            onUploadSuccess={(url: string) => {
-              // Automatically sync the new URL to profile
-              updateProfileAsync({ url_ttd: url });
-            }}
-          />
-        )}
       </Stack>
     </Container>
   );
