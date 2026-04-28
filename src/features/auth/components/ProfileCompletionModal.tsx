@@ -134,12 +134,6 @@ export function ProfileCompletionModal() {
           </Text>
         </Box>
 
-        <Alert color="blue" variant="light" icon={<IconAlertCircle size={16} />}>
-          <Text size="xs">
-            Karena keterbatasan sinkronisasi data pusat, saat ini Anda diminta untuk menginput IPK dan Semester secara mandiri. Mohon pastikan data yang diisi <b>valid dan tidak dibuat-buat</b> demi kelancaran proses skripsi.
-          </Text>
-        </Alert>
-
         <Divider />
 
         <Grid gutter="md">
@@ -157,7 +151,6 @@ export function ProfileCompletionModal() {
           <Grid.Col span={6}>
             <NumberInput
               label="IPK Terakhir"
-              description="Pastikan data yang diisi sesuai dengan transkrip asli (tidak dibuat-buat)."
               placeholder="0.00"
               value={ipk}
               onChange={setIpk}
@@ -173,7 +166,6 @@ export function ProfileCompletionModal() {
           <Grid.Col span={6}>
             <NumberInput
               label="Semester"
-              description="Input semester aktif Anda saat ini."
               placeholder="1"
               value={semester}
               onChange={setSemester}
@@ -217,7 +209,13 @@ export function ProfileCompletionModal() {
           )}
         </Grid>
 
-        <Group justify="space-between" mt="xl">
+        <Box bg="blue.0" p="xs" style={{ borderRadius: '8px', borderLeft: '4px solid var(--mantine-color-blue-6)' }}>
+          <Text size="xs" c="blue.9">
+            <b>Catatan:</b> Karena keterbatasan data pusat, silakan input IPK & Semester secara mandiri sesuai dokumen asli (KHS/Transkrip). Mohon pastikan data yang diisi <b>valid dan tidak dibuat-buat</b> demi kelancaran proses skripsi.
+          </Text>
+        </Box>
+
+        <Group justify="space-between" mt="md">
           <Button variant="subtle" color="gray" onClick={logout}>
             Keluar
           </Button>
