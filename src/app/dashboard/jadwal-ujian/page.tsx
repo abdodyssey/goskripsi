@@ -31,6 +31,7 @@ import {
   IconDotsVertical,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
+import { ujianService } from "@/features/ujian/api/ujian.service";
 
 // ---- Types ----
 interface PengujiItem {
@@ -319,6 +320,12 @@ export default function JadwalUjianDosenPage() {
             >
               Lihat Detail
             </Menu.Item>
+            <Menu.Item 
+              leftSection={<IconPrinter size={16} stroke={1.5} />} 
+              onClick={() => handleDownloadUndangan(row.pendaftaranUjianId, row.pendaftaranUjian?.mahasiswa?.nim || "MHS")}
+            >
+              Cetak Undangan
+            </Menu.Item>
 
           </Menu.Dropdown>
         </Menu>
@@ -350,6 +357,26 @@ export default function JadwalUjianDosenPage() {
       });
     } finally {
       setDownloading(false);
+    }
+  };
+
+  const handleDownloadUndangan = async (pendaftaranId: string, nim: string) => {
+    try {
+      const blob = await ujianService.downloadUndanganPdf(pendaftaranId);
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Undangan_Ujian_${nim}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch {
+      notifications.show({
+        title: "Gagal",
+        message: "Terjadi kesalahan saat mendownload Undangan",
+        color: "red",
+      });
     }
   };
 
