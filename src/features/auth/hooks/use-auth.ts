@@ -62,6 +62,7 @@ export const useAuth = () => {
   const changePasswordMutation = useMutation({
     mutationFn: (data: ChangePasswordInput) => authService.changePassword(data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       notifications.show({
         title: "Berhasil",
         message: "Kata sandi Anda telah diperbarui.",
