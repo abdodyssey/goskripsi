@@ -38,11 +38,11 @@ export function AuthForm() {
   return (
     <Paper
       radius="24px"
-      p={40}
+      p={32}
       className="w-full bg-white dark:bg-slate-900 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)]"
     >
-      <Box mb={32}>
-        <div className="flex items-center gap-2 mb-6 lg:hidden">
+      <Box mb={24}>
+        <div className="flex items-center gap-2 mb-4 lg:hidden">
           <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg">G</div>
           <span className="text-slate-900 dark:text-white font-bold text-xl tracking-tight">GoSkripsi</span>
         </div>
@@ -56,7 +56,7 @@ export function AuthForm() {
       </Box>
 
       <form onSubmit={form.onSubmit(onSubmit)}>
-        <Stack gap="xl">
+        <Stack gap="md">
           <TextInput
             label="NIM / Username"
             placeholder="Contoh: 23051450225"
@@ -83,7 +83,7 @@ export function AuthForm() {
             {...form.getInputProps("password")}
           />
 
-          <Box>
+          <Box mt="xs">
             <Button
               type="submit"
               fullWidth
@@ -100,16 +100,15 @@ export function AuthForm() {
             </Button>
           </Box>
 
-          <Alert color="blue" radius="lg" variant="light" p="md">
-            <Text size="xs" c="blue.9" style={{ lineHeight: 1.6 }}>
+          <Alert color="blue" radius="md" variant="light" p="xs">
+            <Text size="xs" c="blue.9" style={{ lineHeight: 1.5 }}>
               <b>Informasi Login Mahasiswa:</b><br/>
-              Gunakan <b>NIM</b> sebagai Username. Jika ini adalah pertama kalinya Anda login, gunakan <b>NIM</b> Anda juga sebagai kata sandi default.
+              Gunakan <b>NIM</b> sebagai Username & Password awal.
             </Text>
           </Alert>
 
           <Text ta="center" size="xs" c="dimmed">
-            &copy; {new Date().getFullYear()} Fakultas Sains dan Teknologi <br/>
-            UIN Raden Fatah Palembang
+            &copy; {new Date().getFullYear()} FST UIN Raden Fatah
           </Text>
         </Stack>
       </form>

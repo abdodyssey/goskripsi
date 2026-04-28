@@ -2,9 +2,9 @@ import { AuthForm } from "@/features/auth/components/auth-form";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-white dark:bg-slate-950">
+    <div className="h-screen max-h-screen grid lg:grid-cols-2 bg-white dark:bg-slate-950 overflow-hidden">
       {/* Left Side: Brand/Visual Section */}
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-indigo-700 dark:bg-indigo-900 relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between p-12 bg-indigo-700 dark:bg-indigo-900 relative overflow-hidden h-full">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
         
         <div className="z-10">
