@@ -651,7 +651,7 @@ async function main() {
 
   if (fs.existsSync(jsonPath)) {
     const jsonContent = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-    const years = Object.keys(jsonContent);
+    const years = Object.keys(jsonContent).filter(y => parseInt(y) >= 2020);
 
     for (const year of years) {
       const students = jsonContent[year];
@@ -661,7 +661,7 @@ async function main() {
 
       for (const s of students) {
         const nimStr = s.nim.toString();
-        const email = `${nimStr}@mhs.radenfatah.ac.id`;
+        const email = `${nimStr}@example.com`;
 
         // Determine Dosen PA ID
         let dosenPaId: number | null = null;
@@ -679,13 +679,13 @@ async function main() {
           update: {
             nama: s.nama,
             email,
-            password: defaultPassword,
+            password: await bcrypt.hash(nimStr, 10),
           },
           create: {
             username: nimStr,
             nama: s.nama,
             email,
-            password: defaultPassword,
+            password: await bcrypt.hash(nimStr, 10),
             roleId: roleMap["mahasiswa"],
             status: "aktif",
           },
@@ -698,16 +698,20 @@ async function main() {
             angkatan: year,
             dosenPa: dosenPaId,
             status: "aktif",
+            semester: 1,
+            ipk: 0.0,
+            peminatanId: null,
           },
           create: {
             id: user.id,
             prodiId: prodiSIId,
             nim: nimStr,
             angkatan: year,
-            semester: 8,
-            ipk: 3.5,
+            semester: 1,
+            ipk: 0.0,
             status: "aktif",
             dosenPa: dosenPaId,
+            peminatanId: null,
           },
         });
       }

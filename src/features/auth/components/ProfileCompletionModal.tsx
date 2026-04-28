@@ -134,6 +134,12 @@ export function ProfileCompletionModal() {
           </Text>
         </Box>
 
+        <Alert color="blue" variant="light" icon={<IconAlertCircle size={16} />}>
+          <Text size="xs">
+            Karena keterbatasan sinkronisasi data pusat, saat ini Anda diminta untuk menginput IPK dan Semester secara mandiri. Mohon pastikan data yang diisi <b>valid dan tidak dibuat-buat</b> demi kelancaran proses skripsi.
+          </Text>
+        </Alert>
+
         <Divider />
 
         <Grid gutter="md">
@@ -151,6 +157,7 @@ export function ProfileCompletionModal() {
           <Grid.Col span={6}>
             <NumberInput
               label="IPK Terakhir"
+              description="Pastikan data yang diisi sesuai dengan transkrip asli (tidak dibuat-buat)."
               placeholder="0.00"
               value={ipk}
               onChange={setIpk}
@@ -166,6 +173,7 @@ export function ProfileCompletionModal() {
           <Grid.Col span={6}>
             <NumberInput
               label="Semester"
+              description="Input semester aktif Anda saat ini."
               placeholder="1"
               value={semester}
               onChange={setSemester}
