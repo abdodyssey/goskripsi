@@ -13,11 +13,11 @@ export default function LoginPage() {
             <span className="text-white font-bold text-2xl tracking-tight">GoSkripsi</span>
           </div>
           
-          <h1 className="text-4xl xl:text-5xl font-extrabold text-white leading-tight mb-6 max-w-lg">
+          <h1 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight mb-6 max-w-lg">
             Sistem Informasi <br/>
             <span className="text-indigo-200">Manajemen Skripsi</span> Digital.
           </h1>
-          <p className="text-indigo-100 text-lg max-w-md leading-relaxed">
+          <p className="text-indigo-100 text-base max-w-md leading-relaxed">
             Platform modern untuk pengelolaan administrasi skripsi Mahasiswa Fakultas Sains dan Teknologi UIN Raden Fatah Palembang.
           </p>
         </div>
