@@ -87,7 +87,7 @@ const PERAN_LABELS: Record<string, string> = {
   penguji_2: "Penguji 2",
 };
 
-export default function JadwalUjianDosenPage() {
+export default function PenilaianUjianPage() {
   const { userResponse, isLoadingProfile, isAuthenticated } = useAuth();
 
   const user = userResponse?.user;
@@ -290,6 +290,19 @@ export default function JadwalUjianDosenPage() {
               Lihat Detail
             </Menu.Item>
 
+            {row.pengujiUjians?.some((p) => String(p.dosenId) === String(userId)) && (
+              <>
+                <Menu.Divider />
+                <Menu.Item 
+                  color="indigo"
+                  leftSection={<IconPlayerPlay size={16} stroke={1.5} />} 
+                  component={Link}
+                  href={`/dashboard/penilaian-ujian/ujian/${row.id}`}
+                >
+                  Eksekusi Ujian
+                </Menu.Item>
+              </>
+            )}
           </Menu.Dropdown>
         </Menu>
       ),
@@ -320,6 +333,19 @@ export default function JadwalUjianDosenPage() {
               Lihat Detail
             </Menu.Item>
 
+            {row.pengujiUjians?.some((p) => String(p.dosenId) === String(userId)) && (
+              <>
+                <Menu.Divider />
+                <Menu.Item 
+                  color="indigo"
+                  leftSection={<IconPlayerPlay size={16} stroke={1.5} />} 
+                  component={Link}
+                  href={`/dashboard/penilaian-ujian/ujian/${row.id}`}
+                >
+                  Eksekusi Ujian
+                </Menu.Item>
+              </>
+            )}
           </Menu.Dropdown>
         </Menu>
       ),
@@ -367,102 +393,23 @@ export default function JadwalUjianDosenPage() {
   return (
     <Container size="xl" pt="md">
       <PageHeader
-        title="Jadwal Ujian"
+        title="Penilaian Ujian"
         items={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: "Jadwal Ujian" },
+          { label: "Penilaian Ujian" },
         ]}
-        description="Lihat dan pantau jadwal ujian skripsi yang telah ditetapkan"
-        icon={IconCalendarEvent}
-        rightSection={
-          canViewAll && (
-            <Group>
-              <Button
-                variant="light"
-                color="indigo"
-                leftSection={<IconPrinter size={16} />}
-                onClick={handleDownloadPdf}
-                loading={downloading}
-              >
-                Cetak Jadwal (PDF)
-              </Button>
-            </Group>
-          )
-        }
+        description="Lakukan eksekusi penilaian untuk ujian yang telah dijadwalkan kepada Anda"
+        icon={IconPlayerPlay}
       />
 
       <Paper withBorder radius="lg" p={0} style={{ overflow: "hidden" }}>
-        <Tabs defaultValue={defaultTab}>
-          <Tabs.List px="md" pt="md">
-            {/* Hanya tampil untuk Dosen biasa */}
-            {isDosen && !isKaprodi && !isSekprodi && (
-              <Tabs.Tab
-                value="saya"
-                rightSection={
-                  myUjian.length ? (
-                    <Badge
-                      size="sm"
-                      color="indigo"
-                      variant="light"
-                      radius="xl"
-                      px={8}
-                    >
-                      {myUjian.length}
-                    </Badge>
-                  ) : null
-                }
-              >
-                Ujian Saya
-              </Tabs.Tab>
-            )}
-
-            {/* Tampil untuk peran administratif */}
-            {canViewAll && (
-              <Tabs.Tab
-                value="semua"
-                rightSection={
-                  allUjian?.length ? (
-                    <Badge
-                      size="sm"
-                      color="gray"
-                      variant="light"
-                      radius="xl"
-                      px={8}
-                    >
-                      {allUjian.length}
-                    </Badge>
-                  ) : null
-                }
-              >
-                Semua Ujian
-              </Tabs.Tab>
-            )}
-          </Tabs.List>
-
-          {isDosen && !isKaprodi && !isSekprodi && (
-            <Tabs.Panel value="saya" p={0}>
-              <DataTable<UjianItem>
-                data={myUjian}
-                columns={myColumns}
-                loading={isLoading}
-                error={error ? "Gagal memuat data ujian" : null}
-                noCard
-              />
-            </Tabs.Panel>
-          )}
-
-          {canViewAll && (
-            <Tabs.Panel value="semua" p={0}>
-              <DataTable<UjianItem>
-                data={allUjian || []}
-                columns={allColumns}
-                loading={isLoading}
-                error={error ? "Gagal memuat data ujian" : null}
-                noCard
-              />
-            </Tabs.Panel>
-          )}
-        </Tabs>
+        <DataTable<UjianItem>
+          data={myUjian}
+          columns={myColumns}
+          loading={isLoading}
+          error={error ? "Gagal memuat data ujian" : null}
+          noCard
+        />
       </Paper>
 
       {/* ---- Detail Modal ---- */}

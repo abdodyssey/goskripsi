@@ -48,9 +48,9 @@ const PENGAJUAN_RANPEL_SELECT = {
       user: { select: { id: true, nama: true, email: true } },
       prodi: { select: { id: true, namaProdi: true } },
       peminatan: { select: { id: true, namaPeminatan: true } },
-      dosenPaRel: { select: { id: true, user: { select: { nama: true } } } },
-      pembimbing1Rel: { select: { id: true, user: { select: { nama: true } } } },
-      pembimbing2Rel: { select: { id: true, user: { select: { nama: true } } } },
+      dosenPaRel: { select: { id: true, nip: true, nidn: true, user: { select: { nama: true } } } },
+      pembimbing1Rel: { select: { id: true, nip: true, nidn: true, user: { select: { nama: true } } } },
+      pembimbing2Rel: { select: { id: true, nip: true, nidn: true, user: { select: { nama: true } } } },
     },
   },
 };

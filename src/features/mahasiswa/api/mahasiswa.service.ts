@@ -13,7 +13,7 @@ export interface SingleMahasiswaResponse {
 
 export const mahasiswaService = {
   getAll: async (): Promise<MahasiswaResponse> => {
-    const response = await apiClient.get<MahasiswaResponse>("/mahasiswa");
+    const response = await apiClient.get<MahasiswaResponse>("/mahasiswa?limit=1000");
     return response.data;
   },
 

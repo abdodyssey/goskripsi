@@ -478,6 +478,11 @@ export class UjianService {
       for (const px of ujian.pengujiUjians) {
         let dosenTotalScore = 0;
         for (const kp of komponenPenilaians) {
+          if (kp.kriteria.toLowerCase().includes("bimbingan") && 
+             (px.peran === "penguji_1" || px.peran === "penguji_2")) {
+            continue;
+          }
+
           const bp = kp.bobotKomponenPerans.find((b) => b.peran === px.peran);
           if (!bp) continue;
 
@@ -803,6 +808,12 @@ export class UjianService {
 
     for (const p of penilaians) {
       const peran = rolesMap.get(p.dosenId);
+      
+      if (p.komponenPenilaian.kriteria.toLowerCase().includes("bimbingan") && 
+         (peran === "penguji_1" || peran === "penguji_2")) {
+         continue;
+      }
+
       const bobotData = p.komponenPenilaian.bobotKomponenPerans.find(
         (b: any) => b.peran === peran,
       );

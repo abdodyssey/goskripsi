@@ -78,21 +78,20 @@ export function LinksGroup({
               mini && isActive ? "rgba(255, 255, 255, 0.15)" : "transparent",
           }}
         >
-          <ThemeIcon
-            variant={
-              (!hasLinks && pathname === link) || isParentActive
-                ? "light"
-                : "transparent"
-            }
-            color={
-              (!hasLinks && pathname === link) || isParentActive
-                ? "indigo"
-                : "gray"
-            }
-            size={mini ? 24 : 30}
+          <Box
+            style={{
+              width: mini ? 24 : 30,
+              height: mini ? 24 : 30,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 'var(--mantine-radius-md)',
+              backgroundColor: ((!hasLinks && pathname === link) || isParentActive) ? 'rgba(92, 115, 230, 0.15)' : 'transparent',
+              color: ((!hasLinks && pathname === link) || isParentActive) ? 'var(--mantine-color-indigo-4)' : 'var(--mantine-color-gray-4)'
+            }}
           >
             <Icon style={{ width: rem(18), height: rem(18) }} />
-          </ThemeIcon>
+          </Box>
           {!mini && <Box ml="md">{label}</Box>}
         </Box>
         {hasLinks && !mini && (

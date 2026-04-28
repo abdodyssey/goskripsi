@@ -84,6 +84,10 @@ export function NavbarNested({ opened, onToggle }: NavbarNestedProps) {
                       label: "Mahasiswa Bimbingan",
                       link: "/dashboard/mahasiswa-bimbingan",
                     },
+                    {
+                      label: "Mahasiswa PA",
+                      link: "/dashboard/mahasiswa-pa",
+                    },
                   ]
                 : []),
 
@@ -134,6 +138,7 @@ export function NavbarNested({ opened, onToggle }: NavbarNestedProps) {
                 : []),
 
               { label: "Jadwal Ujian", link: "/dashboard/jadwal-ujian" },
+              { label: "Penilaian Ujian", link: "/dashboard/penilaian-ujian" },
             ],
           },
         ]
@@ -205,7 +210,7 @@ export function NavbarNested({ opened, onToggle }: NavbarNestedProps) {
             </div>
             <ActionIcon
               variant="subtle"
-              color="gray"
+              color="gray.4"
               onClick={onToggle}
               size="lg"
               aria-label="Toggle navigation"
@@ -220,7 +225,7 @@ export function NavbarNested({ opened, onToggle }: NavbarNestedProps) {
             </div>
             <ActionIcon
               variant="subtle"
-              color="gray"
+              color="gray.4"
               onClick={onToggle}
               size="lg"
               aria-label="Toggle navigation"

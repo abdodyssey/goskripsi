@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { ranpelService } from "@/server/services/ranpel.service";
 import { getAuthUser } from "@/lib/auth-helper";
-import { generatePdf } from "@/lib/pdf-helper";
-import { getRanpelTemplate } from "@/server/templates/ranpel.template";
 import { supabaseAdmin } from "@/lib/supabase";
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
 
 export async function GET(
   request: Request,
@@ -56,22 +57,46 @@ export async function GET(
       dosenPaNip: pengajuan.mahasiswa?.dosenPa?.nip,
       dosenPaSignatureUrl,
       studentSignatureUrl,
-      tanggalReviewPa: (pengajuan as any).tanggalReviewPa,
-      tanggalReviewKaprodi: (pengajuan as any).tanggalReviewKaprodi,
+      tanggal: new Date((pengajuan as any).tanggalReviewKaprodi || new Date()).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }),
     };
 
-    const htmlContent = getRanpelTemplate(dataToPdf);
-    const pdfBuffer = await generatePdf(htmlContent, {
-        margin: { top: "30mm", right: "30mm", bottom: "30mm", left: "40mm" }
-    });
+    const templatePath = path.join(process.cwd(), "src/server/templates/docs/RANCANGAN_PENELITIAN_TEMPLATE.docx");
+    const scriptPath = path.join(process.cwd(), "src/server/scripts/generate_ranpel_pdf.py");
+    const outputDir = path.join(process.cwd(), "scratch");
+    if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
+    const outputPath = path.join(outputDir, `RANPEL_${pengajuan.mahasiswa?.nim}_${Date.now()}.pdf`);
 
-    return new Response(pdfBuffer as any, {
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename=RANPEL_${pengajuan.mahasiswa?.nim}.pdf`,
-      },
-    });
+    const dataPath = path.join(outputDir, `data_${pengajuan.mahasiswa?.nim}_${Date.now()}.json`);
+    fs.writeFileSync(dataPath, JSON.stringify(dataToPdf));
+
+    // Call Python script
+    const command = `python3 "${scriptPath}" "${dataPath}" "${templatePath}" "${outputPath}"`;
+    
+    try {
+        execSync(command, { stdio: 'pipe' });
+        const pdfBuffer = fs.readFileSync(outputPath);
+        
+        // Cleanup files
+        fs.unlinkSync(outputPath);
+        fs.unlinkSync(dataPath);
+
+        return new Response(pdfBuffer as any, {
+          headers: {
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `attachment; filename=RANPEL_${pengajuan.mahasiswa?.nim}.pdf`,
+          },
+        });
+    } catch (err: any) {
+        const stderr = err.stderr?.toString() || err.message;
+        console.error("Python PDF generation failed:", stderr);
+        throw new Error(`Failed to generate PDF: ${stderr}`);
+    }
   } catch (error: any) {
+    console.error("Export error:", error);
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

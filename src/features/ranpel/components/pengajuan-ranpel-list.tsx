@@ -347,20 +347,6 @@ export function PengajuanRanpelList({
         description="Daftar pengajuan rancangan penelitian Mahasiswa"
         rightSection={
           <Group gap="sm">
-            {acceptedPengajuan && (
-              <Button
-                variant="outline"
-                color="teal"
-                leftSection={<IconDownload size={18} />}
-                onClick={() => handleDownloadSuratJudul(acceptedPengajuan)}
-                radius="md"
-                h={42}
-                px="lg"
-                className="active:scale-95 transition-all"
-              >
-                Download Surat Pengajuan Judul
-              </Button>
-            )}
             <Button
               leftSection={<IconPlus size={18} />}
               onClick={handleCreateNew}

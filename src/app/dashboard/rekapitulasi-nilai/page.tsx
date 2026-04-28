@@ -222,7 +222,7 @@ export default function RekapitulasiNilaiPage() {
             Detail Informasi Nilai
           </Text>
         }
-        size="xl"
+        size="70rem"
         centered
         radius="lg"
         styles={{
@@ -238,45 +238,76 @@ export default function RekapitulasiNilaiPage() {
       >
         {selectedItem && (
           <Stack gap="md">
-            <Paper p="md" withBorder radius="md" bg="gray.0">
-              <Stack gap="xs">
-                <Text size="xs" fw={700} c="dimmed" tt="uppercase">
-                  Mahasiswa
-                </Text>
-                <Text fw={600}>
-                  {selectedItem.pendaftaranUjian.mahasiswa.user.nama}
-                </Text>
-                <Text size="xs">
-                  {selectedItem.pendaftaranUjian.mahasiswa.nim}
-                </Text>
-              </Stack>
+            <Paper
+              p="md"
+              withBorder
+              radius="lg"
+              bg={selectedItem.hasil === "lulus" ? "teal.0" : "red.0"}
+              style={{
+                borderColor: selectedItem.hasil === "lulus" ? "var(--mantine-color-teal-3)" : "var(--mantine-color-red-3)",
+              }}
+            >
+              <Group justify="space-between" align="center">
+                <Group gap="lg">
+                  <Box ta="center" px="md" style={{ borderRight: "2px solid rgba(0,0,0,0.05)" }}>
+                    <Text size="10px" fw={800} tt="uppercase" c={selectedItem.hasil === "lulus" ? "teal.9" : "red.9"}>
+                      Nilai Akhir
+                    </Text>
+                    <Group gap="xs" align="baseline" justify="center" wrap="nowrap">
+                      <Title order={2} c={selectedItem.hasil === "lulus" ? "teal.9" : "red.9"}>
+                        {Number(selectedItem.nilaiAkhir || 0).toFixed(2)}
+                      </Title>
+                      <Badge size="lg" variant="filled" color={selectedItem.hasil === "lulus" ? "teal" : "red"}>
+                        {selectedItem.nilaiHuruf}
+                      </Badge>
+                    </Group>
+                  </Box>
+                  <Stack gap={0}>
+                    <Text fw={800} size="xl" c={selectedItem.hasil === "lulus" ? "teal.9" : "red.9"}>
+                      {selectedItem.hasil === "lulus" ? "LULUS" : "TIDAK LULUS"}
+                    </Text>
+                    <Text size="sm" c="dimmed" fw={600}>
+                      Difinalisasi pada: {selectedItem.tanggalFinalisasi ? new Date(selectedItem.tanggalFinalisasi).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "-"}
+                    </Text>
+                  </Stack>
+                </Group>
+                <Button
+                  variant="filled"
+                  color={selectedItem.hasil === "lulus" ? "teal" : "red"}
+                  leftSection={<IconPrinter size={18} />}
+                  loading={printing}
+                  onClick={() => handlePrint(selectedItem.id)}
+                  radius="md"
+                >
+                  Cetak Berita Acara
+                </Button>
+              </Group>
             </Paper>
 
-            <Paper p="md" withBorder radius="md">
-              <Grid gutter="xs">
-                <Grid.Col span={6}>
-                  <Text size="xs" fw={700} c="dimmed" tt="uppercase">
-                    Jenis Ujian
-                  </Text>
-                  <Text size="sm">
-                    {selectedItem.pendaftaranUjian.jenisUjian.namaJenis}
-                  </Text>
+            <Paper p="md" withBorder radius="lg" bg="gray.0">
+              <Grid align="center">
+                <Grid.Col span={{ base: 12, sm: 8 }}>
+                  <Stack gap={0}>
+                    <Text size="10px" fw={800} c="dimmed" tt="uppercase" mb={4}>
+                      Mahasiswa
+                    </Text>
+                    <Text fw={700} size="lg">
+                      {selectedItem.pendaftaranUjian.mahasiswa.user.nama}
+                    </Text>
+                    <Text size="sm" c="dimmed" fw={500}>
+                      {selectedItem.pendaftaranUjian.mahasiswa.nim}
+                    </Text>
+                  </Stack>
                 </Grid.Col>
-                <Grid.Col span={6}>
-                  <Text size="xs" fw={700} c="dimmed" tt="uppercase">
-                    Tanggal Finalisasi
-                  </Text>
-                  <Text size="sm">
-                    {selectedItem.tanggalFinalisasi
-                      ? new Date(
-                          selectedItem.tanggalFinalisasi,
-                        ).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })
-                      : "-"}
-                  </Text>
+                <Grid.Col span={{ base: 12, sm: 4 }} style={{ textAlign: "right" }}>
+                  <Stack gap={4} align="flex-end">
+                    <Text size="10px" fw={800} c="dimmed" tt="uppercase">
+                      Jenis Ujian
+                    </Text>
+                    <Badge variant="outline" color="indigo" size="lg" radius="md">
+                      {selectedItem.pendaftaranUjian.jenisUjian.namaJenis}
+                    </Badge>
+                  </Stack>
                 </Grid.Col>
               </Grid>
             </Paper>
@@ -297,7 +328,7 @@ export default function RekapitulasiNilaiPage() {
                           const pScore = selectedItem.penilaians.find(s => s.dosenId === dId);
                           return (
                             <Table.Th key={i} ta="center" style={{ fontSize: '10px' }}>
-                              {pScore?.dosen.user.nama.split(' ')[0]}
+                              {pScore?.dosen.user.nama}
                             </Table.Th>
                           );
                         })}
@@ -351,41 +382,7 @@ export default function RekapitulasiNilaiPage() {
               </Stack>
             </Paper>
 
-            <Paper
-              p="xl"
-              withBorder
-              radius="lg"
-              style={{ textAlign: "center" }}
-            >
-              <Text size="xs" fw={700} c="dimmed" tt="uppercase" mb="xs">
-                Nilai Akhir
-              </Text>
-              <Title order={1} c="indigo" fz={48}>
-                {Number(selectedItem.nilaiAkhir || 0).toFixed(2)}
-              </Title>
-              <Badge size="xl" variant="filled" color="indigo" mt="sm">
-                {selectedItem.nilaiHuruf}
-              </Badge>
-              <Text
-                fw={700}
-                c={selectedItem.hasil === "lulus" ? "teal" : "red"}
-                mt="md"
-                fz="lg"
-              >
-                {selectedItem.hasil === "lulus" ? "LULUS" : "TIDAK LULUS"}
-              </Text>
-              <Button
-                variant="light"
-                color="indigo"
-                fullWidth
-                leftSection={<IconPrinter size={18} />}
-                mt="lg"
-                loading={printing}
-                onClick={() => handlePrint(selectedItem.id)}
-              >
-                Cetak Berita Acara
-              </Button>
-            </Paper>
+
           </Stack>
         )}
       </Modal>

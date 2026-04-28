@@ -77,7 +77,7 @@ export const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
                 <Text
                   size="xs"
                   fw={500}
-                  c="dimmed"
+                  c="dark.2"
                   tt="capitalize"
                 >
                   {roles[0] || "No Role"}
@@ -90,7 +90,7 @@ export const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
                   height: rem(14),
                 }}
                 stroke={1.5}
-                color="gray"
+                color="var(--mantine-color-dark-2)"
               />
             </>
           )}

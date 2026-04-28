@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Modal,
   Button,
@@ -47,6 +48,9 @@ export function RanpelPreviewModal({
   isDosenPa,
   onComment,
 }: RanpelPreviewModalProps) {
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [downloadingSurat, setDownloadingSurat] = useState(false);
+
   if (!pengajuan || !pengajuan.rancanganPenelitian) return null;
 
   const data = pengajuan.rancanganPenelitian;
@@ -73,6 +77,7 @@ export function RanpelPreviewModal({
     if (!pengajuan) return;
 
     try {
+      setDownloadingPdf(true);
       const response = await apiClient.get(
         `/ranpel/export-pdf/${pengajuan.id}`,
         {
@@ -90,6 +95,8 @@ export function RanpelPreviewModal({
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("PDF Export Error:", error);
+    } finally {
+      setDownloadingPdf(false);
     }
   };
 
@@ -97,6 +104,7 @@ export function RanpelPreviewModal({
     if (!pengajuan) return;
 
     try {
+      setDownloadingSurat(true);
       const response = await apiClient.get(
         `/ranpel/export-surat-judul/${pengajuan.id}`,
         {
@@ -117,6 +125,8 @@ export function RanpelPreviewModal({
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("PDF Export Error:", error);
+    } finally {
+      setDownloadingSurat(false);
     }
   };
 
@@ -394,7 +404,8 @@ export function RanpelPreviewModal({
                 variant="filled"
                 color="indigo"
                 radius="md"
-                leftSection={<IconDownload size={20} />}
+                loading={downloadingPdf}
+                leftSection={!downloadingPdf && <IconDownload size={20} />}
                 className="shadow-lg hover:shadow-indigo-200 transition-all duration-300"
               >
                 Download PDF
@@ -408,7 +419,8 @@ export function RanpelPreviewModal({
                   variant="outline"
                   color="teal"
                   radius="md"
-                  leftSection={<IconDownload size={18} />}
+                  loading={downloadingSurat}
+                  leftSection={!downloadingSurat && <IconDownload size={18} />}
                   className="shadow-sm hover:shadow-teal-100 transition-all duration-300"
                   styles={{
                     label: { fontSize: "12px" },

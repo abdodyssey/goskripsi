@@ -99,16 +99,27 @@ export function PenilaianTab({
   ujian,
 }: PenilaianTabProps) {
   const [scores, setScores] = useState<PenilaianItem[]>(() => {
+    const myDosenId = formData?.penguji?.dosenId;
+    const myRole = ujian.pengujiUjians.find((p) => p.dosenId === myDosenId)?.peran;
+
     return (
       formData?.components
-        ?.map((c) => ({
-          komponenPenilaianId: c.id,
-          kriteria: c.kriteria,
-          nilai: Number(c.penilaians[0]?.nilai) || 0,
-          komentar: c.penilaians[0]?.komentar || "",
-          bobot: c.bobotKomponenPerans?.[0]?.bobot || 0,
-        }))
-        .filter((s) => s.bobot > 0) || []
+        ?.map((c) => {
+          const myBobot = c.bobotKomponenPerans?.find((b) => b.peran === myRole)?.bobot || 0;
+          return {
+            komponenPenilaianId: c.id,
+            kriteria: c.kriteria,
+            nilai: Number(c.penilaians[0]?.nilai) || 0,
+            komentar: c.penilaians[0]?.komentar || "",
+            bobot: myBobot,
+          };
+        })
+        .filter((s) => {
+          if (s.kriteria.toLowerCase().includes("bimbingan") && myRole !== "ketua_penguji" && myRole !== "sekretaris_penguji") {
+            return false;
+          }
+          return s.bobot > 0;
+        }) || []
     );
   });
   const [globalScores, setGlobalScores] = useState<ScoreDetail[]>(
@@ -124,16 +135,27 @@ export function PenilaianTab({
 
   if (formData?.components !== prevComponents) {
     setPrevComponents(formData.components);
+    const myDosenId = formData?.penguji?.dosenId;
+    const myRole = ujian.pengujiUjians.find((p) => p.dosenId === myDosenId)?.peran;
+
     const mapped =
       formData.components
-        ?.map((c) => ({
-          komponenPenilaianId: c.id,
-          kriteria: c.kriteria,
-          nilai: Number(c.penilaians[0]?.nilai) || 0,
-          komentar: c.penilaians[0]?.komentar || "",
-          bobot: c.bobotKomponenPerans?.[0]?.bobot || 0,
-        }))
-        .filter((s) => s.bobot > 0) || [];
+        ?.map((c) => {
+          const myBobot = c.bobotKomponenPerans?.find((b) => b.peran === myRole)?.bobot || 0;
+          return {
+            komponenPenilaianId: c.id,
+            kriteria: c.kriteria,
+            nilai: Number(c.penilaians[0]?.nilai) || 0,
+            komentar: c.penilaians[0]?.komentar || "",
+            bobot: myBobot,
+          };
+        })
+        .filter((s) => {
+          if (s.kriteria.toLowerCase().includes("bimbingan") && myRole !== "ketua_penguji" && myRole !== "sekretaris_penguji") {
+            return false;
+          }
+          return s.bobot > 0;
+        }) || [];
     setScores(mapped);
   }
 
@@ -618,7 +640,23 @@ export function PenilaianTab({
             Detail Penilaian Tim Penguji
           </Title>
           <Accordion variant="separated" radius="md">
-            {Object.entries(groupedScores).map(([dosenId, group]) => {
+            {Object.entries(groupedScores)
+              .sort(([dosenIdA], [dosenIdB]) => {
+                const peranOrder: Record<string, number> = {
+                  ketua_penguji: 1,
+                  sekretaris_penguji: 2,
+                  penguji_1: 3,
+                  penguji_2: 4,
+                };
+                const peranA =
+                  ujian.pengujiUjians.find((p) => p.dosenId === Number(dosenIdA))
+                    ?.peran || "";
+                const peranB =
+                  ujian.pengujiUjians.find((p) => p.dosenId === Number(dosenIdB))
+                    ?.peran || "";
+                return (peranOrder[peranA] || 99) - (peranOrder[peranB] || 99);
+              })
+              .map(([dosenId, group]) => {
               const penguji = ujian.pengujiUjians.find(
                 (p) => p.dosenId === Number(dosenId),
               );
@@ -691,6 +729,13 @@ export function PenilaianTab({
                                     (b: { peran: string; bobot: number }) =>
                                       b.peran === penguji?.peran,
                                   )?.bobot || 0;
+                                
+                                if (sc.komponenPenilaian.kriteria.toLowerCase().includes("bimbingan") && 
+                                    penguji?.peran !== "ketua_penguji" && 
+                                    penguji?.peran !== "sekretaris_penguji") {
+                                  return false;
+                                }
+
                                 return b > 0;
                               })
                               .map((sc: ScoreDetail, idx: number) => {

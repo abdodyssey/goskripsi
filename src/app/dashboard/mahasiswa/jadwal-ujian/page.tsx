@@ -166,7 +166,7 @@ export default function MahasiswaJadwalUjianPage() {
                   ?.response?.data?.message || "Gagal memuat jadwal Anda"}
               </Alert>
             ) : myUjian ? (
-              <MahasiswaUjianCard ujian={myUjian} />
+              <MahasiswaUjianCard ujian={myUjian} hideResults />
             ) : (
               <Alert
                 icon={<IconInfoCircle size={16} />}
@@ -199,7 +199,7 @@ export default function MahasiswaJadwalUjianPage() {
         size="lg"
         radius="lg"
       >
-        {selectedUjian && <MahasiswaUjianCard ujian={selectedUjian} />}
+        {selectedUjian && <MahasiswaUjianCard ujian={selectedUjian} hideResults />}
       </Modal>
     </Container>
   );

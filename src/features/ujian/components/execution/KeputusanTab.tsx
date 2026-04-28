@@ -114,31 +114,6 @@ export function KeputusanTab({
         </Stack>
       </Paper>
 
-      {isSelesai && (
-        <Paper withBorder p="xl" radius="md">
-          <Stack gap="md">
-            <Title order={4}>Cetak Dokumen Ujian</Title>
-            <Text size="sm" color="dimmed">
-              Seluruh berkas pendaftaran, berita acara, daftar hadir, dan lembar
-              nilai dapat dicetak dalam satu dokumen PDF.
-            </Text>
-            <Group>
-              <Button
-                variant="outline"
-                color="blue"
-                onClick={() =>
-                  window.open(
-                    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/ujian/${ujian.id}/pdf/bulk`,
-                    "_blank",
-                  )
-                }
-              >
-                Cetak Semua Berkas
-              </Button>
-            </Group>
-          </Stack>
-        </Paper>
-      )}
     </Stack>
   );
 }

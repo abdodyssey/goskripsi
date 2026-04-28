@@ -11,14 +11,14 @@ export function Logo({
   return (
     <Group gap="xs" style={style} justify={mini ? "center" : "flex-start"}>
       <Image
-        src="/uin-logo.png"
+        src="/uin-logo-transparent.png"
         alt="UIN Logo"
         width={32}
         height={32}
         className="object-contain"
       />
       {!mini && (
-        <Text fw={800} size="xl" className="text-slate-900 dark:text-white">
+        <Text fw={800} size="xl" className="text-slate-100">
           GoSkripsi
         </Text>
       )}

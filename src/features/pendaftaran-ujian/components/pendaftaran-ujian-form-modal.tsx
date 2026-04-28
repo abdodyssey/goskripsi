@@ -432,17 +432,23 @@ export function PendaftaranUjianFormModal({
                    
                    <Group justify="space-between">
                      <Text size="xs">IPK (Min 2.00)</Text>
-                     <Badge color={isIpkEligible ? "teal" : "red"} variant="light">{ipkValue.toFixed(2)}</Badge>
+                     <ThemeIcon color={isIpkEligible ? "teal" : "red"} variant="light" size="sm" radius="xl">
+                        {isIpkEligible ? <IconCheck size={12} stroke={3} /> : <IconX size={12} stroke={3} />}
+                     </ThemeIcon>
                    </Group>
-
+ 
                    <Group justify="space-between">
                      <Text size="xs">Semester (Min 6)</Text>
-                     <Badge color={isSemesterEligible ? "teal" : "red"} variant="light">Smstr {semesterValue}</Badge>
+                     <ThemeIcon color={isSemesterEligible ? "teal" : "red"} variant="light" size="sm" radius="xl">
+                        {isSemesterEligible ? <IconCheck size={12} stroke={3} /> : <IconX size={12} stroke={3} />}
+                     </ThemeIcon>
                    </Group>
-
+ 
                    <Group justify="space-between">
                      <Text size="xs">Status Ranpel</Text>
-                     <Badge color={isRanpelEligible ? "teal" : "red"} variant="light">{isRanpelEligible ? "ACC" : "NONE"}</Badge>
+                     <ThemeIcon color={isRanpelEligible ? "teal" : "red"} variant="light" size="sm" radius="xl">
+                        {isRanpelEligible ? <IconCheck size={12} stroke={3} /> : <IconX size={12} stroke={3} />}
+                     </ThemeIcon>
                    </Group>
                  </Stack>
               </Grid.Col>

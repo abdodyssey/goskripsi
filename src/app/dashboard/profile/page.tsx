@@ -225,7 +225,9 @@ export default function ProfilePage() {
           
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} verticalSpacing="md" spacing="xl">
             <Stack gap={2}>
-              <Text fw={700} size="xs" c="dimmed" tt="uppercase">NIM / NIP</Text>
+              <Text fw={700} size="xs" c="dimmed" tt="uppercase">
+                {isDosenOrKaprodi ? "NIP" : "NIM"}
+              </Text>
               <Text size="sm" fw={600}>{nimNip}</Text>
             </Stack>
 

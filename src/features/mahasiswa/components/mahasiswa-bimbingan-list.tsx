@@ -2,20 +2,21 @@
 
 import { useMahasiswa } from "../hooks/use-mahasiswa";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { Text, Badge, Stack, TextInput, Center, Tooltip } from "@mantine/core";
-import { IconSearch, IconUsers } from "@tabler/icons-react";
+import { Text, Badge, Stack, TextInput, Center, Tooltip, Select, Group } from "@mantine/core";
+import { IconSearch, IconUsers, IconFilter } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { Mahasiswa } from "@/types/user.type";
 import { useState, useMemo } from "react";
 import { StudentProfileModal } from "./student-profile-modal";
 import { DataTable, DataTableColumn } from "@/components/ui/data-table";
 
-export function MahasiswaBimbinganList() {
+export function MahasiswaBimbinganList({ onlyPA = false }: { onlyPA?: boolean }) {
   const { mahasiswaList, isLoading, isError } = useMahasiswa();
   const { userResponse } = useAuth();
   const lecturerId = userResponse?.user?.id;
 
   const [search, setSearch] = useState("");
+  const [filterAngkatan, setFilterAngkatan] = useState<string | null>("all");
   const [profileOpened, { open: openProfile, close: closeProfile }] =
     useDisclosure(false);
   const [selectedStudent, setSelectedStudent] = useState<Mahasiswa | null>(
@@ -26,6 +27,15 @@ export function MahasiswaBimbinganList() {
     setSelectedStudent(student);
     openProfile();
   };
+
+  const angkatanOptions = useMemo(() => {
+    const list = Array.isArray(mahasiswaList) ? (mahasiswaList as Mahasiswa[]) : [];
+    const uniqueAngkatan = Array.from(new Set(list.map(m => m.angkatan).filter(Boolean)));
+    return [
+      { label: "Semua Angkatan", value: "all" },
+      ...uniqueAngkatan.sort().reverse().map(a => ({ label: `Angkatan ${a}`, value: a as string }))
+    ];
+  }, [mahasiswaList]);
 
   const filteredData = useMemo(() => {
     if (!lecturerId) return [];
@@ -38,7 +48,7 @@ export function MahasiswaBimbinganList() {
 
     // Filter by advisor 1, 2, or PA
     return list.filter((item) => {
-      // Safely extracting IDs
+      // 1. Filter by role (Advisor/PA)
       const p1Id =
         typeof item.pembimbing_1 === "object"
           ? item.pembimbing_1?.id
@@ -54,8 +64,18 @@ export function MahasiswaBimbinganList() {
       const isP2 = p2Id?.toString() === currentLecturerId;
       const isPA = paId?.toString() === currentLecturerId;
 
-      if (!(isP1 || isP2 || isPA)) return false;
+      if (onlyPA) {
+        if (!isPA) return false;
+      } else {
+        if (!(isP1 || isP2 || isPA)) return false;
+      }
 
+      // 2. Filter by Angkatan
+      if (filterAngkatan && filterAngkatan !== "all") {
+        if (item.angkatan !== filterAngkatan) return false;
+      }
+
+      // 3. Filter by Search
       const searchStr = (search || "").toLowerCase();
       const nama = item.nama || "";
       const nim = item.nim || "";
@@ -65,7 +85,7 @@ export function MahasiswaBimbinganList() {
         nim.toLowerCase().includes(searchStr)
       );
     });
-  }, [mahasiswaList, search, lecturerId]);
+  }, [mahasiswaList, search, lecturerId, filterAngkatan]);
 
   const columns: DataTableColumn<Mahasiswa>[] = [
     {
@@ -171,17 +191,32 @@ export function MahasiswaBimbinganList() {
         columns={columns}
         loading={isLoading}
         error={isError ? "Gagal memuat data mahasiswa bimbingan." : null}
-        title="Mahasiswa Bimbingan & PA"
-        description="Daftar mahasiswa yang Anda bimbing sebagai Pembimbing 1, Pembimbing 2, atau Dosen PA"
+        title={onlyPA ? "Mahasiswa PA" : "Mahasiswa Bimbingan & PA"}
+        description={onlyPA 
+          ? "Daftar mahasiswa yang Anda bimbing sebagai Pembimbing Akademik (PA)" 
+          : "Daftar mahasiswa yang Anda bimbing sebagai Pembimbing 1, Pembimbing 2, atau Dosen PA"
+        }
         rightSection={
-          <TextInput
-            placeholder="Cari Nama / NIM..."
-            leftSection={<IconSearch size={16} />}
-            value={search}
-            onChange={(e) => setSearch(e.currentTarget.value)}
-            style={{ width: 250 }}
-            radius="md"
-          />
+          <Group gap="xs">
+            <Select
+              placeholder="Angkatan"
+              data={angkatanOptions}
+              value={filterAngkatan}
+              onChange={setFilterAngkatan}
+              leftSection={<IconFilter size={16} />}
+              style={{ width: 150 }}
+              radius="md"
+              allowDeselect={false}
+            />
+            <TextInput
+              placeholder="Cari Nama / NIM..."
+              leftSection={<IconSearch size={16} />}
+              value={search}
+              onChange={(e) => setSearch(e.currentTarget.value)}
+              style={{ width: 220 }}
+              radius="md"
+            />
+          </Group>
         }
         emptyState={
           <Center py={60}>

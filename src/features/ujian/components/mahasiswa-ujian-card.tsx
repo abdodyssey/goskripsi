@@ -67,7 +67,7 @@ const PERAN_MAP: Record<string, string> = {
   penguji_2: "Penguji 2",
 };
 
-export function MahasiswaUjianCard({ ujian }: { ujian: Ujian | null }) {
+export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null, hideResults?: boolean }) {
   if (!ujian) {
     return (
       <Paper withBorder radius="md" p="xl" bg="gray.0">
@@ -89,7 +89,7 @@ export function MahasiswaUjianCard({ ujian }: { ujian: Ujian | null }) {
 
   const isSelesai = ujian.status === "selesai";
   const isFinalized = ujian.nilaiDifinalisasi || isSelesai;
-  const showResults = isFinalized || !!ujian.nilaiAkhir;
+  const showResults = !hideResults && (isFinalized || !!ujian.nilaiAkhir);
 
   // Calculate scores per examiner
   const scoresPerExaminer = (ujian.pengujiUjians || []).map((p) => {
@@ -326,7 +326,7 @@ export function MahasiswaUjianCard({ ujian }: { ujian: Ujian | null }) {
                           "Sedang ditentukan"}
                       </Text>
                     </Stack>
-                    {isFinalized && p.average !== null && (
+                    {!hideResults && isFinalized && p.average !== null && (
                       <Stack gap={0} align="flex-end">
                         <Text fw={900} c="indigo" fz="sm">
                           {p.average.toFixed(2)}
