@@ -10,10 +10,11 @@ const execPromise = promisify(exec);
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idStr } = await params;
+    const id = parseInt(idStr);
 
     const pendaftaran = await prisma.pendaftaranUjian.findUnique({
       where: { id },
