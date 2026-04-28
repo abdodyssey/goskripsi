@@ -18,6 +18,7 @@ export function ProfileCompletionModal() {
   const [email, setEmail] = useState("");
   const [ipk, setIpk] = useState<number | string>(0);
   const [semester, setSemester] = useState<number | string>(1);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   
@@ -57,6 +58,10 @@ export function ProfileCompletionModal() {
     }
 
     if (isDefaultPassword) {
+      if (!currentPassword) {
+        notifications.show({ title: "Error", message: "Kata sandi saat ini wajib diisi", color: "red" });
+        return;
+      }
       if (!newPassword || newPassword.length < 6) {
         notifications.show({ title: "Error", message: "Kata sandi baru minimal 6 karakter", color: "red" });
         return;
@@ -79,7 +84,7 @@ export function ProfileCompletionModal() {
       // 2. Change Password if it was default
       if (isDefaultPassword) {
         await changePasswordAsync({
-          current_password: user?.username || "", // Default password is usually NIM/Username
+          current_password: currentPassword,
           new_password: newPassword,
           new_password_confirmation: confirmPassword
         });
@@ -184,6 +189,16 @@ export function ProfileCompletionModal() {
                     Anda masih menggunakan kata sandi bawaan. Silakan ganti dengan kata sandi baru yang aman.
                   </Text>
                 </Alert>
+              </Grid.Col>
+              
+              <Grid.Col span={12}>
+                <PasswordInput
+                  label="Kata Sandi Saat Ini"
+                  placeholder="Masukkan kata sandi saat ini"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.currentTarget.value)}
+                  required
+                />
               </Grid.Col>
               
               <Grid.Col span={6}>
