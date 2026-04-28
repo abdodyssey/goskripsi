@@ -37,91 +37,78 @@ export function AuthForm() {
   return (
     <Paper
       radius="24px"
-      p={32}
-      withBorder
-      className="w-full max-w-[400px] shadow-[0_20px_50px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl"
+      p={40}
+      className="w-full bg-white dark:bg-slate-900 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)]"
     >
-      <Box ta="center" mb={28}>
-        <div className="flex justify-center mb-5">
-          <Image
-            src="/uin-logo.png"
-            alt="UIN Logo"
-            width={85}
-            height={85}
-            className="object-contain"
-          />
+      <Box mb={32}>
+        <div className="flex items-center gap-2 mb-6 lg:hidden">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg">G</div>
+          <span className="text-slate-900 dark:text-white font-bold text-xl tracking-tight">GoSkripsi</span>
         </div>
 
-        <Text
-          size="xs"
-          fw={700}
-          tt="uppercase"
-          lts={3}
-          mb={4}
-          className="tracking-[0.3em]"
-          c="dimmed"
-        >
-          GoSkripsi
-        </Text>
-        <Title order={2} fw={800} fz={22} className="tracking-tight text-slate-900 dark:text-white">
-          Silakan masuk
+        <Title order={1} fw={800} fz={28} className="tracking-tight text-slate-900 dark:text-white mb-2">
+          Selamat Datang
         </Title>
-        <Text c="dimmed" size="xs" mt={4} className="max-w-[260px] mx-auto leading-relaxed">
-          Masukkan kredensial Anda untuk mengakses sistem informasi skripsi
+        <Text c="dimmed" size="sm" className="leading-relaxed">
+          Gunakan NIM dan kata sandi Anda untuk mengakses portal manajemen skripsi.
         </Text>
       </Box>
 
       <form onSubmit={form.onSubmit(onSubmit)}>
-        <Stack gap="lg">
+        <Stack gap="xl">
           <TextInput
-            label="Username"
-            placeholder="23051450225"
-            size="sm"
-            radius="md"
-            leftSection={<IconUser size={16} stroke={1.5} />}
+            label="NIM / Username"
+            placeholder="Contoh: 23051450225"
+            size="md"
+            radius="lg"
+            leftSection={<IconUser size={18} stroke={1.5} className="text-indigo-500" />}
             styles={{
-              label: {
-                marginBottom: 6,
-                fontSize: 12,
-                fontWeight: 600,
-              },
+              input: { backgroundColor: 'var(--mantine-color-gray-0)', border: 'none' },
+              label: { marginBottom: 8, fontSize: 13, fontWeight: 600, color: 'var(--mantine-color-slate-7)' },
             }}
             {...form.getInputProps("username")}
           />
 
           <PasswordInput
             label="Kata Sandi"
-            placeholder="••••••••"
-            size="sm"
-            radius="md"
-            leftSection={<IconLock size={16} stroke={1.5} />}
+            placeholder="Masukkan kata sandi"
+            size="md"
+            radius="lg"
+            leftSection={<IconLock size={18} stroke={1.5} className="text-indigo-500" />}
             styles={{
-              label: {
-                marginBottom: 6,
-                fontSize: 12,
-                fontWeight: 600,
-              },
+              input: { backgroundColor: 'var(--mantine-color-gray-0)', border: 'none' },
+              label: { marginBottom: 8, fontSize: 13, fontWeight: 600, color: 'var(--mantine-color-slate-7)' },
             }}
             {...form.getInputProps("password")}
           />
 
-          <Button
-            type="submit"
-            fullWidth
-            size="sm"
-            radius="md"
-            h={46}
-            loading={isLoggingIn}
-            className="shadow-md shadow-indigo-900/10 dark:shadow-indigo-400/5 active:scale-[0.98] transition-all duration-200"
-            styles={{
-              label: { fontSize: 14, fontWeight: 600 },
-            }}
-          >
-            Masuk
-          </Button>
+          <Box>
+            <Button
+              type="submit"
+              fullWidth
+              size="md"
+              radius="lg"
+              h={54}
+              loading={isLoggingIn}
+              className="bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 shadow-lg shadow-indigo-200 dark:shadow-none"
+              styles={{
+                label: { fontSize: 16, fontWeight: 700 },
+              }}
+            >
+              Masuk ke Dashboard
+            </Button>
+          </Box>
 
-          <Text ta="center" size="xs" c="dimmed" mt="xs">
-            &copy; {new Date().getFullYear()} Fakultas Sains dan Teknologi.
+          <Alert color="blue" radius="lg" variant="light" p="md">
+            <Text size="xs" c="blue.9" style={{ lineHeight: 1.6 }}>
+              <b>Informasi Login Mahasiswa:</b><br/>
+              Gunakan <b>NIM</b> sebagai Username. Jika ini adalah pertama kalinya Anda login, gunakan <b>NIM</b> Anda juga sebagai kata sandi default.
+            </Text>
+          </Alert>
+
+          <Text ta="center" size="xs" c="dimmed">
+            &copy; {new Date().getFullYear()} Fakultas Sains dan Teknologi <br/>
+            UIN Raden Fatah Palembang
           </Text>
         </Stack>
       </form>
