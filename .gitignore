@@ -40,3 +40,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 credentials.txt
+/scratch/
+*.json
+*.pyc
+__pycache__/
+.venv
+.vscode/
+.idea/
+*.pdf
+!public/*.pdf
