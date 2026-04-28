@@ -41,8 +41,8 @@ export function AuthForm() {
       p={32}
       className="w-full bg-white dark:bg-slate-900 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)]"
     >
-      <Box mb={24}>
-        <div className="flex items-center gap-3 mb-6 lg:hidden">
+      <Box mb={32}>
+        <div className="flex items-center gap-3 mb-8 lg:hidden">
           <Image src="/uin-logo.png" alt="UIN Logo" width={32} height={32} className="object-contain" />
           <span className="text-slate-900 dark:text-white font-bold text-xl tracking-tight">
             GoSkripsi
@@ -51,15 +51,16 @@ export function AuthForm() {
 
         <Title
           order={1}
-          fw={700}
-          fz={24}
-          className="tracking-tight text-slate-900 dark:text-white mb-1"
+          fw={800}
+          fz={28}
+          className="tracking-tight text-slate-900 dark:text-white mb-2"
+          style={{ letterSpacing: "-0.03em" }}
         >
           Selamat Datang
         </Title>
-        <Text c="dimmed" size="sm" className="leading-relaxed">
+        <Text c="dimmed" size="sm" style={{ lineHeight: 1.6, maxWidth: "340px" }}>
           Gunakan NIM dan kata sandi Anda untuk mengakses portal manajemen
-          skripsi.
+          skripsi secara aman.
         </Text>
       </Box>
 

@@ -20,6 +20,7 @@ import {
   Center,
   Loader,
   Menu,
+  Divider,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { PageHeader } from "@/components/PageHeader/PageHeader";
@@ -142,10 +143,17 @@ export default function PenjadwalanUjianPage() {
       setSchedulingFormData(res.data);
 
       if (!editingUjianId && res.data.defaultExaminers) {
-        const defaults = res.data.defaultExaminers as { dosenId: any; peran: string }[];
-        const ketua = defaults.find(d => d.peran === "ketua_penguji")?.dosenId;
-        const sekretaris = defaults.find(d => d.peran === "sekretaris_penguji")?.dosenId;
-        
+        const defaults = res.data.defaultExaminers as {
+          dosenId: any;
+          peran: string;
+        }[];
+        const ketua = defaults.find(
+          (d) => d.peran === "ketua_penguji",
+        )?.dosenId;
+        const sekretaris = defaults.find(
+          (d) => d.peran === "sekretaris_penguji",
+        )?.dosenId;
+
         if (ketua) setFormKetuaPenguji(String(ketua));
         if (sekretaris) setFormSekretaris(String(sekretaris));
       }
@@ -375,7 +383,10 @@ export default function PenjadwalanUjianPage() {
     }
   };
 
-  const handleDownloadUndangan = async (pendaftaranId: number | string, nim: string) => {
+  const handleDownloadUndangan = async (
+    pendaftaranId: number | string,
+    nim: string,
+  ) => {
     try {
       const blob = await ujianService.downloadUndanganPdf(pendaftaranId);
       const url = window.URL.createObjectURL(new Blob([blob]));
@@ -428,7 +439,7 @@ export default function PenjadwalanUjianPage() {
     {
       header: "Judul Penelitian",
       render: (row) => (
-        <Text size="sm" lineClamp={2} maw={280}>
+        <Text size="sm" lineClamp={2} maw={320} style={{ lineHeight: 1.5 }}>
           {row.rancanganPenelitian?.judulPenelitian || "-"}
         </Text>
       ),
@@ -448,7 +459,13 @@ export default function PenjadwalanUjianPage() {
       textAlign: "center",
       width: 80,
       render: (row) => (
-        <Menu shadow="sm" width={200} position="bottom-end" transitionProps={{ transition: 'pop-top-right' }} withinPortal>
+        <Menu
+          shadow="sm"
+          width={200}
+          position="bottom-end"
+          transitionProps={{ transition: "pop-top-right" }}
+          withinPortal
+        >
           <Menu.Target>
             <ActionIcon variant="subtle" color="gray" radius="md" size="lg">
               <IconDotsVertical size={18} stroke={1.5} />
@@ -457,8 +474,8 @@ export default function PenjadwalanUjianPage() {
 
           <Menu.Dropdown>
             <Menu.Label>Penjadwalan</Menu.Label>
-            <Menu.Item 
-              leftSection={<IconCalendarPlus size={16} stroke={1.5} />} 
+            <Menu.Item
+              leftSection={<IconCalendarPlus size={16} stroke={1.5} />}
               onClick={() => handleOpenScheduleForm(row)}
             >
               Jadwalkan Ujian
@@ -499,7 +516,7 @@ export default function PenjadwalanUjianPage() {
                 year: "numeric",
               })}
             </Text>
-            <Text size="xs" c="dimmed">
+            <Text size="xs" c="dimmed" style={{ lineHeight: 1.4 }}>
               {u.waktuMulai
                 ? new Date(u.waktuMulai).toLocaleTimeString("id-ID", {
                     hour: "2-digit",
@@ -529,7 +546,13 @@ export default function PenjadwalanUjianPage() {
       textAlign: "center",
       width: 100,
       render: (row) => (
-        <Menu shadow="sm" width={200} position="bottom-end" transitionProps={{ transition: 'pop-top-right' }} withinPortal>
+        <Menu
+          shadow="sm"
+          width={200}
+          position="bottom-end"
+          transitionProps={{ transition: "pop-top-right" }}
+          withinPortal
+        >
           <Menu.Target>
             <ActionIcon variant="subtle" color="gray" radius="md" size="lg">
               <IconDotsVertical size={18} stroke={1.5} />
@@ -538,20 +561,22 @@ export default function PenjadwalanUjianPage() {
 
           <Menu.Dropdown>
             <Menu.Label>Penjadwalan</Menu.Label>
-            <Menu.Item 
-              leftSection={<IconCalendarEvent size={16} stroke={1.5} />} 
+            <Menu.Item
+              leftSection={<IconCalendarEvent size={16} stroke={1.5} />}
               onClick={() => handleOpenEditForm(row)}
             >
               Edit Jadwal
             </Menu.Item>
-            <Menu.Item 
-              leftSection={<IconPrinter size={16} stroke={1.5} />} 
-              onClick={() => handleDownloadUndangan(row.id, row.mahasiswa?.nim || "MHS")}
+            <Menu.Item
+              leftSection={<IconPrinter size={16} stroke={1.5} />}
+              onClick={() =>
+                handleDownloadUndangan(row.id, row.mahasiswa?.nim || "MHS")
+              }
             >
               Cetak Undangan
             </Menu.Item>
-            <Menu.Item 
-              leftSection={<IconRotate2 size={16} stroke={1.5} />} 
+            <Menu.Item
+              leftSection={<IconRotate2 size={16} stroke={1.5} />}
               color="red"
               onClick={() => handleUndoSchedule(row)}
             >
@@ -575,70 +600,88 @@ export default function PenjadwalanUjianPage() {
   }
 
   return (
-    <Container size="xl" pt="md">
+    <Container size="xl" py="xl">
       <PageHeader
         title="Penjadwalan Ujian"
         items={[
           { label: "Dashboard", href: "/dashboard" },
           { label: "Penjadwalan Ujian" },
         ]}
-        description="Atur dan kelola jadwal ujian skripsi serta seminar hasil mahasiswa"
+        description="Atur dan kelola jadwal ujian skripsi serta seminar hasil mahasiswa secara efisien"
         icon={IconCalendarPlus}
         rightSection={
           <Button
             variant="outline"
             color="indigo"
-            leftSection={<IconPrinter size={16} />}
+            radius="md"
+            leftSection={<IconPrinter size={18} stroke={1.5} />}
             onClick={handleDownloadPdf}
+            style={{ borderWidth: "1.5px" }}
           >
             Cetak Jadwal PDF
           </Button>
         }
       />
 
-      <Paper withBorder radius="lg" p={0} style={{ overflow: "hidden" }}>
-        <Tabs
-          value={activeTab}
-          onChange={(val) => setActiveTab(val || "belum")}
+      <Stack gap="xl">
+        <Paper 
+          withBorder 
+          radius="xl" 
+          p={0} 
+          shadow="xs" 
+          style={{ 
+            overflow: "hidden",
+            borderColor: "var(--mantine-color-gray-2)",
+            backgroundColor: "var(--mantine-color-white)"
+          }}
         >
-          <Tabs.List px="md" pt="md">
-            <Tabs.Tab
-              value="belum"
-              rightSection={
-                belumDijadwalkan.length > 0 && (
-                  <Badge size="sm" color="orange" variant="light" radius="xl">
-                    {belumDijadwalkan.length}
-                  </Badge>
-                )
-              }
-            >
-              Belum Dijadwalkan
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="dijadwalkan"
-              rightSection={
-                sudahDijadwalkan.length > 0 && (
-                  <Badge size="sm" color="teal" variant="light" radius="xl">
-                    {sudahDijadwalkan.length}
-                  </Badge>
-                )
-              }
-            >
-              Dijadwalkan
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="selesai"
-              rightSection={
-                selesaiDijadwalkan.length > 0 && (
-                  <Badge size="sm" color="blue" variant="light" radius="xl">
-                    {selesaiDijadwalkan.length}
-                  </Badge>
-                )
-              }
-            >
-              Selesai
-            </Tabs.Tab>
-          </Tabs.List>
+          <Tabs
+            value={activeTab}
+            onChange={(val) => setActiveTab(val || "belum")}
+            variant="pills"
+            radius="md"
+          >
+            <Tabs.List px="lg" py="md" style={{ borderBottom: "1px solid var(--mantine-color-gray-2)", backgroundColor: "var(--mantine-color-gray-0)" }}>
+              <Tabs.Tab
+                value="belum"
+                px="xl"
+                rightSection={
+                  belumDijadwalkan.length > 0 && (
+                    <Badge size="xs" color="orange" variant="filled" radius="xl">
+                      {belumDijadwalkan.length}
+                    </Badge>
+                  )
+                }
+              >
+                Belum Dijadwalkan
+              </Tabs.Tab>
+              <Tabs.Tab
+                value="dijadwalkan"
+                px="xl"
+                rightSection={
+                  sudahDijadwalkan.length > 0 && (
+                    <Badge size="xs" color="teal" variant="filled" radius="xl">
+                      {sudahDijadwalkan.length}
+                    </Badge>
+                  )
+                }
+              >
+                Dijadwalkan
+              </Tabs.Tab>
+              <Tabs.Tab
+                value="selesai"
+                px="xl"
+                rightSection={
+                  selesaiDijadwalkan.length > 0 && (
+                    <Badge size="xs" color="indigo" variant="filled" radius="xl">
+                      {selesaiDijadwalkan.length}
+                    </Badge>
+                  )
+                }
+              >
+                Selesai
+              </Tabs.Tab>
+            </Tabs.List>
 
           <Tabs.Panel value="belum">
             <DataTable<PendaftaranUjian>
@@ -666,6 +709,7 @@ export default function PenjadwalanUjianPage() {
           </Tabs.Panel>
         </Tabs>
       </Paper>
+      </Stack>
 
       {/* ---- Schedule / Edit Form Modal ---- */}
       <Modal
@@ -675,9 +719,14 @@ export default function PenjadwalanUjianPage() {
           resetForm();
         }}
         title={
-          <Text fw={700} size="lg">
-            {editingUjianId ? "Edit Jadwal Ujian" : "Buat Jadwal Ujian"}
-          </Text>
+          <Stack gap={4}>
+            <Text fw={700} size="xl" lts={-0.5}>
+              {editingUjianId ? "Edit Jadwal Ujian" : "Buat Jadwal Ujian"}
+            </Text>
+            <Text size="xs" c="dimmed" fw={500}>
+              Lengkapi informasi jadwal dan dewan penguji
+            </Text>
+          </Stack>
         }
         size="lg"
         centered
@@ -692,38 +741,48 @@ export default function PenjadwalanUjianPage() {
         {!isLoadingForm && selectedItem && (
           <Stack gap="md">
             <Paper
-              p="md"
-              radius="md"
+              p="lg"
+              radius="lg"
               withBorder
               bg="var(--mantine-color-gray-0)"
+              style={{ borderColor: "var(--mantine-color-gray-2)" }}
             >
-              <Grid gutter="xs">
+              <Grid gutter="md">
                 <Grid.Col span={6}>
-                  <Text size="xs" tt="uppercase" fw={700} c="dimmed">
-                    Mahasiswa
-                  </Text>
-                  <Text size="sm" fw={500}>
-                    {selectedItem.mahasiswa?.user?.nama}
-                  </Text>
+                  <Stack gap={2}>
+                    <Text size="xs" tt="uppercase" fw={700} c="dimmed" lts={0.5}>
+                      Mahasiswa
+                    </Text>
+                    <Text size="sm" fw={600}>
+                      {selectedItem.mahasiswa?.user?.nama}
+                    </Text>
+                  </Stack>
                 </Grid.Col>
                 <Grid.Col span={6}>
-                  <Text size="xs" tt="uppercase" fw={700} c="dimmed">
-                    Jenis Ujian
-                  </Text>
-                  <Text size="sm" fw={500}>
-                    {selectedItem.jenisUjian?.namaJenis}
-                  </Text>
+                  <Stack gap={2}>
+                    <Text size="xs" tt="uppercase" fw={700} c="dimmed" lts={0.5}>
+                      Jenis Ujian
+                    </Text>
+                    <Text size="sm" fw={600}>
+                      {selectedItem.jenisUjian?.namaJenis}
+                    </Text>
+                  </Stack>
                 </Grid.Col>
                 <Grid.Col span={12}>
-                  <Text size="xs" tt="uppercase" fw={700} c="dimmed">
-                    Judul
-                  </Text>
-                  <Text size="sm" fw={500} lineClamp={2}>
-                    {selectedItem.rancanganPenelitian?.judulPenelitian}
-                  </Text>
+                  <Divider variant="dashed" my="xs" />
+                  <Stack gap={2}>
+                    <Text size="xs" tt="uppercase" fw={700} c="dimmed" lts={0.5}>
+                      Judul Penelitian
+                    </Text>
+                    <Text size="sm" fw={500} lineClamp={2} style={{ lineHeight: 1.5 }}>
+                      {selectedItem.rancanganPenelitian?.judulPenelitian}
+                    </Text>
+                  </Stack>
                 </Grid.Col>
               </Grid>
             </Paper>
+
+            <Divider label="Informasi Jadwal" labelPosition="left" />
 
             <Grid gutter="sm">
               <Grid.Col span={12}>
@@ -768,7 +827,7 @@ export default function PenjadwalanUjianPage() {
               </Grid.Col>
             </Grid>
 
-            <Divider label="Dewan Penguji" />
+            <Divider label="Dewan Penguji" labelPosition="left" />
             <Grid gutter="sm">
               <Grid.Col span={6}>
                 <Select
@@ -816,14 +875,16 @@ export default function PenjadwalanUjianPage() {
               </Grid.Col>
             </Grid>
 
-            <Group justify="flex-end" mt="md">
-              <Button variant="subtle" onClick={closeForm}>
+            <Group justify="flex-end" mt="xl" pt="md" style={{ borderTop: "1px solid var(--mantine-color-gray-2)" }}>
+              <Button variant="subtle" color="gray" onClick={closeForm} radius="md">
                 Batal
               </Button>
               <Button
                 color="indigo"
                 onClick={handleSubmitSchedule}
                 loading={isCreating || isUpdating}
+                radius="md"
+                px="xl"
               >
                 {editingUjianId ? "Simpan Perubahan" : "Jadwalkan Ujian"}
               </Button>
@@ -835,26 +896,3 @@ export default function PenjadwalanUjianPage() {
   );
 }
 
-function Divider({ label }: { label: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", margin: "10px 0" }}>
-      <div
-        style={{
-          flex: 1,
-          height: 1,
-          backgroundColor: "var(--mantine-color-gray-3)",
-        }}
-      />
-      <Text size="xs" fw={700} c="dimmed" px="sm">
-        {label}
-      </Text>
-      <div
-        style={{
-          flex: 1,
-          height: 1,
-          backgroundColor: "var(--mantine-color-gray-3)",
-        }}
-      />
-    </div>
-  );
-}
