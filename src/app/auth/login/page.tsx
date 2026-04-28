@@ -10,7 +10,7 @@ export default function LoginPage() {
         <div className="z-10">
           <div className="flex items-center gap-4 mb-8">
             <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center p-2">
-              <img src="/uin-logo.png" alt="UIN Logo" className="w-full h-full object-contain" />
+              <img src="/uin-logo.png" alt="UIN Logo" className="w-full h-full object-contain brightness-0 invert" />
             </div>
             <span className="text-white font-bold text-2xl tracking-tight">GoSkripsi</span>
           </div>
