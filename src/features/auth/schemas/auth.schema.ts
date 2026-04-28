@@ -16,6 +16,8 @@ export const updateProfileSchema = z.object({
   alamat: z.string().optional().nullable(),
   url_ttd: z.string().url().optional().nullable(),
   foto: z.string().optional().nullable(),
+  ipk: z.number().optional().nullable(),
+  semester: z.number().optional().nullable(),
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
