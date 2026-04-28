@@ -85,4 +85,11 @@ export const ujianService = {
     });
     return response.data;
   },
+
+  downloadUndanganPdf: async (pendaftaranId: number | string) => {
+    const response = await apiClient.get(`/pendaftaran-ujian/export-undangan/${pendaftaranId}`, {
+      responseType: "blob",
+    });
+    return response.data;
+  },
 };

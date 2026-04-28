@@ -361,7 +361,7 @@ export default function PenjadwalanUjianPage() {
       const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "Jadwal_Ujian.pdf");
+      link.setAttribute("download", "Jadwal_Jadwal.pdf");
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
@@ -370,6 +370,26 @@ export default function PenjadwalanUjianPage() {
       notifications.show({
         title: "Gagal",
         message: "Terjadi kesalahan saat mendownload PDF",
+        color: "red",
+      });
+    }
+  };
+
+  const handleDownloadUndangan = async (pendaftaranId: number | string, nim: string) => {
+    try {
+      const blob = await ujianService.downloadUndanganPdf(pendaftaranId);
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Undangan_Ujian_${nim}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch {
+      notifications.show({
+        title: "Gagal",
+        message: "Terjadi kesalahan saat mendownload Undangan",
         color: "red",
       });
     }
@@ -523,6 +543,12 @@ export default function PenjadwalanUjianPage() {
               onClick={() => handleOpenEditForm(row)}
             >
               Edit Jadwal
+            </Menu.Item>
+            <Menu.Item 
+              leftSection={<IconPrinter size={16} stroke={1.5} />} 
+              onClick={() => handleDownloadUndangan(row.id, row.mahasiswa?.nim || "MHS")}
+            >
+              Cetak Undangan
             </Menu.Item>
             <Menu.Item 
               leftSection={<IconRotate2 size={16} stroke={1.5} />} 
