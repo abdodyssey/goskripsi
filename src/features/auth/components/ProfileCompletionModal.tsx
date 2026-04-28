@@ -209,11 +209,9 @@ export function ProfileCompletionModal() {
           )}
         </Grid>
 
-        <Box bg="blue.0" p="xs" style={{ borderRadius: '8px', borderLeft: '4px solid var(--mantine-color-blue-6)' }}>
-          <Text size="xs" c="blue.9">
-            <b>Catatan:</b> Karena keterbatasan data pusat, silakan input IPK & Semester secara mandiri sesuai dokumen asli (KHS/Transkrip). Mohon pastikan data yang diisi <b>valid dan tidak dibuat-buat</b> demi kelancaran proses skripsi.
-          </Text>
-        </Box>
+        <Text size="xs" c="dimmed">
+          <b>Catatan:</b> Karena keterbatasan sinkronisasi data pusat, saat ini Anda diminta untuk menginput IPK dan Semester secara mandiri. Mohon pastikan data yang diisi <b>valid dan tidak dibuat-buat</b> demi kelancaran proses skripsi.
+        </Text>
 
         <Group justify="space-between" mt="md">
           <Button variant="subtle" color="gray" onClick={logout}>
