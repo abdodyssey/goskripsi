@@ -10,6 +10,13 @@ import { Notifications } from "@mantine/notifications";
 import { ModalsProvider } from "@mantine/modals";
 import { Providers } from "@/lib/query-provider";
 import { theme } from "@/theme/mantine-theme";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 
 export const metadata: Metadata = {
@@ -28,7 +35,7 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body
-        className="antialiased"
+        className={`${inter.variable} antialiased`}
         suppressHydrationWarning
       >
         <MantineProvider theme={theme} defaultColorScheme="auto">

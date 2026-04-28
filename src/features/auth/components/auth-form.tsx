@@ -47,7 +47,7 @@ export function AuthForm() {
           <span className="text-slate-900 dark:text-white font-bold text-xl tracking-tight">GoSkripsi</span>
         </div>
 
-        <Title order={1} fw={800} fz={28} className="tracking-tight text-slate-900 dark:text-white mb-2">
+        <Title order={1} fw={700} fz={28} className="tracking-tight text-slate-900 dark:text-white mb-2">
           Selamat Datang
         </Title>
         <Text c="dimmed" size="sm" className="leading-relaxed">
@@ -93,7 +93,7 @@ export function AuthForm() {
               loading={isLoggingIn}
               className="bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 shadow-lg shadow-indigo-200 dark:shadow-none"
               styles={{
-                label: { fontSize: 16, fontWeight: 700 },
+                label: { fontSize: 16, fontWeight: 600 },
               }}
             >
               Masuk ke Dashboard

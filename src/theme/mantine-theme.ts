@@ -50,9 +50,9 @@ export const theme = createTheme({
     ],
   },
 
-  fontFamily: "Satoshi, sans-serif",
+  fontFamily: "var(--font-inter), Inter, sans-serif",
   headings: {
-    fontFamily: "Satoshi, sans-serif",
+    fontFamily: "var(--font-inter), Inter, sans-serif",
     sizes: {
       h1: { fontWeight: "700", fontSize: rem(26), lineHeight: "1.2" },
       h2: { fontWeight: "700", fontSize: rem(20), lineHeight: "1.3" },
