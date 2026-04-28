@@ -19,6 +19,7 @@ import { IconSun, IconMoon, IconAlertCircle } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ProfileCompletionModal } from "@/features/auth/components/ProfileCompletionModal";
 
 export default function DashboardLayout({
   children,
@@ -171,6 +172,7 @@ export default function DashboardLayout({
         <div className="p-4 sm:p-8 max-w-[1400px] mx-auto min-h-[calc(100vh-64px)]">
           {children}
         </div>
+        <ProfileCompletionModal />
       </AppShell.Main>
     </AppShell>
   );
