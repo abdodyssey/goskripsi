@@ -11,7 +11,7 @@ export function Logo({
   return (
     <Group gap="xs" style={style} justify={mini ? "center" : "flex-start"}>
       <Image
-        src="/uin-logo-transparent.png"
+        src="/uin-logo.png"
         alt="UIN Logo"
         width={32}
         height={32}
