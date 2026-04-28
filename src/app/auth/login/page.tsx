@@ -8,17 +8,19 @@ export default function LoginPage() {
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
         
         <div className="z-10">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-bold text-xl">G</div>
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center p-2">
+              <img src="/uin-logo.png" alt="UIN Logo" className="w-full h-full object-contain" />
+            </div>
             <span className="text-white font-bold text-2xl tracking-tight">GoSkripsi</span>
           </div>
           
           <h1 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight mb-6 max-w-lg">
             Sistem Informasi <br/>
-            <span className="text-indigo-200">Manajemen Skripsi</span> Digital.
+            <span className="text-indigo-200">Penelitian Mahasiswa</span>.
           </h1>
           <p className="text-indigo-100 text-base max-w-md leading-relaxed">
-            Platform modern untuk pengelolaan administrasi skripsi Mahasiswa Fakultas Sains dan Teknologi UIN Raden Fatah Palembang.
+            Platform untuk pengelolaan administrasi skripsi Mahasiswa Fakultas Sains dan Teknologi UIN Raden Fatah Palembang.
           </p>
         </div>
 
