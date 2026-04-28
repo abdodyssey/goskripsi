@@ -43,7 +43,7 @@ export function AuthForm() {
     >
       <Box mb={24}>
         <div className="flex items-center gap-3 mb-6 lg:hidden">
-          <img src="/uin-logo.png" alt="UIN Logo" className="w-8 h-8 object-contain" />
+          <Image src="/uin-logo.png" alt="UIN Logo" width={32} height={32} className="object-contain" />
           <span className="text-slate-900 dark:text-white font-bold text-xl tracking-tight">
             GoSkripsi
           </span>
