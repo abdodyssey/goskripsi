@@ -134,7 +134,7 @@ export class AuthService {
         role: mainRole,
         roles: roleNames,
         user: userData,
-        is_default_password: user.username === user.password,
+        is_default_password: bcrypt.compareSync(user.username, user.password),
       };
     } catch (error: any) {
       if (error.message.includes("relationLoadStrategy")) {
@@ -186,7 +186,7 @@ export class AuthService {
       role: mainRole,
       roles: roleNames,
       user: userData,
-      is_default_password: user.username === user.password,
+      is_default_password: bcrypt.compareSync(user.username, user.password),
     };
   }
 
