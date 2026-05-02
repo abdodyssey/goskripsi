@@ -84,7 +84,7 @@ export class UserService {
           roleId: Number(payload.role_id),
           status: payload.status || undefined,
           prodiId: payload.prodi_id ? Number(payload.prodi_id) : undefined,
-        },
+        } as any,
         include: { role: true, prodi: true } as any,
       });
     } catch (error: any) {
@@ -106,7 +106,7 @@ export class UserService {
       roleId: Number(payload.role_id),
       status: payload.status,
       prodiId: payload.prodi_id ? Number(payload.prodi_id) : null,
-    };
+    } as any;
 
     if (payload.password) {
       data.password = await bcrypt.hash(payload.password, 10);
