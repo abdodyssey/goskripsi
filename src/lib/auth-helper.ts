@@ -26,7 +26,7 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
       if (!Number.isNaN(userId)) {
         const dbUser = await prisma.user.findUnique({
           where: { id: userId },
-          select: { prodiId: true },
+          select: { prodiId: true } as any,
         });
         return { ...decoded, prodiId: dbUser?.prodiId ?? null };
       }
