@@ -124,7 +124,7 @@ export const useAllPengajuan = () => {
   });
 
   return {
-    pengajuanList: ((query.data as { data?: unknown[] })?.data || query.data || []) as PengajuanRancanganPenelitian[],
+    pengajuanList: ((query.data as { data?: unknown[] })?.data || query.data || []) as any[],
     isLoading: query.isLoading,
     isError: query.isError,
     refetch: query.refetch,
