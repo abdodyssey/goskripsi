@@ -101,7 +101,7 @@ export async function GET(
     fs.unlinkSync(configPath);
     fs.unlinkSync(dataToPdf.outputPath);
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename=UNDANGAN_${pendaftaran.mahasiswa.nim}.pdf`,

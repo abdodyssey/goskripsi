@@ -93,7 +93,7 @@ export async function GET(request: Request) {
       filterTitle: `Daftar Jadwal Ujian Skripsi — Dicetak ${new Date().toLocaleDateString("id-ID", { dateStyle: "long" })}`,
     });
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
