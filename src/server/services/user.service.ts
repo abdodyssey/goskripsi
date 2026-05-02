@@ -42,7 +42,7 @@ export class UserService {
         take,
         include: { role: true, prodi: true } as any,
         orderBy: { id: "desc" },
-      }),
+      }) as unknown as any[],
       prisma.user.count({ where }),
     ]);
 
