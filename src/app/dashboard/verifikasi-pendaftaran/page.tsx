@@ -32,7 +32,7 @@ import {
   IconDotsVertical,
 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 
