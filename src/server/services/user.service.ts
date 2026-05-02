@@ -40,7 +40,7 @@ export class UserService {
         where,
         skip,
         take,
-        include: { role: true, prodi: true },
+        include: { role: true, prodi: true } as any,
         orderBy: { id: "desc" },
       }),
       prisma.user.count({ where }),
@@ -85,7 +85,7 @@ export class UserService {
           status: payload.status || undefined,
           prodiId: payload.prodi_id ? Number(payload.prodi_id) : undefined,
         },
-        include: { role: true, prodi: true },
+        include: { role: true, prodi: true } as any,
       });
     } catch (error: any) {
       if (error.code === "P2002") {
@@ -116,7 +116,7 @@ export class UserService {
       return await prisma.user.update({
         where: { id: Number(id) },
         data,
-        include: { role: true, prodi: true },
+        include: { role: true, prodi: true } as any,
       });
     } catch (error: any) {
       if (error.code === "P2002") {
