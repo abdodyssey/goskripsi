@@ -10,7 +10,7 @@ export function ProfileCompletionModal() {
   const { userResponse, isDefaultPassword, updateProfileAsync, changePasswordAsync, logout } = useAuth();
   const user = userResponse?.user;
   const roles = user?.roles || userResponse?.roles || [];
-  const isMahasiswa = (Array.isArray(roles) ? roles.includes("mahasiswa") : false) || user?.role_id === 6;
+  const isMahasiswa = (Array.isArray(roles) ? roles.includes("mahasiswa") : false);
   const isStaffOrLecturer = Array.isArray(roles) && (roles.includes("dosen") || roles.includes("kaprodi") || roles.includes("sekprodi") || roles.includes("admin_prodi") || roles.includes("superadmin"));
   const shouldShowAkademik = isMahasiswa && !isStaffOrLecturer;
 
