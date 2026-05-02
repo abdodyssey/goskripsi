@@ -43,7 +43,7 @@ export function RoleBasedDashboard() {
           justifyContent: "center",
         }}
       >
-        <Loader color="indigo.9" size="lg" />
+        <Loader color="var(--gs-primary)" size="lg" />
       </Container>
     );
   }
@@ -84,7 +84,7 @@ export function RoleBasedDashboard() {
   const mainLinks = [
     {
       icon: <IconHome size={20} />,
-      color: "indigo",
+      color: "var(--gs-primary)",
       label: "Dashboard Beranda",
       href: "/dashboard",
     },
@@ -92,31 +92,31 @@ export function RoleBasedDashboard() {
       ? [
           {
             icon: <IconFileText size={20} />,
-            color: "pink",
+            color: "var(--gs-primary)",
             label: "Pengajuan Ranpel",
             href: "/dashboard/pengajuan-ranpel",
           },
           {
             icon: <IconBooks size={20} />,
-            color: "teal",
+            color: "var(--gs-primary)",
             label: "Pendaftaran Skripsi",
             href: "/dashboard/pendaftaran-skripsi",
           },
           {
             icon: <IconSettings size={20} />,
-            color: "violet",
+            color: "var(--gs-primary)",
             label: "Progress Bimbingan",
             href: "/dashboard/progress-bimbingan",
           },
           {
             icon: <IconClipboardCheck size={20} />,
-            color: "blue",
+            color: "var(--gs-primary)",
             label: "Pendaftaran Ujian",
             href: "/dashboard/pendaftaran-ujian",
           },
           {
             icon: <IconEdit size={20} />,
-            color: "orange",
+            color: "var(--gs-primary)",
             label: "Perbaikan Judul",
             href: "/dashboard/perbaikan-judul",
           },
@@ -126,13 +126,13 @@ export function RoleBasedDashboard() {
       ? [
           {
             icon: <IconBriefcase size={20} />,
-            color: "orange",
+            color: "var(--gs-primary)",
             label: "Mahasiswa Bimbingan",
             href: "/dashboard/mahasiswa-bimbingan",
           },
           {
             icon: <IconSettings size={20} />,
-            color: "grape",
+            color: "var(--gs-primary)",
             label: "Jadwal Sidang",
             href: "/dashboard/jadwal-sidang",
           },
@@ -142,13 +142,13 @@ export function RoleBasedDashboard() {
       ? [
           {
             icon: <IconUsers size={20} />,
-            color: "red",
+            color: "var(--gs-primary)",
             label: "Manajemen Ranpel",
             href: "/dashboard/manajemen-ranpel",
           },
           {
             icon: <IconBooks size={20} />,
-            color: "pink",
+            color: "var(--gs-primary)",
             label: "Pengajuan Ranpel",
             href: "/dashboard/pengajuan-ranpel",
           },
@@ -171,10 +171,10 @@ export function RoleBasedDashboard() {
       className="hover:bg-surface-hover transition-colors"
     >
       <Group gap="xs">
-        <ThemeIcon color={link.color} variant="light" size="sm">
+        <ThemeIcon color={link.color} variant="filled" size="sm" radius="md">
           {link.icon}
         </ThemeIcon>
-        <Text size="xs" fw={500}>
+        <Text size="xs" fw={700} className="text-gs-text-primary">
           {link.label}
         </Text>
       </Group>
@@ -196,12 +196,19 @@ export function RoleBasedDashboard() {
               hiddenFrom="sm"
               size="sm"
             />
-            <Text fw={700} c="var(--mantine-primary-color-filled)" size="lg">
-              GoSkripsi
+            <Text fw={800} className="text-gs-primary" size="lg" lts={1}>
+              GOSKRIPSI
             </Text>
           </Group>
-          <Button variant="outline" color="red" onClick={logout} size="sm">
-            Keluar
+          <Button 
+            variant="outline" 
+            color="var(--gs-danger)" 
+            onClick={logout} 
+            size="sm"
+            radius="md"
+            fw={700}
+          >
+            KELUAR
           </Button>
         </Group>
       </AppShell.Header>
@@ -212,14 +219,14 @@ export function RoleBasedDashboard() {
 
       <AppShell.Main>
         <Container size="xl">
-          <Title order={2} mb="xl">
+          <Title order={2} mb="xl" className="gs-page-title">
             Selamat datang, {user.nama}!
           </Title>
 
           <Paper radius="md" p="xl" withBorder>
             <Stack gap="md">
               <div>
-                <Text size="lg" fw={600}>
+                <Text size="lg" fw={800} className="text-gs-text-primary" tt="uppercase" lts={1}>
                   Profil{" "}
                   {isMahasiswa ? "Mahasiswa" : isDosen ? "Dosen" : "Pengguna"}
                 </Text>
@@ -241,7 +248,7 @@ export function RoleBasedDashboard() {
                   </Text>
                   <Text size="sm">
                     <strong>Akses:</strong>{" "}
-                    <span className="uppercase font-medium text-primary-light-color">
+                    <span className="uppercase font-bold text-gs-primary">
                       {roles.join(", ")}
                     </span>
                   </Text>
@@ -249,8 +256,8 @@ export function RoleBasedDashboard() {
 
                 {isMahasiswa && mahasiswaData && (
                   <Stack gap="xs">
-                    <Text fw={600} c="var(--mantine-primary-color-filled)">
-                      Detail Akademik (Subtype: Mahasiswa)
+                    <Text fw={800} className="text-gs-primary" size="sm" tt="uppercase" lts={1}>
+                      Detail Akademik
                     </Text>
                     <Text size="sm">
                       <strong>Angkatan:</strong> {mahasiswaData.angkatan}
@@ -269,8 +276,8 @@ export function RoleBasedDashboard() {
 
                 {isDosen && dosenData && (
                   <Stack gap="xs">
-                    <Text fw={600} c="var(--mantine-primary-color-filled)">
-                      Detail Kepegawaian (Subtype: Dosen)
+                    <Text fw={800} className="text-gs-primary" size="sm" tt="uppercase" lts={1}>
+                      Detail Kepegawaian
                     </Text>
                     <Text size="sm">
                       <strong>NIDN:</strong> {dosenData.nidn}
@@ -283,9 +290,11 @@ export function RoleBasedDashboard() {
                     </Text>
                     {isKaprodi && (
                       <Text
-                        size="sm"
-                        fw={600}
-                        c="var(--mantine-primary-color-filled)"
+                        size="xs"
+                        fw={800}
+                        className="text-gs-primary"
+                        tt="uppercase"
+                        lts={1}
                       >
                         Akses Kepala Program Studi Aktif
                       </Text>

@@ -13,7 +13,7 @@ import {
   Box,
   Menu,
 } from "@mantine/core";
-import { IconEye, IconCheck, IconX, IconRotate2, IconDotsVertical } from "@tabler/icons-react";
+import { IconEye, IconCheck, IconX, IconDotsVertical } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
@@ -22,6 +22,7 @@ import { StudentProfileModal } from "@/features/mahasiswa/components/student-pro
 import { PengajuanRancanganPenelitian } from "../types/ranpel.type";
 import { Mahasiswa } from "@/types/user.type";
 import { useState, useMemo } from "react";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 
 import { DataTable, DataTableColumn } from "@/components/ui/data-table";
 
@@ -37,6 +38,12 @@ export function VerifikasiRanpelList() {
   const [selectedStudent, setSelectedStudent] = useState<Mahasiswa | null>(
     null,
   );
+
+  const { userResponse } = useAuth();
+  const user = userResponse?.user;
+  const roles = user?.roles || userResponse?.roles || [];
+  const isSuperUser = roles.includes("superadmin") || roles.includes("admin");
+  const userProdiId = user?.prodi_id;
 
   const handlePreview = (item: PengajuanRancanganPenelitian) => {
     setSelectedPengajuan(item);
@@ -64,14 +71,14 @@ export function VerifikasiRanpelList() {
       notifications.show({
         title: "Tersimpan",
         message: "Komentar berhasil diperbarui",
-        color: "teal",
+        color: "var(--gs-success)",
         autoClose: 2000,
       });
     } catch (error) {
       notifications.show({
         title: "Gagal",
         message: (error as Error).message || "Gagal menyimpan komentar",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -106,26 +113,26 @@ export function VerifikasiRanpelList() {
         </Stack>
       ),
       labels: { confirm: "Verifikasi & Kirim", cancel: "Batal" },
-      confirmProps: { color: "indigo" },
+      confirmProps: { color: "var(--gs-primary)" },
       onConfirm: async () => {
         try {
           await updatePengajuan({
             id,
             data: {
-              status_dosen_pa: "diterima",
+              status_dosen_pa: "diverifikasi",
               catatan_dosen_pa: comments.note,
             },
           });
           notifications.show({
             title: "Berhasil",
             message: "Pengajuan berhasil diverifikasi",
-            color: "green",
+            color: "var(--gs-success)",
           });
         } catch (error) {
           notifications.show({
             title: "Gagal",
             message: (error as Error).message || "Terjadi kesalahan",
-            color: "red",
+            color: "var(--gs-danger)",
           });
         }
       },
@@ -157,7 +164,7 @@ export function VerifikasiRanpelList() {
           notifications.show({
             title: "Peringatan",
             message: "Harap berikan alasan penolakan.",
-            color: "orange",
+            color: "var(--gs-warning)",
           });
           return;
         }
@@ -170,43 +177,13 @@ export function VerifikasiRanpelList() {
           notifications.show({
             title: "Berhasil",
             message: "Pengajuan telah ditolak",
-            color: "green",
+            color: "var(--gs-success)",
           });
         } catch (error) {
           notifications.show({
             title: "Gagal",
             message: (error as Error).message || "Terjadi kesalahan",
-            color: "red",
-          });
-        }
-      },
-    });
-  };
-
-  const handleUndo = (id: string) => {
-    modals.openConfirmModal({
-      title: "Undo Verifikasi",
-      children: (
-        <Text size="sm">
-          Apakah Anda yakin ingin membatalkan verifikasi ini? Status akan
-          kembali menjadi MENUNGGU.
-        </Text>
-      ),
-      labels: { confirm: "Undo Verifikasi", cancel: "Batal" },
-      confirmProps: { color: "orange" },
-      onConfirm: async () => {
-        try {
-          await updatePengajuan({ id, data: { status_dosen_pa: "menunggu" } });
-          notifications.show({
-            title: "Berhasil",
-            message: "Verifikasi berhasil dibatalkan",
-            color: "green",
-          });
-        } catch (error) {
-          notifications.show({
-            title: "Gagal",
-            message: (error as Error).message || "Terjadi kesalahan",
-            color: "red",
+            color: "var(--gs-danger)",
           });
         }
       },
@@ -214,10 +191,18 @@ export function VerifikasiRanpelList() {
   };
 
   const pengajuanArray: PengajuanRancanganPenelitian[] = useMemo(() => {
-    return Array.isArray(pengajuanList)
+    const list = Array.isArray(pengajuanList)
       ? (pengajuanList as PengajuanRancanganPenelitian[])
       : [];
-  }, [pengajuanList]);
+    
+    if (isSuperUser || !userProdiId) return list;
+
+    return list.filter(p => {
+      const mhsProdi = p.mahasiswa as any;
+      const id = mhsProdi?.prodi_id || mhsProdi?.prodiId;
+      return Number(id) === Number(userProdiId);
+    });
+  }, [pengajuanList, isSuperUser, userProdiId]);
 
   const columns: DataTableColumn<PengajuanRancanganPenelitian>[] = [
     {
@@ -232,7 +217,7 @@ export function VerifikasiRanpelList() {
           }
         >
           <Tooltip label="Klik untuk lihat profil">
-            <Text size="sm" fw={700} c="indigo.7">
+            <Text size="sm" fw={700} className="text-gs-primary">
               {row.mahasiswa?.user?.nama}
             </Text>
           </Tooltip>
@@ -274,11 +259,11 @@ export function VerifikasiRanpelList() {
                   backgroundColor: "var(--mantine-color-gray-4)",
                 }}
               />
-              <Text size="10px" fw={800} c="dimmed" tt="uppercase" lts={0.5}>
+              <Text size="10px" fw={600} c="dimmed" tt="uppercase" lts={0.5}>
                 Pengajuan
               </Text>
             </Group>
-            <Text size="xs" fw={700} pl={12}>
+            <Text size="xs" fw={600} pl={12}>
               {row.tanggalPengajuan
                 ? new Date(row.tanggalPengajuan).toLocaleDateString("id-ID", {
                     day: "numeric",
@@ -296,14 +281,14 @@ export function VerifikasiRanpelList() {
                   h={6}
                   style={{
                     borderRadius: "50%",
-                    backgroundColor: "var(--mantine-color-teal-5)",
+                    backgroundColor: "var(--gs-success)",
                   }}
                 />
-                <Text size="10px" fw={800} c="teal.7" tt="uppercase" lts={0.5}>
+                <Text size="10px" fw={700} className="text-gs-success-text" tt="uppercase" lts={0.5}>
                   Disetujui
                 </Text>
               </Group>
-              <Text size="xs" fw={800} c="teal.9" pl={12}>
+              <Text size="xs" fw={700} className="text-gs-success-text" pl={12}>
                 {new Date(row.tanggalReviewPa).toLocaleDateString("id-ID", {
                   day: "numeric",
                   month: "long",
@@ -319,11 +304,10 @@ export function VerifikasiRanpelList() {
       header: "STATUS",
       width: "150px",
       render: (row) => {
-        let badgeColor = "gray";
-        if (row.statusDosenPa === "diterima") badgeColor = "teal";
-        if (row.statusDosenPa === "ditolak") badgeColor = "red";
-        if (row.statusDosenPa === "diverifikasi") badgeColor = "indigo";
-        if (row.statusDosenPa === "menunggu") badgeColor = "blue";
+        let badgeColor = "var(--gs-border-strong)";
+        if (row.statusDosenPa === "diverifikasi") badgeColor = "var(--gs-primary)";
+        if (row.statusDosenPa === "ditolak") badgeColor = "var(--gs-danger)";
+        if (row.statusDosenPa === "menunggu") badgeColor = "var(--gs-info)";
         return (
           <Badge
             color={badgeColor}
@@ -362,31 +346,18 @@ export function VerifikasiRanpelList() {
               <>
                 <Menu.Divider />
                 <Menu.Item 
-                  color="teal"
-                  leftSection={<IconCheck size={16} stroke={1.5} />} 
+                  color="var(--gs-success)"
+                  leftSection={<IconCheck size={16} stroke={2} />} 
                   onClick={() => handleVerify(row)}
                 >
                   Setujui Verifikasi
                 </Menu.Item>
                 <Menu.Item 
-                  color="red"
-                  leftSection={<IconX size={16} stroke={1.5} />} 
+                  color="var(--gs-danger)"
+                  leftSection={<IconX size={16} stroke={2} />} 
                   onClick={() => handleReject(row.id.toString())}
                 >
                   Tolak / Revisi
-                </Menu.Item>
-              </>
-            )}
-
-            {(row.statusDosenPa === "diterima" || row.statusDosenPa === "ditolak") && row.statusKaprodi === "menunggu" && (
-              <>
-                <Menu.Divider />
-                <Menu.Item 
-                  color="orange"
-                  leftSection={<IconRotate2 size={16} stroke={1.5} />} 
-                  onClick={() => handleUndo(row.id.toString())}
-                >
-                  Undo Verifikasi
                 </Menu.Item>
               </>
             )}

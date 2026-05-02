@@ -13,7 +13,7 @@ export default function AuthLoading() {
       }}
     >
       <Stack align="center" gap="sm">
-        <Loader color="indigo.9" size="lg" />
+        <Loader color="var(--gs-primary)" size="lg" />
         <Text c="dimmed">Memuat Formulir...</Text>
       </Stack>
     </Container>

@@ -47,7 +47,10 @@ export default function MahasiswaHasilUjianPage() {
           <Alert
             icon={<IconAlertCircle size={16} />}
             title="Kesalahan"
-            color="red"
+            color="var(--gs-danger)"
+            variant="light"
+            radius="lg"
+            className="bg-gs-danger-bg border-gs-danger-border text-gs-danger-text"
           >
             {(error as any)?.response?.data?.message ||
               "Gagal memuat hasil ujian"}
@@ -60,8 +63,14 @@ export default function MahasiswaHasilUjianPage() {
           <Alert
             icon={<IconAlertCircle size={16} />}
             title="Informasi"
-            color="blue"
             variant="light"
+            radius="lg"
+            styles={{
+              root: { backgroundColor: 'var(--gs-bg-overlay)', border: '1px solid var(--gs-border)' },
+              title: { color: 'var(--gs-text-primary)' },
+              icon: { color: 'var(--gs-primary)' },
+              message: { color: 'var(--gs-text-secondary)' }
+            }}
           >
             Belum ada riwayat hasil ujian skripsi/seminar untuk Anda.
           </Alert>

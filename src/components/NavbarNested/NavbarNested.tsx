@@ -1,3 +1,5 @@
+"use client";
+
 import {
   IconAdjustments,
   IconHome,
@@ -9,7 +11,15 @@ import {
   IconLayoutSidebarRightCollapse,
   IconUsers,
 } from "@tabler/icons-react";
-import { Group, ScrollArea, Menu, rem, ActionIcon, Box, Stack } from "@mantine/core";
+import {
+  Group,
+  ScrollArea,
+  Menu,
+  rem,
+  ActionIcon,
+  Box,
+  Stack,
+} from "@mantine/core";
 import Link from "next/link";
 import { LinksGroup } from "../NavbarLinksGroup/NavbarLinksGroup";
 import { UserButton } from "../UserButton/UserButton";
@@ -35,6 +45,7 @@ export function NavbarNested({ opened, onToggle }: NavbarNestedProps) {
   const isSekprodi = roles.includes("sekprodi");
   const isAdminProdi = roles.includes("admin_prodi");
   const isSuperAdmin = roles.includes("superadmin");
+  const isAdmin = roles.includes("admin");
 
   const mockdata = [
     { label: "Dashboard", icon: IconHome, link: "/dashboard" },
@@ -66,7 +77,7 @@ export function NavbarNested({ opened, onToggle }: NavbarNestedProps) {
           },
         ]
       : []),
-    ...(isDosen || isKaprodi || isSekprodi || isAdminProdi
+    ...(isDosen || isKaprodi || isSekprodi || isAdminProdi || isAdmin
       ? [
           {
             label: "Skripsi",
@@ -128,7 +139,7 @@ export function NavbarNested({ opened, onToggle }: NavbarNestedProps) {
                 : []),
 
               // Fitur Admin Prodi (Rekapitulasi Nilai)
-              ...(isAdminProdi || isKaprodi || isSekprodi
+              ...(isAdminProdi || isKaprodi || isSekprodi || isAdmin
                 ? [
                     {
                       label: "Rekapitulasi Nilai",
@@ -138,26 +149,29 @@ export function NavbarNested({ opened, onToggle }: NavbarNestedProps) {
                 : []),
 
               { label: "Jadwal Ujian", link: "/dashboard/jadwal-ujian" },
-              { label: "Penilaian Ujian", link: "/dashboard/penilaian-ujian" },
+              ...(isAdmin
+                ? []
+                : [
+                    {
+                      label: "Penilaian Ujian",
+                      link: "/dashboard/penilaian-ujian",
+                    },
+                  ]),
             ],
           },
         ]
       : []),
-    ...(roles.includes("admin") || roles.includes("superadmin")
+    ...(roles.includes("superadmin")
       ? [
           {
             label: "Data Master",
             icon: IconAdjustments,
             initiallyOpened: true,
             links: [
-              ...(isSuperAdmin 
-                ? [
-                    {
-                      label: "User",
-                      link: "/dashboard/users",
-                    },
-                  ] 
-                : []),
+              {
+                label: "User",
+                link: "/dashboard/users",
+              },
               {
                 label: "Mahasiswa",
                 link: "/dashboard/master-data/mahasiswa",
@@ -179,10 +193,56 @@ export function NavbarNested({ opened, onToggle }: NavbarNestedProps) {
                 label: "Keputusan Ujian",
                 link: "/dashboard/master-data/keputusan",
               },
+              {
+                label: "Ranpel",
+                link: "/dashboard/master-data/ranpel",
+              },
+              {
+                label: "Pengajuan Ranpel",
+                link: "/dashboard/master-data/pengajuan-ranpel",
+              },
             ],
           },
         ]
-      : []),
+      : isAdmin
+        ? [
+            {
+              label: "Data Master",
+              icon: IconAdjustments,
+              initiallyOpened: true,
+              links: [
+                {
+                  label: "User",
+                  link: "/dashboard/users",
+                },
+                {
+                  label: "Mahasiswa",
+                  link: "/dashboard/master-data/mahasiswa",
+                },
+                {
+                  label: "Dosen",
+                  link: "/dashboard/master-data/dosen",
+                },
+                {
+                  label: "Peminatan",
+                  link: "/dashboard/master-data/peminatan",
+                },
+                {
+                  label: "Jenis Ujian",
+                  link: "/dashboard/master-data/jenis-ujian",
+                },
+                {
+                  label: "Syarat Ujian",
+                  link: "/dashboard/master-data/syarat",
+                },
+                {
+                  label: "Komponen Penilaian",
+                  link: "/dashboard/master-data/komponen-penilaian",
+                },
+              ],
+            },
+          ]
+        : []),
   ];
 
   const filteredMockdata = mockdata.filter(

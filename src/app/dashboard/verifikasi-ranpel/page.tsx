@@ -23,7 +23,7 @@ export default function VerifikasiRanpelPage() {
   if (!isManagement) {
     return (
       <Container size="xl" pt="md">
-        <Text c="red">
+        <Text className="text-gs-danger" fw={700}>
           Hanya Dosen / Struktural yang memiliki akses ke halaman ini.
         </Text>
       </Container>

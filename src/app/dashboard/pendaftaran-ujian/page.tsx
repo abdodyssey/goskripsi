@@ -20,7 +20,7 @@ export default function PendaftaranUjianPage() {
   if (!isMahasiswa) {
     return (
       <Container size="xl" pt="md">
-        <Text c="red">Hanya Mahasiswa yang memiliki akses ke halaman ini.</Text>
+        <Text className="text-gs-danger" fw={700}>Hanya Mahasiswa yang memiliki akses ke halaman ini.</Text>
       </Container>
     );
   }

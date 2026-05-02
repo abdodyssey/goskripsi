@@ -146,11 +146,11 @@ export function PendaftaranUjianFormModal({
     // Validate: all wajib syarat must have files
     const missingSyarat = wajibSyarat.filter((s) => !syaratFiles[s.id]);
     if (missingSyarat.length > 0) {
-      notifications.show({
-        title: "Berkas Belum Lengkap",
-        message: `Masih ada ${missingSyarat.length} berkas wajib yang belum diunggah`,
-        color: "orange",
-      });
+        notifications.show({
+          title: "Berkas Belum Lengkap",
+          message: `Masih ada ${missingSyarat.length} berkas wajib yang belum diunggah`,
+          color: "var(--gs-warning)",
+        });
       return;
     }
 
@@ -189,7 +189,7 @@ export function PendaftaranUjianFormModal({
       notifications.show({
         title: "Berhasil",
         message: "Pendaftaran ujian berhasil diajukan.",
-        color: "teal",
+        color: "var(--gs-success)",
       });
       form.reset();
       setSyaratFiles({});
@@ -205,7 +205,7 @@ export function PendaftaranUjianFormModal({
           error?.response?.data?.message ||
           (err as Error)?.message ||
           "Terjadi kesalahan",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -228,7 +228,7 @@ export function PendaftaranUjianFormModal({
       notifications.show({
         title: "Dokumen Dipilih",
         message: "Menggunakan dokumen yang sudah ada di profil Anda",
-        color: "blue",
+        color: "var(--gs-primary)",
         autoClose: 2000,
       });
     } catch (error) {
@@ -236,7 +236,7 @@ export function PendaftaranUjianFormModal({
       notifications.show({
         title: "Gagal Mengambil Dokumen",
         message: "Terjadi kesalahan saat mengambil dokumen Anda",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -259,13 +259,13 @@ export function PendaftaranUjianFormModal({
         withBorder
         radius="md"
         p="sm"
-        bg={hasFile ? (isDark ? "teal.9" : "teal.0") : (isDark ? "dark.7" : "white")}
+        bg={hasFile ? "var(--gs-bg-overlay)" : "var(--gs-bg-raised)"}
         style={{
           borderColor: hasFile 
-            ? "var(--mantine-color-teal-3)" 
+            ? "var(--gs-border-strong)" 
             : isWajib && !hasFile 
-              ? "var(--mantine-color-red-2)" 
-              : undefined,
+              ? "var(--gs-danger)" 
+              : "var(--gs-border)",
           transition: "all 0.2s ease"
         }}
       >
@@ -274,7 +274,7 @@ export function PendaftaranUjianFormModal({
             <Group gap="sm" align="flex-start" wrap="nowrap">
                <ThemeIcon 
                   variant={hasFile ? "filled" : "light"} 
-                  color={hasFile ? "teal" : isWajib ? "red" : "gray"} 
+                  color={hasFile ? "var(--gs-success)" : isWajib ? "var(--gs-danger)" : "var(--gs-text-muted)"} 
                   size={24} 
                   radius="md"
                >
@@ -283,10 +283,10 @@ export function PendaftaranUjianFormModal({
                
                <div>
                   <Group gap={6} mb={2}>
-                    <Text size="sm" fw={600} c={isDark ? "gray.3" : "gray.8"}>
+                    <Text size="sm" fw={700} className="text-gs-text-primary">
                       {syarat.namaSyarat}
                     </Text>
-                    {isWajib && <Badge size="xs" variant="light" color="red" radius="sm">Wajib</Badge>}
+                    {isWajib && <Badge size="xs" variant="filled" className="bg-gs-danger" radius="sm">Wajib</Badge>}
                   </Group>
                   <Text size="10px" c="dimmed">Format yang diterima: PDF</Text>
                </div>
@@ -297,8 +297,8 @@ export function PendaftaranUjianFormModal({
                 <Tooltip label={`Auto-match: ${matchingDoc.jenis.replace(/_/g, ' ')}`} withArrow position="left">
                   <Button
                     size="compact-xs"
-                    variant="light"
-                    color="teal"
+                    variant="outline"
+                    color="var(--gs-success)"
                     radius="md"
                     leftSection={<IconCheck size={12} />}
                     onClick={() => handleUseExistingDoc(String(syarat.id), matchingDoc!.fileUrl, syarat.namaSyarat)}
@@ -313,10 +313,10 @@ export function PendaftaranUjianFormModal({
                   <Menu.Target>
                     <Tooltip label="Pilih dari dokumen di profil Anda" withArrow position="left">
                       <Button
-                        size="compact-xs"
-                        variant="light"
-                        color="indigo"
-                        radius="md"
+                         size="compact-xs"
+                         variant="outline"
+                         color="var(--gs-primary)"
+                         radius="md"
                         leftSection={<IconDatabase size={12} />}
                       >
                         Pilih dari Profil
@@ -353,7 +353,7 @@ export function PendaftaranUjianFormModal({
               input: {
                 backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)",
                 fontSize: "12px",
-                border: "1px dashed var(--mantine-color-gray-3)"
+                border: "1px dashed var(--gs-border-strong)"
               }
             }}
           />
@@ -376,49 +376,50 @@ export function PendaftaranUjianFormModal({
           <Paper withBorder radius="md" p="md">
             <Group justify="space-between" mb="md">
                <Group gap={12}>
-                  <ThemeIcon variant="light" size={40} radius="md" color="indigo">
+                  <ThemeIcon variant="light" size={40} radius="md" className="bg-gs-bg-overlay text-gs-primary">
                     <IconUserCircle size={24} />
                   </ThemeIcon>
                   <div>
-                    <Text fw={700} size="md">Verifikasi Data Mahasiswa</Text>
+                    <Text fw={600} size="md">Verifikasi Data Mahasiswa</Text>
                     <Text size="xs" c="dimmed">Pastikan data akademik Anda sudah benar</Text>
                   </div>
                </Group>
                <Button
                 component={Link}
                 href="/dashboard/profile"
-                variant="light"
+                variant="outline"
+                className="text-gs-primary border-gs-border hover:bg-gs-bg-hover"
                 size="xs"
                 radius="md"
                 rightSection={<IconExternalLink size={12} />}
               >
-                Edit Profil
+                EDIT PROFIL
               </Button>
             </Group>
 
             <Grid gutter="md">
               <Grid.Col span={{ base: 12, md: 7 }}>
                 <Stack gap={10}>
-                  <div className="bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-200">
+                  <div className="bg-gs-bg-overlay p-4 rounded-xl border border-dashed border-gs-border">
                     <Group gap="xl">
                       <div>
-                        <Text size="10px" c="dimmed" fw={700} tt="uppercase">Nama Lengkap</Text>
+                        <Text size="10px" c="dimmed" fw={600} tt="uppercase">Nama Lengkap</Text>
                         <Text size="sm" fw={600}>{userData?.nama}</Text>
                       </div>
                       <div>
-                        <Text size="10px" c="dimmed" fw={700} tt="uppercase">NIM</Text>
+                        <Text size="10px" c="dimmed" fw={600} tt="uppercase">NIM</Text>
                         <Text size="sm" fw={600}>{userData?.nim}</Text>
                       </div>
                     </Group>
                     <Divider variant="dashed" my={10} />
                     <div>
-                      <Text size="10px" c="dimmed" fw={700} tt="uppercase">Program Studi</Text>
+                      <Text size="10px" c="dimmed" fw={600} tt="uppercase">Program Studi</Text>
                       <Text size="sm" fw={600}>{userData?.prodi?.nama_prodi || "-"}</Text>
                     </div>
                   </div>
-
-                  <Paper withBorder p="sm" radius="md" bg="indigo.0" style={{ borderStyle: 'dashed' }}>
-                     <Text size="10px" c="indigo" fw={800} tt="uppercase" mb={4}>Rancangan Penelitian (Ranpel) Aktif</Text>
+ 
+                  <Paper withBorder p="sm" radius="md" bg="var(--gs-bg-overlay)" style={{ borderStyle: 'dashed', borderColor: 'var(--gs-border)' }}>
+                     <Text size="10px" className="text-gs-primary" fw={700} tt="uppercase" mb={4}>Rancangan Penelitian (Ranpel) Aktif</Text>
                      <Text size="sm" fw={600} className="line-clamp-2">
                         {ranpelList.find((r) => r.value === form.values.ranpel_id)?.label || "-"}
                      </Text>
@@ -427,35 +428,35 @@ export function PendaftaranUjianFormModal({
               </Grid.Col>
 
               <Grid.Col span={{ base: 12, md: 5 }}>
-                 <Stack gap={8} h="100%" justify="center" className="bg-blue-50/30 p-4 rounded-xl border border-blue-100">
-                   <Text size="xs" fw={700} c="blue.8">Cek Kelayakan Pendaftaran:</Text>
+                 <Stack gap={8} h="100%" justify="center" className="bg-gs-bg-overlay p-4 rounded-xl border border-gs-border">
+                   <Text size="xs" fw={700} className="text-gs-text-primary">Cek Kelayakan Pendaftaran:</Text>
                    
                    <Group justify="space-between">
-                     <Text size="xs">IPK (Min 2.00)</Text>
-                     <ThemeIcon color={isIpkEligible ? "teal" : "red"} variant="light" size="sm" radius="xl">
+                     <Text size="xs" fw={500}>IPK (Min 2.00)</Text>
+                     <ThemeIcon color={isIpkEligible ? "var(--gs-success)" : "var(--gs-danger)"} variant="light" size="sm" radius="xl">
                         {isIpkEligible ? <IconCheck size={12} stroke={3} /> : <IconX size={12} stroke={3} />}
                      </ThemeIcon>
                    </Group>
  
-                   <Group justify="space-between">
-                     <Text size="xs">Semester (Min 6)</Text>
-                     <ThemeIcon color={isSemesterEligible ? "teal" : "red"} variant="light" size="sm" radius="xl">
-                        {isSemesterEligible ? <IconCheck size={12} stroke={3} /> : <IconX size={12} stroke={3} />}
-                     </ThemeIcon>
-                   </Group>
+                    <Group justify="space-between">
+                      <Text size="xs" fw={500}>Semester (Min 6)</Text>
+                      <ThemeIcon color={isSemesterEligible ? "var(--gs-success)" : "var(--gs-danger)"} variant="light" size="sm" radius="xl">
+                         {isSemesterEligible ? <IconCheck size={12} stroke={3} /> : <IconX size={12} stroke={3} />}
+                      </ThemeIcon>
+                    </Group>
  
-                   <Group justify="space-between">
-                     <Text size="xs">Status Ranpel</Text>
-                     <ThemeIcon color={isRanpelEligible ? "teal" : "red"} variant="light" size="sm" radius="xl">
-                        {isRanpelEligible ? <IconCheck size={12} stroke={3} /> : <IconX size={12} stroke={3} />}
-                     </ThemeIcon>
-                   </Group>
+                    <Group justify="space-between">
+                      <Text size="xs" fw={500}>Status Ranpel</Text>
+                      <ThemeIcon color={isRanpelEligible ? "var(--gs-success)" : "var(--gs-danger)"} variant="light" size="sm" radius="xl">
+                         {isRanpelEligible ? <IconCheck size={12} stroke={3} /> : <IconX size={12} stroke={3} />}
+                      </ThemeIcon>
+                    </Group>
                  </Stack>
               </Grid.Col>
             </Grid>
 
             {!isEligible && (
-              <Alert color="red" icon={<IconAlertCircle size={16} />} p="sm" mt="md" radius="md">
+              <Alert color="var(--gs-danger)" icon={<IconAlertCircle size={16} />} p="sm" mt="md" radius="md" className="bg-gs-danger-bg border-gs-danger-border">
                 <Text size="xs" fw={500}>
                   {!isRanpelEligible
                     ? "Rancangan Penelitian (Ranpel) Anda belum disetujui oleh Kaprodi atau Anda belum mengajukan Ranpel."
@@ -467,7 +468,7 @@ export function PendaftaranUjianFormModal({
 
 
           <Paper withBorder p="lg" radius="md">
-            <Text fw={700} size="sm" mb="lg">Alur Ujian Skripsi</Text>
+            <Text fw={600} size="sm" mb="lg">Alur Ujian Skripsi</Text>
             <Timeline
               bulletSize={36}
               lineWidth={2}
@@ -490,65 +491,65 @@ export function PendaftaranUjianFormModal({
                   const current = activePendaftaran.find((p) => p.jenis_id === id);
                   const isRegistered = current && ["menunggu", "revisi", "diterima"].includes(current.status);
 
-                  let bulletColor = "gray";
+                  let bulletColor = "var(--gs-text-muted)";
                   let bulletIcon = <IconLock size={18} />;
                   let isSelectable = false;
                   let statusText = "Terkunci";
-                  let statusColor = "gray";
-
+                  let statusColor = "var(--gs-text-muted)";
+ 
                   if (id === 1) {
                     if (isPassed) {
-                      bulletColor = "teal";
+                      bulletColor = "var(--gs-success)";
                       bulletIcon = <IconCheck size={18} />;
                       statusText = "Lulus";
-                      statusColor = "teal";
+                      statusColor = "var(--gs-success)";
                     } else if (isRegistered) {
-                      bulletColor = "blue";
+                      bulletColor = "var(--gs-primary)";
                       bulletIcon = <IconPlayerPlay size={18} />;
                       statusText = `Proses`;
-                      statusColor = "blue";
+                      statusColor = "var(--gs-primary)";
                     } else {
-                      bulletColor = "indigo";
+                      bulletColor = "var(--gs-primary)";
                       bulletIcon = <IconSchool size={18} />;
                       isSelectable = true;
                       statusText = "Tersedia";
-                      statusColor = "indigo";
+                      statusColor = "var(--gs-primary)";
                     }
                   } else if (id === 2) {
                     if (isPassed) {
-                      bulletColor = "teal";
+                      bulletColor = "var(--gs-success)";
                       bulletIcon = <IconCheck size={18} />;
                       statusText = "Lulus";
-                      statusColor = "teal";
+                      statusColor = "var(--gs-success)";
                     } else if (isRegistered) {
-                      bulletColor = "blue";
+                      bulletColor = "var(--gs-primary)";
                       bulletIcon = <IconPlayerPlay size={18} />;
                       statusText = `Proses`;
-                      statusColor = "blue";
+                      statusColor = "var(--gs-primary)";
                     } else if (passedExams.includes(1)) {
-                      bulletColor = "indigo";
+                      bulletColor = "var(--gs-primary)";
                       bulletIcon = <IconFlask size={18} />;
                       isSelectable = true;
                       statusText = "Tersedia";
-                      statusColor = "indigo";
+                      statusColor = "var(--gs-primary)";
                     } else { statusText = "Terkunci"; }
                   } else if (id === 3) {
                     if (isPassed) {
-                      bulletColor = "teal";
+                      bulletColor = "var(--gs-success)";
                       bulletIcon = <IconCheck size={18} />;
                       statusText = "Lulus";
-                      statusColor = "teal";
+                      statusColor = "var(--gs-success)";
                     } else if (isRegistered) {
-                      bulletColor = "blue";
+                      bulletColor = "var(--gs-primary)";
                       bulletIcon = <IconPlayerPlay size={18} />;
                       statusText = `Proses`;
-                      statusColor = "blue";
+                      statusColor = "var(--gs-primary)";
                     } else if (passedExams.includes(2)) {
-                      bulletColor = "indigo";
+                      bulletColor = "var(--gs-primary)";
                       bulletIcon = <IconCertificate size={18} />;
                       isSelectable = true;
                       statusText = "Tersedia";
-                      statusColor = "indigo";
+                      statusColor = "var(--gs-primary)";
                     } else { statusText = "Terkunci"; }
                   }
 
@@ -561,13 +562,13 @@ export function PendaftaranUjianFormModal({
                       color={bulletColor}
                       title={
                         <Group justify="space-between" wrap="nowrap">
-                          <Text fw={isSelected ? 800 : 700} size="sm" c={isPassed ? "teal" : isRegistered ? "blue" : isSelectable ? "gray.8" : "gray.4"}>
+                          <Text fw={isSelected ? 800 : 700} size="sm" className={isPassed ? "text-gs-success-text" : isRegistered ? "text-gs-primary" : isSelectable ? "text-gs-text-primary" : "text-gs-text-muted"}>
                             {j.namaJenis}
                           </Text>
-                          <Badge color={statusColor} size="xs" variant="light" radius="sm">
+                          <Badge color={statusColor} size="xs" variant="filled" radius="sm" fw={700}>
                             {statusText}
                           </Badge>
-                        </Group>
+                                                </Group>
                       }
                     >
                       <Paper
@@ -578,13 +579,13 @@ export function PendaftaranUjianFormModal({
                         style={{
                           cursor: isSelectable ? "pointer" : "default",
                           transition: "all 0.2s ease",
-                          borderColor: isSelected ? "var(--mantine-color-indigo-4)" : "var(--mantine-color-gray-1)",
-                          backgroundColor: isSelected ? "var(--mantine-color-indigo-0)" : (isDark ? "transparent" : "var(--mantine-color-gray-0)"),
+                          borderColor: isSelected ? "var(--gs-border-strong)" : "var(--gs-border)",
+                          backgroundColor: isSelected ? "var(--gs-bg-hover)" : (isDark ? "transparent" : "var(--gs-bg-base)"),
                           boxShadow: isSelected ? "0 4px 12px rgba(0,0,0,0.05)" : "none",
                         }}
                         onClick={() => { if (isSelectable) form.setFieldValue("jenis_ujian_id", String(id)); }}
                       >
-                        <Text size="xs" fw={500} c={isSelectable ? "indigo.7" : "dimmed"}>
+                        <Text size="xs" fw={700} className={isSelectable ? "text-gs-primary" : "text-gs-text-muted"}>
                           {isPassed ? "Tahap ini telah diselesaikan." : isRegistered ? "Pendaftaran sedang diproses." : isSelectable ? (isSelected ? "➔ Tahap Terpilih" : "Klik untuk pilih tahap ini") : "Prasyarat tahap sebelumnya belum terpenuhi."}
                         </Text>
                       </Paper>
@@ -596,19 +597,20 @@ export function PendaftaranUjianFormModal({
 
           {/* Syarat Section with per-item file uploads */}
           {selectedJenisUjianId && (
-            <div className="bg-gray-50/50 rounded-2xl border border-gray-100 p-6">
+            <div className="bg-gs-bg-overlay rounded-2xl border border-gs-border p-6">
               <Group justify="space-between" mb="lg">
                 <Group gap="sm">
-                  <ThemeIcon variant="filled" color="indigo" radius="md">
+                  <ThemeIcon variant="filled" color="var(--gs-primary)" radius="md">
                     <IconFile size={16} />
                   </ThemeIcon>
-                  <Text size="md" fw={700}>Kelengkapan Berkas</Text>
+                  <Text size="md" fw={700} className="text-gs-text-primary">Kelengkapan Berkas</Text>
                 </Group>
                 {syaratList.length > 0 && (
                   <Badge
                     variant="dot"
                     size="md"
-                    color={wajibUploadedCount === wajibSyarat.length ? "teal" : "orange"}
+                    color={wajibUploadedCount === wajibSyarat.length ? "var(--gs-success)" : "var(--gs-warning)"}
+                    fw={700}
                   >
                     {uploadedCount} dari {syaratList.length} Berkas
                   </Badge>
@@ -616,7 +618,7 @@ export function PendaftaranUjianFormModal({
               </Group>
 
               {isLoadingSyarat ? (
-                <Center py="xl"><Loader size="sm" color="indigo" /></Center>
+                <Center py="xl"><Loader size="sm" color="var(--gs-primary)" /></Center>
               ) : syaratList.length === 0 ? (
                 <Text size="sm" c="dimmed" ta="center" py="md">Tidak ada syarat khusus untuk jenis ujian ini.</Text>
               ) : (
@@ -624,8 +626,8 @@ export function PendaftaranUjianFormModal({
                   {wajibSyarat.length > 0 && (
                     <>
                       <Group gap={6} px={4}>
-                        <Text size="xs" fw={700} tt="uppercase" c="red.6" className="tracking-wider">Berkas Wajib</Text>
-                        <Divider style={{ flex: 1 }} opacity={0.4} />
+                        <Text size="xs" fw={700} tt="uppercase" className="text-gs-danger tracking-wider">Berkas Wajib</Text>
+                        <Divider style={{ flex: 1 }} opacity={0.4} color="var(--gs-border)" />
                       </Group>
                       {wajibSyarat.map((syarat, idx) => renderSyaratItem(syarat, idx, true))}
                     </>
@@ -634,8 +636,8 @@ export function PendaftaranUjianFormModal({
                   {opsionalSyarat.length > 0 && (
                     <>
                       <Group gap={6} px={4} mt="md">
-                        <Text size="xs" fw={700} tt="uppercase" c="gray.5" className="tracking-wider">Berkas Opsional</Text>
-                        <Divider style={{ flex: 1 }} opacity={0.4} />
+                        <Text size="xs" fw={700} tt="uppercase" className="text-gs-text-muted tracking-wider">Berkas Opsional</Text>
+                        <Divider style={{ flex: 1 }} opacity={0.4} color="var(--gs-border)" />
                       </Group>
                       {opsionalSyarat.map((syarat, idx) => renderSyaratItem(syarat, idx, false))}
                     </>
@@ -647,13 +649,16 @@ export function PendaftaranUjianFormModal({
 
           <Button
             type="submit"
-            color="indigo"
+            className="bg-gs-primary hover:bg-gs-primary-hover"
             fullWidth
             mt="sm"
+            size="md"
+            radius="md"
+            fw={700}
             loading={isCreating}
             disabled={!isEligible}
           >
-            Ajukan Pendaftaran
+            AJUKAN PENDAFTARAN
           </Button>
         </Stack>
       </form>

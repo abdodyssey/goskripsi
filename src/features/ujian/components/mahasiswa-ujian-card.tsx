@@ -75,7 +75,7 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
           <ThemeIcon size={50} radius="xl" color="gray" variant="light">
             <IconCalendar size={30} />
           </ThemeIcon>
-          <Text fw={700} size="lg">
+          <Text fw={600} size="lg">
             Jadwal Ujian Belum Ditentukan
           </Text>
           <Text c="dimmed" size="sm" ta="center">
@@ -120,20 +120,21 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
         justify="space-between"
         px="md"
         py="sm"
-        bg={isSelesai ? "teal.0" : isFinalized ? "blue.0" : "indigo.0"}
+        bg="var(--gs-bg-overlay)"
+        style={{ borderBottom: "1px solid var(--gs-border)" }}
       >
         <Stack gap={0}>
           <Text
             fw={800}
             size="lg"
-            c={isSelesai ? "teal.9" : isFinalized ? "blue.9" : "indigo.9"}
+            className="text-gs-text-primary"
             tt="uppercase"
-            lts={0.5}
+            lts={1}
           >
             {ujian.pendaftaranUjian?.jenisUjian?.namaJenis || "UJIAN"}
           </Text>
           {ujian.pendaftaranUjian?.mahasiswa && (
-            <Text size="xs" c="dimmed" fw={600}>
+            <Text size="xs" className="text-gs-text-secondary" fw={600}>
               {ujian.pendaftaranUjian.mahasiswa.user?.nama} ({ujian.pendaftaranUjian.mahasiswa.nim})
             </Text>
           )}
@@ -141,8 +142,9 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
         <Badge
           size="sm"
           variant="filled"
-          color={isSelesai ? "teal" : isFinalized ? "blue" : "indigo"}
+          className={isSelesai ? "bg-gs-success" : isFinalized ? "bg-gs-primary" : "bg-gs-warning"}
           radius="sm"
+          fw={700}
         >
           {isSelesai ? "FINISHED" : isFinalized ? "FINALIZED" : "UPCOMING"}
         </Badge>
@@ -150,49 +152,52 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
 
       {showResults && (
         <Paper
-          p="md"
-          bg={isSelesai ? "teal.0" : "blue.0"}
+          p="xl"
+          bg={isSelesai ? "var(--gs-success-bg)" : "var(--gs-bg-overlay)"}
           mx="md"
           my="sm"
-          radius="md"
+          radius="lg"
           withBorder
           style={{
             borderColor: isSelesai
-              ? "var(--mantine-color-teal-2)"
-              : "var(--mantine-color-blue-2)",
+              ? "var(--gs-success-border)"
+              : "var(--gs-border)",
           }}
         >
           <Grid align="center" gutter="md">
             <Grid.Col span={{ base: 4, sm: 3 }} ta="center">
-              <Text size="10px" tt="uppercase" fw={800} c="dimmed">
+              <Text size="10px" tt="uppercase" fw={600} c="dimmed">
                 Nilai Akhir
               </Text>
-              <Text fw={900} fz="xl" c={isSelesai ? "teal.9" : "blue.9"}>
+              <Text className="gs-stat-number">
                 {Number(ujian.nilaiAkhir)?.toFixed(2) || "-"}
               </Text>
             </Grid.Col>
             {isFinalized && (
               <Grid.Col span={{ base: 4, sm: 3 }} ta="center">
-                <Text size="10px" tt="uppercase" fw={800} c="dimmed">
+                <Text size="10px" tt="uppercase" fw={600} c="dimmed">
                   Nilai Huruf
                 </Text>
-                <Text fw={900} fz="xl" c={isSelesai ? "teal.9" : "blue.9"}>
+                <Text className="gs-stat-number">
                   {ujian.nilaiHuruf || "-"}
                 </Text>
               </Grid.Col>
             )}
             <Grid.Col span={{ base: 4, sm: 3 }} ta="center">
-              <Text size="10px" tt="uppercase" fw={800} c="dimmed" mb={2}>
+              <Text size="10px" tt="uppercase" fw={600} c="dimmed" mb={2}>
                 Hasil Kelulusan
               </Text>
               {!isSelesai ? (
-                <Badge size="xs" color="blue" variant="outline">
+                <Badge size="xs" variant="outline" color="var(--gs-text-muted)" fw={700}>
                   PENDING
                 </Badge>
               ) : (
                 <Badge
                   size="sm"
-                  color={ujian.hasil === "lulus" ? "green" : "red"}
+                  variant="filled"
+                  className={ujian.hasil === "lulus" ? "bg-gs-success" : "bg-gs-danger"}
+                  fw={700}
+                  radius="sm"
                 >
                   {(ujian.hasil || "TIDAK LULUS").toUpperCase()}
                 </Badge>
@@ -217,12 +222,12 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
         <section>
           <Group gap={6} mb={8}>
             <IconInfoCircle size={16} color="var(--mantine-color-indigo-6)" />
-            <Text fw={800} size="xs" tt="uppercase" lts={1}>
+            <Text fw={600} size="xs" tt="uppercase" lts={1}>
               Informasi Penelitian
             </Text>
           </Group>
-          <Paper withBorder p="sm" radius="md" bg="gray.0">
-            <Text fw={600} size="sm" style={{ fontStyle: "italic" }}>
+          <Paper withBorder p="md" radius="lg" bg="var(--gs-bg-overlay)" className="border-gs-border">
+            <Text fw={700} size="sm" className="text-gs-text-primary" style={{ fontStyle: "italic" }}>
               &quot;
               {ujian.pendaftaranUjian?.rancanganPenelitian?.judulPenelitian || "Judul tidak tersedia"}
               &quot;
@@ -240,10 +245,10 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
                   <IconCalendar size={16} />
                 </ThemeIcon>
                 <Stack gap={0}>
-                  <Text size="10px" tt="uppercase" fw={800} c="dimmed">
+                  <Text size="10px" tt="uppercase" fw={600} c="dimmed">
                     Tanggal & Hari
                   </Text>
-                  <Text fw={700} size="sm">
+                  <Text fw={600} size="sm">
                     {ujian.hariUjian},{" "}
                     {ujian.jadwalUjian ? new Date(ujian.jadwalUjian).toLocaleDateString("id-ID", {
                       day: "numeric",
@@ -260,10 +265,10 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
                   <IconClock size={16} />
                 </ThemeIcon>
                 <Stack gap={0}>
-                  <Text size="10px" tt="uppercase" fw={800} c="dimmed">
+                  <Text size="10px" tt="uppercase" fw={600} c="dimmed">
                     Waktu
                   </Text>
-                  <Text fw={700} size="sm">
+                  <Text fw={600} size="sm">
                     {ujian.waktuMulai ? new Date(ujian.waktuMulai).toLocaleTimeString("id-ID", {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -283,10 +288,10 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
                   <IconMapPin size={16} />
                 </ThemeIcon>
                 <Stack gap={0}>
-                  <Text size="10px" tt="uppercase" fw={800} c="dimmed">
+                  <Text size="10px" tt="uppercase" fw={600} c="dimmed">
                     Ruangan
                   </Text>
-                  <Text fw={700} size="sm">{ujian.ruangan?.namaRuangan || "-"}</Text>
+                  <Text fw={600} size="sm">{ujian.ruangan?.namaRuangan || "-"}</Text>
                 </Stack>
               </Group>
             </Grid.Col>
@@ -298,7 +303,7 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
         <section>
           <Group gap={6} mb={8}>
             <IconUsers size={16} color="var(--mantine-color-indigo-6)" />
-            <Text fw={800} size="xs" tt="uppercase" lts={1}>
+            <Text fw={600} size="xs" tt="uppercase" lts={1}>
               Dewan Penguji
             </Text>
           </Group>
@@ -315,12 +320,12 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
                       <Text
                         size="10px"
                         tt="uppercase"
-                        fw={800}
+                        fw={600}
                         c="dimmed"
                       >
                         {PERAN_MAP[p.peran] || p.peran}
                       </Text>
-                      <Text fw={700} size="xs">
+                      <Text fw={600} size="xs">
                         {p.dosen?.user?.nama ||
                           p.dosen?.nama ||
                           "Sedang ditentukan"}
@@ -328,7 +333,7 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
                     </Stack>
                     {!hideResults && isFinalized && p.average !== null && (
                       <Stack gap={0} align="flex-end">
-                        <Text fw={900} c="indigo" fz="sm">
+                        <Text fw={600} c="indigo" fz="sm">
                           {p.average.toFixed(2)}
                         </Text>
                       </Stack>
@@ -342,12 +347,16 @@ export function MahasiswaUjianCard({ ujian, hideResults }: { ujian: Ujian | null
 
         <Alert
           variant="light"
-          color="indigo"
-          icon={<IconInfoCircle size={14} />}
-          radius="md"
+          radius="lg"
+          icon={<IconInfoCircle size={14} stroke={2} />}
           py="xs"
+          styles={{
+            root: { backgroundColor: 'var(--gs-bg-overlay)', border: '1px solid var(--gs-border)' },
+            icon: { color: 'var(--gs-primary)' },
+            message: { color: 'var(--gs-text-secondary)' }
+          }}
         >
-          <Text size="xs" fw={500}>
+          <Text size="xs" fw={700}>
             Peserta diharuskan hadir paling lambat 1 jam sebelum jadwal ujian. Hubungi pembimbing untuk teknis lebih lanjut.
           </Text>
         </Alert>

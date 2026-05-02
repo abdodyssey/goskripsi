@@ -46,13 +46,13 @@ export function KeputusanTab({
       notifications.show({
         title: "Berhasil",
         message: "Keputusan telah disubmit.",
-        color: "teal",
+        color: "var(--gs-success)",
       });
     } catch (error: any) {
       notifications.show({
         title: "Gagal",
         message: error.response?.data?.message || "Gagal submit keputusan.",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -90,13 +90,15 @@ export function KeputusanTab({
             <Group justify="flex-end">
               <Button
                 size="md"
-                color="teal"
-                leftSection={<IconCheck size={18} />}
+                className="bg-gs-primary hover:bg-gs-primary-hover"
+                radius="md"
+                fw={700}
+                leftSection={<IconCheck size={18} stroke={1.5} />}
                 loading={isSubmitting}
                 onClick={handleSubmit}
                 disabled={!keputusanId}
               >
-                Submit Keputusan
+                SUBMIT KEPUTUSAN
               </Button>
             </Group>
           )}
@@ -105,8 +107,9 @@ export function KeputusanTab({
             <Alert
               icon={<IconInfoCircle size={16} />}
               title="Sudah Selesai"
-              color="green"
+              color="var(--gs-success)"
               variant="light"
+              radius="md"
             >
               Keputusan sudah disubmit dan status ujian adalah SELESAI.
             </Alert>

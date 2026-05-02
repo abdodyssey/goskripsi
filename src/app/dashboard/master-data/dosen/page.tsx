@@ -23,7 +23,7 @@ export default function DosenMasterPage() {
   if (!isAuthorized) {
     return (
       <Container size="xl" pt="md">
-        <Text c="red">
+        <Text className="text-gs-danger" fw={700}>
           Hanya Admin atau Superadmin yang memiliki akses ke halaman ini.
         </Text>
       </Container>

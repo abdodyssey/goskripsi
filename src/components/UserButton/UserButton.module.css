@@ -2,12 +2,12 @@
   display: block;
   width: 100%;
   padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
-  color: var(--mantine-color-dark-0);
+  color: var(--gs-text-inverse);
   border-radius: var(--mantine-radius-md);
   transition: all 200ms ease;
 
   &:hover {
-    background-color: var(--mantine-color-dark-6);
+    background-color: rgba(255, 255, 255, 0.08);
   }
 
   &[data-mini] {

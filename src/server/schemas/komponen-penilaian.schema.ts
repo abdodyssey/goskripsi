@@ -5,7 +5,7 @@ export const createKomponenPenilaianSchema = z.object({
   body: z
     .object({
       jenis_ujian_id: z.coerce.number().openapi({ example: 1 }),
-      nama_komponen: z.string().openapi({ example: "Presentasi" }),
+      kriteria: z.string().openapi({ example: "Presentasi" }),
       bobot: z.coerce.number().openapi({ example: 30 }),
     })
     .openapi("CreateKomponenPenilaianRequest"),
@@ -24,7 +24,7 @@ export const updateKomponenPenilaianSchema = z.object({
         .optional()
         .nullable()
         .openapi({ example: 1 }),
-      nama_komponen: z
+      kriteria: z
         .string()
         .optional()
         .nullable()

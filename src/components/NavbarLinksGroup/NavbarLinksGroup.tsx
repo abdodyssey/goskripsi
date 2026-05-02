@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   Group,
@@ -86,9 +88,9 @@ export function LinksGroup({
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: 'var(--mantine-radius-md)',
-              backgroundColor: ((!hasLinks && pathname === link) || isParentActive) ? 'rgba(92, 115, 230, 0.15)' : 'transparent',
-              color: ((!hasLinks && pathname === link) || isParentActive) ? 'var(--mantine-color-indigo-4)' : 'var(--mantine-color-gray-4)'
-            }}
+            backgroundColor: ((!hasLinks && pathname === link) || isParentActive) ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+            color: ((!hasLinks && pathname === link) || isParentActive) ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.4)'
+          }}
           >
             <Icon style={{ width: rem(18), height: rem(18) }} />
           </Box>

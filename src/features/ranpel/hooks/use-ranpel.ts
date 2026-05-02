@@ -67,7 +67,7 @@ export const useAllPengajuan = () => {
 
   const query = useQuery({
     queryKey: ["all-pengajuan-ranpel"],
-    queryFn: () => ranpelService.getAllPengajuan(),
+    queryFn: () => ranpelService.getAllPengajuan(100),
   });
 
   const updateMutation = useMutation({
@@ -100,12 +100,40 @@ export const useAllPengajuan = () => {
     },
   });
 
+  const createMutation = useMutation({
+    mutationFn: (data: any) =>
+      ranpelService.createPengajuanByMahasiswa(data.mahasiswaId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["all-pengajuan-ranpel"] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => ranpelService.deletePengajuan(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["all-pengajuan-ranpel"] });
+    },
+  });
+
+  const updateRanpelMutation = useMutation({
+    mutationFn: ({ ranpelId, data }: { ranpelId: string; data: any }) =>
+      ranpelService.updateRanpel(ranpelId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["all-pengajuan-ranpel"] });
+    },
+  });
+
   return {
-    pengajuanList: (query.data as { data?: unknown[] })?.data || query.data,
+    pengajuanList: ((query.data as { data?: unknown[] })?.data || query.data || []) as PengajuanRancanganPenelitian[],
     isLoading: query.isLoading,
     isError: query.isError,
     refetch: query.refetch,
     updatePengajuan: updateMutation.mutateAsync,
-    isUpdating: updateMutation.isPending,
+    isUpdating: updateMutation.isPending || updateRanpelMutation.isPending,
+    updateRanpel: updateRanpelMutation.mutateAsync,
+    createPengajuan: createMutation.mutateAsync,
+    isCreating: createMutation.isPending,
+    deletePengajuan: deleteMutation.mutateAsync,
+    isDeleting: deleteMutation.isPending,
   };
 };

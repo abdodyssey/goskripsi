@@ -54,7 +54,7 @@ export function InfoPaper({
                 </ThemeIcon>
               )}
               {title && (
-                <Text fw={700} fz="sm" tt="uppercase" lts={1} c="slate.4">
+                <Text fw={600} fz="sm" tt="uppercase" lts={1} c="slate.4">
                   {title}
                 </Text>
               )}

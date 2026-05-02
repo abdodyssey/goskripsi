@@ -39,19 +39,20 @@ export function PerbaikanJudulList({ currentTitle }: { currentTitle: string }) {
 
   const getStatusBadge = (status: string) => {
     const configs: Record<string, { color: string; icon: any; label: string }> = {
-      menunggu: { color: "blue", icon: IconClock, label: "MENUNGGU" },
-      diterima: { color: "teal", icon: IconCheck, label: "DISETUJUI" },
-      ditolak: { color: "red", icon: IconX, label: "DITOLAK" },
+      menunggu: { color: "var(--gs-info)", icon: IconClock, label: "MENUNGGU" },
+      diterima: { color: "var(--gs-success)", icon: IconCheck, label: "DISETUJUI" },
+      ditolak: { color: "var(--gs-danger)", icon: IconX, label: "DITOLAK" },
     };
-    const config = configs[status] || { color: "gray", icon: IconFileText, label: status.toUpperCase() };
+    const config = configs[status] || { color: "var(--gs-text-muted)", icon: IconFileText, label: status.toUpperCase() };
 
     return (
       <Badge 
-        color={config.color} 
-        variant="light" 
-        leftSection={<config.icon size={12} />}
+        variant="outline" 
+        color={config.color}
+        leftSection={<config.icon size={12} stroke={2} />}
         radius="sm"
         px="xs"
+        fw={700}
       >
         {config.label}
       </Badge>
@@ -94,19 +95,18 @@ export function PerbaikanJudulList({ currentTitle }: { currentTitle: string }) {
       render: (row) => (
         <Stack gap={6}>
           <Paper 
-            p="xs" 
+            p="md" 
             radius="md" 
-            bg="indigo.0" 
-            className="dark:bg-indigo-9/20"
+            bg="var(--gs-bg-overlay)" 
+            className="border-gs-border"
             withBorder
-            style={{ borderColor: "var(--mantine-color-indigo-2)" }}
           >
-            <Text size="sm" fw={700} className="text-indigo-9 dark:text-indigo-2" lineClamp={2}>
+            <Text size="sm" fw={700} className="text-gs-text-primary" lineClamp={2}>
               {row.judulBaru}
             </Text>
           </Paper>
           <Group gap={4} wrap="nowrap">
-            <Text size="10px" fw={800} c="dimmed" tt="uppercase">Judul Lama:</Text>
+            <Text size="10px" fw={600} c="dimmed" tt="uppercase">Judul Lama:</Text>
             <Text size="10px" c="dimmed" lineClamp={1}>{row.judulLama}</Text>
           </Group>
         </Stack>
@@ -180,13 +180,14 @@ export function PerbaikanJudulList({ currentTitle }: { currentTitle: string }) {
         loading={isLoadingMy}
         rightSection={
           <Button
-            leftSection={<IconPlus size={18} />}
+            leftSection={<IconPlus size={18} stroke={2} />}
             onClick={open}
-            color="indigo.9"
+            className="bg-gs-primary hover:bg-gs-primary-hover"
             radius="md"
             px="xl"
+            fw={700}
           >
-            Ajukan Perbaikan
+            AJUKAN PERBAIKAN
           </Button>
         }
         emptyState={
@@ -196,13 +197,20 @@ export function PerbaikanJudulList({ currentTitle }: { currentTitle: string }) {
                 <IconEdit size={32} stroke={1.5} />
               </ThemeIcon>
               <Stack gap={4} align="center">
-                <Text fw={700} size="lg">Belum ada riwayat</Text>
+                <Text fw={600} size="lg">Belum ada riwayat</Text>
                 <Text c="dimmed" size="sm" ta="center" maw={300}>
                   Anda belum pernah mengajukan perbaikan judul penelitian.
                 </Text>
               </Stack>
-              <Button variant="light" color="indigo" onClick={open} radius="md" mt="sm">
-                Mulai Pengajuan Sekarang
+              <Button 
+                variant="filled" 
+                className="bg-gs-primary hover:bg-gs-primary-hover" 
+                onClick={open} 
+                radius="md" 
+                mt="sm"
+                fw={700}
+              >
+                MULAI PENGAJUAN SEKARANG
               </Button>
             </Stack>
           </Center>

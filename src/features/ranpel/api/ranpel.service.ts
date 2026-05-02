@@ -15,10 +15,10 @@ export const ranpelService = {
     return response.data;
   },
 
-  getAllPengajuan: async (): Promise<PengajuanRancanganPenelitian[]> => {
+  getAllPengajuan: async (limit: number = 10, skip: number = 0): Promise<PengajuanRancanganPenelitian[]> => {
     const response = await apiClient.get<{
       data: PengajuanRancanganPenelitian[];
-    }>("/ranpel/pengajuan");
+    }>(`/ranpel/pengajuan?limit=${limit}&skip=${skip}`);
     return response.data.data;
   },
 

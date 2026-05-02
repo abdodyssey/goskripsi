@@ -29,20 +29,20 @@ export function StatCard({
   title,
   value,
   icon: Icon,
-  color = "indigo",
+  color = "dark",
   description,
   trend,
 }: StatCardProps) {
   return (
     <Paper
-      radius="md"
-      p="lg"
+      radius="lg"
+      p="xl"
       withBorder
-      className="hover:border-indigo-500/30 transition-all group hover:bg-gray-50 dark:hover:bg-dark-8"
+      className="hover:border-gs-border-strong transition-all group hover:bg-gs-bg-hover"
       styles={{
         root: {
-          backgroundColor:
-            "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
+          backgroundColor: 'var(--gs-bg-raised)',
+          borderColor: 'var(--gs-border)',
         },
       }}
     >
@@ -50,37 +50,35 @@ export function StatCard({
         <Stack gap={0}>
           <Text
             c="dimmed"
-            fz="10px"
+            size="xs"
             tt="uppercase"
-            fw={800}
+            fw={700}
             lts={1}
-            className="group-hover:text-indigo-500 transition-colors"
+            className="group-hover:text-gs-text-primary transition-colors"
           >
             {title}
           </Text>
-          <Text fw={800} fz={24} className="tracking-tight">
+          <Text className="gs-stat" fw={400} size="xl" mt={4}>
             {value}
           </Text>
           {description && (
-            <Text size="xs" c="dimmed">
+            <Text size="xs" c="dimmed" mt={4}>
               {description}
             </Text>
           )}
           {trend && (
-            <Group gap={4} mt={4}>
-              <Text size="xs" fw={700} c={trend.isPositive ? "teal" : "red"}>
+            <Group gap={4} mt={8}>
+              <Text size="xs" fw={700} c={trend.isPositive ? "var(--gs-success-text)" : "var(--gs-danger-text)"}>
                 {trend.isPositive ? "+" : "-"}
                 {Math.abs(trend.value)}%
               </Text>
               <Badge
-                variant="white"
-                color="indigo"
-                radius="sm"
+                variant="outline"
+                color="var(--gs-border-strong)"
+                radius="xs"
                 size="xs"
                 px={6}
-                styles={{
-                  root: { border: "1px solid var(--mantine-color-indigo-1)" },
-                }}
+                fw={600}
               >
                 {trend.label}
               </Badge>
@@ -88,13 +86,13 @@ export function StatCard({
           )}
         </Stack>
         <ThemeIcon
-          size={44}
-          radius="md"
+          size={52}
+          radius="lg"
           variant="light"
-          color={color}
-          className="group-hover:scale-105 transition-transform"
+          color="var(--gs-primary)"
+          className="bg-gs-bg-overlay group-hover:scale-105 transition-transform"
         >
-          <Icon size={rem(22)} stroke={1.5} />
+          <Icon size={rem(26)} stroke={2} className="text-gs-primary" />
         </ThemeIcon>
       </Group>
     </Paper>

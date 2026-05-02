@@ -45,7 +45,7 @@ export function EmptyState({
         </ThemeIcon>
 
         <Stack gap={4}>
-          <Text fw={900} fz="xl" className="tracking-tight">
+          <Text fw={600} fz="xl" className="tracking-tight">
             {title}
           </Text>
           {description && (

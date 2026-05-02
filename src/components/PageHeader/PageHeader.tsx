@@ -8,6 +8,7 @@ import {
   Stack,
   Group,
   Center,
+  Box,
 } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
 import Link from "next/link";
@@ -48,7 +49,7 @@ export function PageHeader({
       );
     }
     return (
-      <Text key={index} size="sm" c="indigo" fw={500}>
+      <Text key={index} size="sm" className="text-gs-text-primary" fw={700}>
         {item.label}
       </Text>
     );
@@ -56,32 +57,34 @@ export function PageHeader({
 
   return (
     <Stack gap="xs" mb="xl">
-      <Breadcrumbs separator={<IconChevronRight size={14} stroke={1.5} />}>
+      <Breadcrumbs separator={<IconChevronRight size={14} stroke={1.5} className="text-gs-text-muted" />}>
         {breadcrumbItems}
       </Breadcrumbs>
 
-      <Group gap="md" align="center">
-        {Icon && (
-          <Center
-            w={48}
-            h={48}
-            bg="light-dark(indigo.1, dark.6)"
-            style={{ borderRadius: 12, border: "1px solid var(--mantine-color-indigo-light-hover)" }}
-          >
-            <Icon size={24} c="indigo" stroke={1.5} />
-          </Center>
-        )}
-        <Stack gap={0} style={{ flex: 1 }}>
-          <Title order={2} fw={700} style={{ letterSpacing: "-0.5px" }}>
-            {title}
-          </Title>
-          {description && (
-            <Text c="dimmed" size="xs" fw={500}>
-              {description}
-            </Text>
+      <Group gap="xl" align="flex-end" justify="space-between" wrap="nowrap">
+        <Group gap="md" align="center" style={{ flex: 1 }}>
+          {Icon && (
+            <Center
+              w={48}
+              h={48}
+              bg="var(--gs-bg-overlay)"
+              style={{ borderRadius: 12, border: "1px solid var(--gs-border)" }}
+            >
+              <Icon size={24} className="text-gs-primary" stroke={2} />
+            </Center>
           )}
-        </Stack>
-        {rightSection && <Group>{rightSection}</Group>}
+          <Stack gap={2}>
+            <Title order={1} className="gs-page-title">
+              {title}
+            </Title>
+            {description && (
+              <Text c="dimmed" size="sm" fw={400} lh={1.2}>
+                {description}
+              </Text>
+            )}
+          </Stack>
+        </Group>
+        {rightSection && <Box>{rightSection}</Box>}
       </Group>
     </Stack>
   );

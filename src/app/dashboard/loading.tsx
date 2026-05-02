@@ -13,7 +13,7 @@ export default function DashboardLoading() {
       }}
     >
       <Stack align="center" gap="md">
-        <Loader color="indigo.9" type="bars" size="xl" />
+        <Loader color="var(--gs-primary)" type="dots" size="xl" />
         <Text c="dimmed">Menyiapkan Dashboard Beranda...</Text>
       </Stack>
     </Container>

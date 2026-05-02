@@ -6,7 +6,8 @@ import { getPaginationParams } from "@/utils/pagination";
 
 export async function GET(request: Request) {
   const user = await getAuthUser(request);
-  if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  if (!user)
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
   const { page, limit, skip } = getPaginationParams(request);
 
@@ -15,6 +16,7 @@ export async function GET(request: Request) {
     const result = await ranpelService.getAllPengajuan({
       userId: user.id,
       roles,
+      prodiId: user.prodiId,
       skip,
       take: limit,
     });
@@ -26,7 +28,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const user = await getAuthUser(request);
-  if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  if (!user)
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
   try {
     const body = await request.json();

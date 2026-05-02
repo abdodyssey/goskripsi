@@ -1,3 +1,5 @@
+"use client";
+
 import {
   UnstyledButton,
   Group,
@@ -58,7 +60,7 @@ export const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
         >
           <Avatar
             radius="xl"
-            color="indigo"
+            color="dark"
             variant="filled"
             size={mini ? 38 : 40}
             className="border-2 border-white/10"
@@ -70,14 +72,14 @@ export const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
           {!mini && (
             <>
               <Stack gap={0} flex={1}>
-                <Text size="sm" fw={700} lineClamp={1}>
+                <Text size="sm" fw={600} lineClamp={1}>
                   {user?.nama || "Pengguna"}
                 </Text>
 
                 <Text
                   size="xs"
                   fw={500}
-                  c="dark.2"
+                  c="rgba(255,255,255,0.5)"
                   tt="capitalize"
                 >
                   {roles[0] || "No Role"}
@@ -90,7 +92,7 @@ export const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
                   height: rem(14),
                 }}
                 stroke={1.5}
-                color="var(--mantine-color-dark-2)"
+                color="rgba(255,255,255,0.3)"
               />
             </>
           )}

@@ -25,9 +25,9 @@ const PENGAJUAN_RANPEL_SELECT = {
   mahasiswaId: true,
   tanggalPengajuan: true,
   statusDosenPa: true,
+  statusKaprodi: true,
   catatanDosenPa: true,
   tanggalReviewPa: true,
-  statusKaprodi: true,
   catatanKaprodi: true,
   tanggalReviewKaprodi: true,
   komenPaMasalah: true,
@@ -48,17 +48,37 @@ const PENGAJUAN_RANPEL_SELECT = {
       user: { select: { id: true, nama: true, email: true } },
       prodi: { select: { id: true, namaProdi: true } },
       peminatan: { select: { id: true, namaPeminatan: true } },
-      dosenPaRel: { select: { id: true, nip: true, nidn: true, user: { select: { nama: true } } } },
-      pembimbing1Rel: { select: { id: true, nip: true, nidn: true, user: { select: { nama: true } } } },
-      pembimbing2Rel: { select: { id: true, nip: true, nidn: true, user: { select: { nama: true } } } },
+      dosenPaRel: {
+        select: {
+          id: true,
+          nip: true,
+          nidn: true,
+          user: { select: { nama: true } },
+        },
+      },
+      pembimbing1Rel: {
+        select: {
+          id: true,
+          nip: true,
+          nidn: true,
+          user: { select: { nama: true } },
+        },
+      },
+      pembimbing2Rel: {
+        select: {
+          id: true,
+          nip: true,
+          nidn: true,
+          user: { select: { nama: true } },
+        },
+      },
     },
   },
 };
 
 export class RanpelService {
   async getAllRanpel() {
-    const list = await prisma.rancanganPenelitian.findMany({
-    });
+    const list = await prisma.rancanganPenelitian.findMany({});
     return list.map((r) => this.transformRanpel(r));
   }
 
@@ -67,8 +87,9 @@ export class RanpelService {
     roles?: string[];
     skip?: number;
     take?: number;
+    prodiId?: number | null;
   }) {
-    const { userId, roles = [], skip = 0, take = 10 } = params;
+    const { userId, roles = [], skip = 0, take = 10, prodiId } = params;
     const where: any = {};
 
     const isManagement = roles.some((r) =>
@@ -76,9 +97,17 @@ export class RanpelService {
     );
 
     if (userId && roles.includes("dosen") && !isManagement) {
-      if (isNaN(Number(userId))) return { data: [], meta: createPaginationMeta(0, 1, take) };
+      if (isNaN(Number(userId)))
+        return { data: [], meta: createPaginationMeta(0, 1, take) };
       where.mahasiswa = {
         dosenPa: Number(userId),
+      };
+    }
+
+    // If user is admin/kaprodi/sekprodi (but not superadmin) with a prodiId, filter by mahasiswa prodi
+    if (isManagement && !roles.includes("superadmin") && prodiId) {
+      where.mahasiswa = {
+        prodiId,
       };
     }
 
@@ -116,8 +145,12 @@ export class RanpelService {
   }
 
   async storeByMahasiswa(payload: CreateRanpelInput, mahasiswaId: string) {
-    console.log(`[RanpelService] storeByMahasiswa called with MhsID: ${mahasiswaId}`, payload);
-    if (!mahasiswaId || isNaN(Number(mahasiswaId))) throw new Error("Mahasiswa ID tidak valid");
+    console.log(
+      `[RanpelService] storeByMahasiswa called with MhsID: ${mahasiswaId}`,
+      payload,
+    );
+    if (!mahasiswaId || isNaN(Number(mahasiswaId)))
+      throw new Error("Mahasiswa ID tidak valid");
 
     const result = await prisma.$transaction(async (tx) => {
       const rancanganPenelitian = await tx.rancanganPenelitian.create({
@@ -159,18 +192,25 @@ export class RanpelService {
       });
 
       if (mhs?.dosenPaRel?.user?.email) {
-        console.log(`[RanpelService] Triggering submission email to PA: ${mhs.dosenPaRel.user.email}`);
+        console.log(
+          `[RanpelService] Triggering submission email to PA: ${mhs.dosenPaRel.user.email}`,
+        );
         await mailService.sendRanpelSubmissionNotification(
           mhs.dosenPaRel.user.email,
           mhs.dosenPaRel.user.nama,
           mhs.user.nama,
-          payload.judul_penelitian
+          payload.judul_penelitian,
         );
       } else {
-        console.warn(`[RanpelService] Could not send email. PA not found or has no email for Mhs ID: ${mahasiswaId}`);
+        console.warn(
+          `[RanpelService] Could not send email. PA not found or has no email for Mhs ID: ${mahasiswaId}`,
+        );
       }
     } catch (err) {
-      console.error("[RanpelService] Error in submission notification flow:", err);
+      console.error(
+        "[RanpelService] Error in submission notification flow:",
+        err,
+      );
     }
 
     return this.transformRanpel(result.rancanganPenelitian);
@@ -180,7 +220,8 @@ export class RanpelService {
     rancanganPenelitianId: string,
     payload: UpdateRanpelInput,
   ) {
-    if (isNaN(Number(rancanganPenelitianId))) throw new Error("ID Ranpel tidak valid");
+    if (isNaN(Number(rancanganPenelitianId)))
+      throw new Error("ID Ranpel tidak valid");
 
     const dataUpdate: any = {};
     if (payload.judul_penelitian !== undefined)
@@ -231,6 +272,17 @@ export class RanpelService {
       }
     }
 
+    // Legacy support for 'status' field if needed, mapping to Kaprodi if it's accepted/rejected
+    if (payload.status && !payload.status_dosen_pa && !payload.status_kaprodi) {
+      if (payload.status === "diverifikasi") {
+        dataUpdate.statusDosenPa = payload.status;
+        dataUpdate.tanggalReviewPa = new Date();
+      } else {
+        dataUpdate.statusKaprodi = payload.status;
+        dataUpdate.tanggalReviewKaprodi = new Date();
+      }
+    }
+
     if (payload.catatan_dosen_pa !== undefined) {
       dataUpdate.catatanDosenPa = payload.catatan_dosen_pa;
     }
@@ -239,18 +291,28 @@ export class RanpelService {
     }
 
     // Section comments PA
-    if (payload.komen_pa_masalah !== undefined) dataUpdate.komenPaMasalah = payload.komen_pa_masalah;
-    if (payload.komen_pa_solusi !== undefined) dataUpdate.komenPaSolusi = payload.komen_pa_solusi;
-    if (payload.komen_pa_hasil !== undefined) dataUpdate.komenPaHasil = payload.komen_pa_hasil;
-    if (payload.komen_pa_data !== undefined) dataUpdate.komenPaData = payload.komen_pa_data;
-    if (payload.komen_pa_metode !== undefined) dataUpdate.komenPaMetode = payload.komen_pa_metode;
+    if (payload.komen_pa_masalah !== undefined)
+      dataUpdate.komenPaMasalah = payload.komen_pa_masalah;
+    if (payload.komen_pa_solusi !== undefined)
+      dataUpdate.komenPaSolusi = payload.komen_pa_solusi;
+    if (payload.komen_pa_hasil !== undefined)
+      dataUpdate.komenPaHasil = payload.komen_pa_hasil;
+    if (payload.komen_pa_data !== undefined)
+      dataUpdate.komenPaData = payload.komen_pa_data;
+    if (payload.komen_pa_metode !== undefined)
+      dataUpdate.komenPaMetode = payload.komen_pa_metode;
 
     // Section comments Kaprodi
-    if (payload.komen_kpr_masalah !== undefined) dataUpdate.komenKprMasalah = payload.komen_kpr_masalah;
-    if (payload.komen_kpr_solusi !== undefined) dataUpdate.komenKprSolusi = payload.komen_kpr_solusi;
-    if (payload.komen_kpr_hasil !== undefined) dataUpdate.komenKprHasil = payload.komen_kpr_hasil;
-    if (payload.komen_kpr_data !== undefined) dataUpdate.komenKprData = payload.komen_kpr_data;
-    if (payload.komen_kpr_metode !== undefined) dataUpdate.komenKprMetode = payload.komen_kpr_metode;
+    if (payload.komen_kpr_masalah !== undefined)
+      dataUpdate.komenKprMasalah = payload.komen_kpr_masalah;
+    if (payload.komen_kpr_solusi !== undefined)
+      dataUpdate.komenKprSolusi = payload.komen_kpr_solusi;
+    if (payload.komen_kpr_hasil !== undefined)
+      dataUpdate.komenKprHasil = payload.komen_kpr_hasil;
+    if (payload.komen_kpr_data !== undefined)
+      dataUpdate.komenKprData = payload.komen_kpr_data;
+    if (payload.komen_kpr_metode !== undefined)
+      dataUpdate.komenKprMetode = payload.komen_kpr_metode;
 
     const result = await prisma.pengajuanRancanganPenelitian.update({
       where: { id: Number(pengajuanId) },
@@ -264,46 +326,49 @@ export class RanpelService {
       const mhsNama = result.mahasiswa.user.nama;
       const judul = result.rancanganPenelitian?.judulPenelitian || "-";
 
-      console.log(`[RanpelService] Preparing notifications for Mhs: ${mhsEmail}, Status PA: ${payload.status_dosen_pa}, Status Kpr: ${payload.status_kaprodi}`);
+      const statusToNotify =
+        payload.status_dosen_pa || payload.status_kaprodi || payload.status;
 
-      if (payload.status_dosen_pa && payload.status_dosen_pa !== "menunggu") {
-        // Notify Student about PA review
-        const paNama = result.mahasiswa.dosenPaRel?.user?.nama || "Dosen PA";
-        mailService.sendRanpelReviewNotification(
-          mhsEmail,
-          mhsNama,
-          paNama,
-          payload.status_dosen_pa,
-          payload.catatan_dosen_pa || "",
-          judul
-        );
+      if (statusToNotify && statusToNotify !== "menunggu") {
+        // If Approved by PA (Verified), notify Kaprodi
+        if (
+          statusToNotify === "diverifikasi" ||
+          payload.status_dosen_pa === "diverifikasi"
+        ) {
+          const paNama = result.mahasiswa.dosenPaRel?.user?.nama || "Dosen PA";
+          mailService.sendRanpelReviewNotification(
+            mhsEmail,
+            mhsNama,
+            paNama,
+            "diverifikasi",
+            payload.catatan_dosen_pa || "",
+            judul,
+          );
 
-        // If Approved by PA, notify Kaprodi
-        if (payload.status_dosen_pa === "diterima") {
           const kaprodi = await prisma.user.findFirst({
             where: { role: { name: "kaprodi" } },
           });
           if (kaprodi?.email) {
-            console.log(`[RanpelService] Notifying Kaprodi: ${kaprodi.email}`);
             mailService.sendRanpelApprovalToKaprodiNotification(
               kaprodi.email,
               mhsNama,
-              judul
+              judul,
             );
-          } else {
-            console.warn("[RanpelService] Kaprodi email not found in database.");
           }
+        } else if (
+          statusToNotify === "diterima" ||
+          statusToNotify === "ditolak"
+        ) {
+          // Notify Student about Kaprodi review
+          mailService.sendRanpelReviewNotification(
+            mhsEmail,
+            mhsNama,
+            "Ketua Program Studi",
+            statusToNotify,
+            payload.catatan_kaprodi || "",
+            judul,
+          );
         }
-      } else if (payload.status_kaprodi && payload.status_kaprodi !== "menunggu") {
-        // Notify Student about Kaprodi review
-        mailService.sendRanpelReviewNotification(
-          mhsEmail,
-          mhsNama,
-          "Ketua Program Studi",
-          payload.status_kaprodi,
-          payload.catatan_kaprodi || "",
-          judul
-        );
       }
     }
 
@@ -316,8 +381,9 @@ export class RanpelService {
     take?: number;
   }) {
     const { mahasiswaId, skip = 0, take = 10 } = params;
-    if (!mahasiswaId || isNaN(Number(mahasiswaId))) return { data: [], meta: createPaginationMeta(0, 1, take) };
-    
+    if (!mahasiswaId || isNaN(Number(mahasiswaId)))
+      return { data: [], meta: createPaginationMeta(0, 1, take) };
+
     const where = { mahasiswaId: Number(mahasiswaId) };
 
     const [list, total] = await Promise.all([
@@ -339,7 +405,7 @@ export class RanpelService {
 
   async getPengajuanById(id: string) {
     if (!id || isNaN(Number(id))) return null;
-    
+
     const p = await prisma.pengajuanRancanganPenelitian.findUnique({
       where: { id: Number(id) },
       select: PENGAJUAN_RANPEL_SELECT,
@@ -385,9 +451,9 @@ export class RanpelService {
       mahasiswaId: p.mahasiswaId,
       tanggalPengajuan: p.tanggalPengajuan,
       statusDosenPa: p.statusDosenPa,
+      statusKaprodi: p.statusKaprodi,
       catatanDosenPa: p.catatanDosenPa,
       tanggalReviewPa: p.tanggalReviewPa,
-      statusKaprodi: p.statusKaprodi,
       catatanKaprodi: p.catatanKaprodi,
       tanggalReviewKaprodi: p.tanggalReviewKaprodi,
       komenPaMasalah: p.komenPaMasalah,

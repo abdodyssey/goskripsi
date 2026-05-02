@@ -24,12 +24,18 @@ export default function AuthError({
       }}
     >
       <Stack align="center" gap="md">
-        <Title order={2} c="red.7">
+        <Title order={2} className="text-gs-danger">
           Terjadi Kesalahan
         </Title>
         <Text c="dimmed">Gagal memuat halaman otentikasi.</Text>
-        <Button onClick={() => reset()} variant="outline" color="indigo.9">
-          Coba Lagi
+        <Button 
+          onClick={() => reset()} 
+          variant="outline" 
+          className="text-gs-primary border-gs-border hover:bg-gs-bg-hover"
+          radius="md"
+          fw={700}
+        >
+          COBA LAGI
         </Button>
       </Stack>
     </Container>

@@ -8,7 +8,6 @@ import {
   Box,
   Center,
   Loader,
-  Card,
   Pagination,
   Paper,
 } from "@mantine/core";
@@ -52,7 +51,6 @@ export function DataTable<T>({
   const [page, setPage] = useState(1);
   const recordsPerPage = 10;
 
-  // Calculate derived records state
   const totalPages = Math.ceil(data.length / recordsPerPage);
   const currentRecords = useMemo(() => {
     return data.slice((page - 1) * recordsPerPage, page * recordsPerPage);
@@ -61,13 +59,19 @@ export function DataTable<T>({
   const Wrapper = noCard ? Box : Paper;
   const wrapperProps = noCard
     ? { p: "md" }
-    : { radius: "lg" as const, p: "xl", withBorder: true, shadow: "sm" };
+    : {
+        radius: "lg" as const,
+        p: "xl",
+        withBorder: true,
+        shadow: "sm",
+        bg: "var(--gs-bg-raised)",
+      };
 
   if (loading) {
     return (
       <Wrapper {...wrapperProps}>
         <Center py={40}>
-          <Loader color="indigo" size="md" />
+          <Loader size="md" />
         </Center>
       </Wrapper>
     );
@@ -78,7 +82,7 @@ export function DataTable<T>({
       <Wrapper {...wrapperProps}>
         <Center py={40}>
           <Stack align="center" gap="xs">
-            <Text c="red.6" fw={600} size="sm">
+            <Text c="var(--gs-danger)" fw={600} size="sm">
               Terjadi Kesalahan
             </Text>
             <Text c="dimmed" size="xs">
@@ -100,10 +104,10 @@ export function DataTable<T>({
   return (
     <Wrapper {...wrapperProps}>
       {(title || description || rightSection) && (
-        <Group justify="space-between" mb="md" align="center">
+        <Group justify="space-between" mb="xl" align="center">
           <Stack gap={2}>
             {title && (
-              <Text size="md" fw={700}>
+              <Text size="md" fw={700} className="text-gs-text-primary">
                 {title}
               </Text>
             )}
@@ -129,22 +133,22 @@ export function DataTable<T>({
         <Stack gap="md">
           <Box style={{ overflowX: "auto" }}>
             <Table
-              verticalSpacing="sm"
+              verticalSpacing="md"
               horizontalSpacing="md"
               highlightOnHover
               withTableBorder={false}
               withColumnBorders={false}
               styles={{
-                thead: { borderBottom: "1px solid var(--mantine-color-default-border)" },
-                tr: { borderBottom: "1px solid var(--mantine-color-default-border)" },
+                thead: { borderBottom: "1px solid var(--gs-border-strong)" },
+                tr: { borderBottom: "1px solid var(--gs-border)" },
               }}
             >
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th
-                    c="dimmed"
+                    c="var(--gs-text-muted)"
                     fw={700}
-                    fz={11}
+                    fz={10}
                     tt="uppercase"
                     lts={1}
                     py={12}
@@ -158,9 +162,9 @@ export function DataTable<T>({
                   {columns.map((col, index) => (
                     <Table.Th
                       key={index}
-                      c="dimmed"
+                      c="var(--gs-text-muted)"
                       fw={700}
-                      fz={11}
+                      fz={10}
                       tt="uppercase"
                       lts={1}
                       py={16}
@@ -180,16 +184,16 @@ export function DataTable<T>({
                     key={getRowKey(row)}
                     style={{
                       cursor: onRowClick ? "pointer" : "default",
-                      transition: "background-color 0.2s ease",
                     }}
+                    className="hover:bg-gs-bg-hover transition-colors"
                     onClick={() => onRowClick?.(row)}
                   >
                     <Table.Td
-                      c="dimmed"
+                      c="var(--gs-text-secondary)"
                       style={{
                         textAlign: "center",
-                        fontSize: "14px",
-                        fontWeight: 500,
+                        fontSize: "13px",
+                        fontWeight: 600,
                       }}
                     >
                       {(page - 1) * recordsPerPage + index + 1}
@@ -199,7 +203,8 @@ export function DataTable<T>({
                         key={colIndex}
                         style={{
                           textAlign: col.textAlign || "left",
-                          fontSize: "14px",
+                          fontSize: "13px",
+                          color: "var(--gs-text-primary)",
                         }}
                       >
                         {col.render
@@ -214,16 +219,22 @@ export function DataTable<T>({
               </Table.Tbody>
             </Table>
           </Box>
-          <Group 
-            justify="space-between" 
-            align="center" 
-            mt="lg" 
-            pt="md" 
-            style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
+          <Group
+            justify="space-between"
+            align="center"
+            mt="lg"
+            pt="md"
+            style={{ borderTop: "1px solid var(--gs-border)" }}
           >
             <Text size="xs" c="dimmed" fw={500}>
-              Menampilkan <span style={{ fontWeight: 700, color: "var(--mantine-color-indigo-6)" }}>{(page - 1) * recordsPerPage + 1} -{" "}
-              {Math.min(page * recordsPerPage, data.length)}</span> dari <span style={{ fontWeight: 700 }}>{data.length}</span> data
+              Menampilkan{" "}
+              <span
+                style={{ fontWeight: 700, color: "var(--gs-text-primary)" }}
+              >
+                {(page - 1) * recordsPerPage + 1} -{" "}
+                {Math.min(page * recordsPerPage, data.length)}
+              </span>{" "}
+              dari <span style={{ fontWeight: 700 }}>{data.length}</span> data
             </Text>
             <Pagination
               total={totalPages}
@@ -232,7 +243,7 @@ export function DataTable<T>({
               size="sm"
               radius="md"
               withEdges
-              color="indigo"
+              color="dark"
             />
           </Group>
         </Stack>

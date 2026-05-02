@@ -26,9 +26,9 @@ export interface PengajuanRancanganPenelitian {
   mahasiswaId: number;
   tanggalPengajuan: string;
   statusDosenPa: StatusPengajuan;
+  statusKaprodi: StatusPengajuan;
   catatanDosenPa: string | null;
   tanggalReviewPa: string | null;
-  statusKaprodi: StatusPengajuan;
   catatanKaprodi: string | null;
   tanggalReviewKaprodi: string | null;
   

@@ -26,7 +26,7 @@ export default function NotFoundPage() {
               size={120}
               radius={rem(40)}
               variant="light"
-              color="indigo"
+              color="var(--gs-primary)"
               className={classes.mainIcon}
             >
               <IconSearch size={60} stroke={1.5} />
@@ -54,10 +54,10 @@ export default function NotFoundPage() {
               href="/dashboard"
               size="md"
               variant="filled"
-              color="indigo"
-              leftSection={<IconHome size={18} />}
-              className={classes.control}
+              className="bg-gs-primary hover:bg-gs-primary-hover"
+              leftSection={<IconHome size={18} stroke={1.5} />}
               radius="md"
+              fw={700}
             >
               Kembali ke Dashboard
             </Button>
@@ -65,10 +65,10 @@ export default function NotFoundPage() {
               onClick={() => window.history.back()}
               size="md"
               variant="light"
-              color="indigo"
-              leftSection={<IconArrowLeft size={18} />}
-              className={classes.control}
+              color="var(--gs-primary)"
+              leftSection={<IconArrowLeft size={18} stroke={1.5} />}
               radius="md"
+              fw={700}
             >
               Kembali Sebelumnya
             </Button>

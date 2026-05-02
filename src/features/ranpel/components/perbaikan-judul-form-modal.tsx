@@ -92,7 +92,7 @@ export function PerbaikanJudulFormModal({
     <Modal
       opened={opened}
       onClose={onClose}
-      title={<Text fw={700}>Pengajuan Perbaikan Judul</Text>}
+      title={<Text fw={600}>Pengajuan Perbaikan Judul</Text>}
       radius="lg"
       size="md"
     >
@@ -120,15 +120,18 @@ export function PerbaikanJudulFormModal({
             onChange={setFile}
           />
           <Group justify="flex-end" mt="xl">
-            <Button variant="subtle" onClick={onClose} color="gray">
+            <Button variant="subtle" onClick={onClose} color="var(--gs-text-secondary)" radius="md">
               Batal
             </Button>
             <Button
               type="submit"
+              className="bg-gs-primary hover:bg-gs-primary-hover"
               loading={isSubmitting || isUploading}
-              leftSection={<IconFileText size={18} />}
+              leftSection={<IconFileText size={18} stroke={1.5} />}
+              radius="md"
+              fw={700}
             >
-              Kirim Pengajuan
+              KIRIM PENGAJUAN
             </Button>
           </Group>
         </Stack>

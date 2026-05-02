@@ -40,9 +40,9 @@ export const mahasiswaService = {
     return response.data;
   },
 
-  getDosens: async (): Promise<{ data: any[] }> => {
-    const response = await apiClient.get<{ data: any[] }>("/dosen?role=dosen&limit=1000");
-    return response.data;
+  getDosens: async (): Promise<any[]> => {
+    const response = await apiClient.get<{ data: any[] }>("/dosen?limit=1000");
+    return response.data.data;
   },
 
   getMyDocuments: async (): Promise<{

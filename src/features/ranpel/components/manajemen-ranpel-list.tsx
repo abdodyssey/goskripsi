@@ -39,6 +39,7 @@ import { StudentProfileModal } from "@/features/mahasiswa/components/student-pro
 import { PengajuanRancanganPenelitian } from "../types/ranpel.type";
 import { Mahasiswa } from "@/types/user.type";
 import { useState, useMemo } from "react";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 
 import { DataTable, DataTableColumn } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -60,9 +61,15 @@ export function ManajemenRanpelList() {
     null,
   );
 
+  const { userResponse } = useAuth();
+  const user = userResponse?.user;
+  const roles = user?.roles || userResponse?.roles || [];
+  const isSuperUser = roles.includes("superadmin") || roles.includes("admin");
+  const userProdiId = user?.prodi_id;
+
   // Filter States
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string | null>("menunggu");
+  const [statusFilter, setStatusFilter] = useState<string | null>("diverifikasi");
   const [angkatanFilter, setAngkatanFilter] = useState<string | null>(null);
 
   const handlePreview = (item: PengajuanRancanganPenelitian) => {
@@ -116,7 +123,7 @@ export function ManajemenRanpelList() {
         </Stack>
       ),
       labels: { confirm: label, cancel: "Batal" },
-      confirmProps: { color: statusKaprodi === "diterima" ? "green" : "red" },
+      confirmProps: { color: statusKaprodi === "diterima" ? "var(--gs-success)" : "var(--gs-danger)" },
       onConfirm: async () => {
         try {
           await updatePengajuan({
@@ -129,57 +136,33 @@ export function ManajemenRanpelList() {
           notifications.show({
             title: "Berhasil",
             message: `Pengajuan berhasil di${statusKaprodi === "diterima" ? "setujui" : "tolak"}`,
-            color: "green",
+            color: "var(--gs-success)",
           });
         } catch (error) {
           notifications.show({
             title: "Gagal",
             message: (error as Error).message || "Terjadi kesalahan",
-            color: "red",
+            color: "var(--gs-danger)",
           });
         }
       },
     });
   };
 
-  const handleUndo = (id: string) => {
-    modals.openConfirmModal({
-      title: "Undo Keputusan",
-      children: (
-        <Text size="sm">
-          Apakah Anda yakin ingin membatalkan keputusan ini? Status akan kembali
-          menjadi TERVERIFIKASI.
-        </Text>
-      ),
-      labels: { confirm: "Undo Keputusan", cancel: "Batal" },
-      confirmProps: { color: "orange" },
-      onConfirm: async () => {
-        try {
-          await updatePengajuan({
-            id,
-            data: { status_kaprodi: "menunggu" },
-          });
-          notifications.show({
-            title: "Berhasil",
-            message: "Keputusan berhasil dibatalkan",
-            color: "green",
-          });
-        } catch (error) {
-          notifications.show({
-            title: "Gagal",
-            message: (error as Error).message || "Terjadi kesalahan",
-            color: "red",
-          });
-        }
-      },
-    });
-  };
 
   const pengajuanArray: PengajuanRancanganPenelitian[] = useMemo(() => {
-    return Array.isArray(pengajuanList)
+    const list = Array.isArray(pengajuanList)
       ? (pengajuanList as PengajuanRancanganPenelitian[])
       : [];
-  }, [pengajuanList]);
+    
+    if (isSuperUser || !userProdiId) return list;
+
+    return list.filter(p => {
+      const mhsProdi = p.mahasiswa as any;
+      const id = mhsProdi?.prodi_id || mhsProdi?.prodiId;
+      return Number(id) === Number(userProdiId);
+    });
+  }, [pengajuanList, isSuperUser, userProdiId]);
 
   const uniqueAngkatan = useMemo(() => {
     const angkatanSet = new Set<string>();
@@ -200,8 +183,9 @@ export function ManajemenRanpelList() {
       // Must be at least verified, accepted, rejected, or waiting for PA
       const validKaprodiStatus =
         row.statusDosenPa === "menunggu" ||
+        row.statusDosenPa === "ditolak" ||
         (row.statusKaprodi === "menunggu" &&
-          row.statusDosenPa === "diterima") ||
+          row.statusDosenPa === "diverifikasi") ||
         row.statusKaprodi === "diterima" ||
         row.statusKaprodi === "ditolak";
 
@@ -211,12 +195,16 @@ export function ManajemenRanpelList() {
       if (statusFilter && statusFilter !== "semua") {
         if (statusFilter === "menunggu_pa") {
           if (row.statusDosenPa !== "menunggu") return false;
-        } else if (statusFilter === "menunggu") {
+        } else if (statusFilter === "diverifikasi") {
           if (
             row.statusKaprodi !== "menunggu" ||
-            row.statusDosenPa !== "diterima"
+            row.statusDosenPa !== "diverifikasi"
           )
             return false;
+        } else if (statusFilter === "ditolak") {
+          if (row.statusKaprodi !== "ditolak" && row.statusDosenPa !== "ditolak") {
+            return false;
+          }
         } else if (row.statusKaprodi !== statusFilter) {
           return false;
         }
@@ -246,6 +234,24 @@ export function ManajemenRanpelList() {
     });
   }, [pengajuanArray, search, statusFilter, angkatanFilter]);
 
+  const counts = useMemo(() => {
+    const baseList = pengajuanArray.filter((row) => 
+      row.statusDosenPa === "menunggu" ||
+      row.statusDosenPa === "ditolak" ||
+      (row.statusKaprodi === "menunggu" && row.statusDosenPa === "diverifikasi") ||
+      row.statusKaprodi === "diterima" ||
+      row.statusKaprodi === "ditolak"
+    );
+
+    return {
+      semua: baseList.length,
+      menunggu_pa: baseList.filter(r => r.statusDosenPa === "menunggu").length,
+      diverifikasi: baseList.filter(r => r.statusKaprodi === "menunggu" && r.statusDosenPa === "diverifikasi").length,
+      diterima: baseList.filter(r => r.statusKaprodi === "diterima").length,
+      ditolak: baseList.filter(r => r.statusKaprodi === "ditolak" || r.statusDosenPa === "ditolak").length,
+    };
+  }, [pengajuanArray]);
+
   const columns: DataTableColumn<PengajuanRancanganPenelitian>[] = [
     {
       header: "Mahasiswa",
@@ -257,7 +263,7 @@ export function ManajemenRanpelList() {
           }
         >
           <Tooltip label="Klik untuk lihat profil">
-            <Text size="sm" fw={700} c="indigo.7">
+            <Text size="sm" fw={700} className="text-gs-primary">
               {row.mahasiswa?.user?.nama}
             </Text>
           </Tooltip>
@@ -275,9 +281,9 @@ export function ManajemenRanpelList() {
           <Box>
             <Group gap={6} mb={2}>
               <Box w={6} h={6} style={{ borderRadius: "50%", backgroundColor: "var(--mantine-color-gray-4)" }} />
-              <Text size="10px" fw={800} c="dimmed" tt="uppercase" lts={0.5}>Verified PA</Text>
+              <Text size="10px" fw={600} c="dimmed" tt="uppercase" lts={0.5}>Verified PA</Text>
             </Group>
-            <Text size="xs" fw={700} pl={12}>
+            <Text size="xs" fw={600} pl={12}>
               {row.tanggalReviewPa
                 ? new Date(row.tanggalReviewPa).toLocaleDateString("id-ID", {
                     day: "numeric",
@@ -290,10 +296,10 @@ export function ManajemenRanpelList() {
           {row.statusKaprodi === "diterima" && row.tanggalReviewKaprodi && (
             <Box>
               <Group gap={6} mb={2}>
-                <Box w={6} h={6} style={{ borderRadius: "50%", backgroundColor: "var(--mantine-color-teal-5)" }} />
-                <Text size="10px" fw={800} c="teal.7" tt="uppercase" lts={0.5}>Diterima KPR</Text>
+                <Box w={6} h={6} style={{ borderRadius: "50%", backgroundColor: "var(--gs-success)" }} />
+                <Text size="10px" fw={700} className="text-gs-success-text" tt="uppercase" lts={0.5}>Diterima KPR</Text>
               </Group>
-              <Text size="xs" fw={800} c="teal.9" pl={12}>
+              <Text size="xs" fw={700} className="text-gs-success-text" pl={12}>
                 {new Date(row.tanggalReviewKaprodi).toLocaleDateString("id-ID", {
                   day: "numeric",
                   month: "long",
@@ -309,7 +315,7 @@ export function ManajemenRanpelList() {
       header: "Judul Penelitian",
       render: (row) => (
         <Stack gap={4} py={4}>
-          <Text size="sm" fw={700} lineClamp={2} style={{ lineHeight: 1.4 }}>
+          <Text size="sm" fw={600} lineClamp={2} style={{ lineHeight: 1.4 }}>
             {row.rancanganPenelitian?.judulPenelitian || "Tidak Ada Judul"}
           </Text>
           <Text size="10px" c="dimmed" fw={500}>
@@ -326,10 +332,10 @@ export function ManajemenRanpelList() {
         if (row.statusKaprodi === "ditolak" || row.statusDosenPa === "ditolak") {
           status = "ditolak";
         } else if (
-          row.statusDosenPa === "diterima" &&
+          row.statusDosenPa === "diverifikasi" &&
           row.statusKaprodi === "menunggu"
         ) {
-          status = "proses";
+          status = "diverifikasi";
         } else if (row.statusDosenPa === "menunggu") {
           status = "menunggu";
         }
@@ -389,16 +395,16 @@ export function ManajemenRanpelList() {
                 )}
 
                 {row.statusKaprodi === "menunggu" &&
-                  row.statusDosenPa === "diterima" && (
+                  row.statusDosenPa === "diverifikasi" && (
                     <>
                       <Menu.Divider />
                       <Menu.Label>Keputusan Kaprodi</Menu.Label>
                       <Menu.Item
-                        color="teal"
+                        color="var(--gs-success)"
                         leftSection={
                           <IconCheck
                             style={{ width: rem(16), height: rem(16) }}
-                            stroke={1.5}
+                            stroke={2}
                           />
                         }
                         onClick={() => {
@@ -409,11 +415,11 @@ export function ManajemenRanpelList() {
                         Setujui (Diterima)
                       </Menu.Item>
                       <Menu.Item
-                        color="red"
+                        color="var(--gs-danger)"
                         leftSection={
                           <IconX
                             style={{ width: rem(16), height: rem(16) }}
-                            stroke={1.5}
+                            stroke={2}
                           />
                         }
                         onClick={() =>
@@ -425,24 +431,6 @@ export function ManajemenRanpelList() {
                     </>
                   )}
 
-                {(row.statusKaprodi === "ditolak" ||
-                  row.statusKaprodi === "diterima") && (
-                  <>
-                    <Menu.Divider />
-                    <Menu.Item
-                      color="orange"
-                      leftSection={
-                        <IconRotate2
-                          style={{ width: rem(16), height: rem(16) }}
-                          stroke={1.5}
-                        />
-                      }
-                      onClick={() => handleUndo(row.id.toString())}
-                    >
-                      Undo Keputusan
-                    </Menu.Item>
-                  </>
-                )}
               </Menu.Dropdown>
             </Menu>
         );
@@ -452,98 +440,127 @@ export function ManajemenRanpelList() {
 
   return (
     <Stack gap="lg">
-      <Paper withBorder p="sm" radius="lg" shadow="xs">
-        <Stack gap="md">
+      <Paper 
+        withBorder 
+        p="md" 
+        radius="xl" 
+        shadow="sm" 
+        className="bg-white/50 backdrop-blur-md"
+        style={{ border: '1px solid rgba(0,0,0,0.05)' }}
+      >
+        <Stack gap="lg">
+          {/* Top Row: Tabs */}
           <Group justify="space-between" align="center">
             <Tabs
               variant="pills"
               value={statusFilter || "semua"}
               onChange={setStatusFilter}
               radius="xl"
+              classNames={{
+                tab: "data-[active]:shadow-md data-[active]:bg-white data-[active]:border-slate-100"
+              }}
               styles={{
                 tab: {
-                  fontWeight: 700,
-                  fontSize: rem(11),
-                  padding: `${rem(6)} ${rem(12)}`,
-                  transition: 'background-color 0.2s ease, color 0.2s ease',
+                  fontWeight: 800,
+                  fontSize: rem(10),
+                  padding: `${rem(8)} ${rem(16)}`,
+                  transition: 'all 0.2s ease',
                   textTransform: 'uppercase',
-                  letterSpacing: rem(0.5),
+                  letterSpacing: rem(1),
+                  border: '1px solid transparent',
                 },
                 list: {
-                  gap: rem(4),
+                  gap: rem(6),
+                  backgroundColor: '#f8fafc',
+                  padding: rem(4),
+                  borderRadius: rem(100),
+                  border: '1px solid #f1f5f9'
                 }
               }}
             >
               <Tabs.List>
-                <Tabs.Tab value="semua">SEMUA</Tabs.Tab>
+                <Tabs.Tab value="semua">SEMUA ({counts.semua})</Tabs.Tab>
                 <Tabs.Tab
                   value="menunggu_pa"
-                  color="orange"
-                  leftSection={<IconRotate2 size={14} />}
+                  color="var(--gs-warning)"
+                  leftSection={<IconRotate2 size={14} stroke={2.5} />}
                 >
-                  BELUM ACC PA
+                  MENUNGGU ({counts.menunggu_pa})
                 </Tabs.Tab>
                 <Tabs.Tab
-                  value="menunggu"
-                  color="indigo"
-                  leftSection={<IconRotate2 size={14} />}
+                  value="diverifikasi"
+                  color="var(--gs-primary)"
+                  leftSection={<IconRotate2 size={14} stroke={2.5} />}
                 >
-                  MENUNGGU
+                  DIVERIFIKASI ({counts.diverifikasi})
                 </Tabs.Tab>
                 <Tabs.Tab
                   value="diterima"
-                  color="teal"
-                  leftSection={<IconCheck size={14} />}
+                  color="var(--gs-success)"
+                  leftSection={<IconCheck size={14} stroke={2.5} />}
                 >
-                  DITERIMA
+                  DITERIMA ({counts.diterima})
                 </Tabs.Tab>
                 <Tabs.Tab
                   value="ditolak"
-                  color="red"
-                  leftSection={<IconX size={14} />}
+                  color="var(--gs-danger)"
+                  leftSection={<IconX size={14} stroke={2.5} />}
                 >
-                  DITOLAK
+                  DITOLAK ({counts.ditolak})
                 </Tabs.Tab>
               </Tabs.List>
             </Tabs>
 
-            <Group gap="xs" style={{ flexGrow: 1 }} justify="flex-end">
-              <Select
-                size="sm"
-                placeholder="Angkatan"
-                data={[
-                  { value: "semua", label: "Semua Angkatan" },
-                  ...uniqueAngkatan.map((a) => ({ value: a, label: a })),
-                ]}
-                value={angkatanFilter || "semua"}
-                onChange={setAngkatanFilter}
-                radius="md"
-                w={{ base: "100%", sm: 150 }}
-                variant="filled"
-                styles={{
-                  input: {
-                    fontWeight: 600,
-                    fontSize: rem(12),
-                  }
-                }}
-              />
-              <TextInput
-                size="sm"
-                placeholder="Cari Nama / NIM..."
-                leftSection={<IconSearch size={16} />}
-                value={search}
-                onChange={(e) => setSearch(e.currentTarget.value)}
-                w={{ base: "100%", sm: 220 }}
-                radius="md"
-                variant="filled"
-                styles={{
-                  input: {
-                    fontWeight: 600,
-                    fontSize: rem(12),
-                  }
-                }}
-              />
-            </Group>
+            <Text size="xs" fw={700} c="dimmed" tt="uppercase" lts={1} visibleFrom="md">
+              Filter Manajemen
+            </Text>
+          </Group>
+
+          <Divider color="slate.1" variant="dashed" />
+
+          {/* Bottom Row: Search & Filters */}
+          <Group gap="md">
+            <Select
+              size="md"
+              placeholder="Filter Angkatan"
+              leftSection={<IconUsers size={18} className="text-gs-primary" />}
+              data={[
+                { value: "semua", label: "Semua Angkatan" },
+                ...uniqueAngkatan.map((a) => ({ value: a, label: `Angkatan ${a}` })),
+              ]}
+              value={angkatanFilter || "semua"}
+              onChange={setAngkatanFilter}
+              radius="lg"
+              w={{ base: "100%", sm: 220 }}
+              variant="filled"
+              styles={{
+                input: {
+                  fontWeight: 700,
+                  fontSize: rem(13),
+                  backgroundColor: 'white',
+                  border: '1px solid #f1f5f9'
+                }
+              }}
+            />
+            
+            <TextInput
+              size="md"
+              placeholder="Cari Mahasiswa berdasarkan Nama atau NIM..."
+              leftSection={<IconSearch size={18} className="text-gs-primary" />}
+              value={search}
+              onChange={(e) => setSearch(e.currentTarget.value)}
+              style={{ flexGrow: 1 }}
+              radius="lg"
+              variant="filled"
+              styles={{
+                input: {
+                  fontWeight: 700,
+                  fontSize: rem(13),
+                  backgroundColor: 'white',
+                  border: '1px solid #f1f5f9'
+                }
+              }}
+            />
           </Group>
         </Stack>
       </Paper>
@@ -581,8 +598,14 @@ export function ManajemenRanpelList() {
         opened={pembimbingOpened}
         onClose={closePembimbing}
         mahasiswaId={selectedPengajuan?.mahasiswa?.id || null}
-        currentP1={selectedPengajuan?.mahasiswa?.pembimbing1?.id || null}
-        currentP2={selectedPengajuan?.mahasiswa?.pembimbing2?.id || null}
+        currentP1={
+          pengajuanList?.find(p => p.id === selectedPengajuan?.id)?.mahasiswa?.pembimbing1?.id || 
+          selectedPengajuan?.mahasiswa?.pembimbing1?.id || null
+        }
+        currentP2={
+          pengajuanList?.find(p => p.id === selectedPengajuan?.id)?.mahasiswa?.pembimbing2?.id || 
+          selectedPengajuan?.mahasiswa?.pembimbing2?.id || null
+        }
         onSuccess={refetch}
       />
 

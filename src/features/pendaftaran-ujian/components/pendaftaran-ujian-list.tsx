@@ -59,7 +59,7 @@ export function PendaftaranUjianList({ mahasiswaId }: { mahasiswaId: string }) {
       notifications.show({
         title: "Gagal",
         message: (error as Error).message || "Terjadi kesalahan saat submit",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -107,13 +107,14 @@ export function PendaftaranUjianList({ mahasiswaId }: { mahasiswaId: string }) {
 
   const getStatusConfig = (status: string) => {
     const configs: Record<string, { color: string; label: string; icon: any }> = {
-      menunggu: { color: "blue", label: "MENUNGGU", icon: IconClock },
-      revisi: { color: "orange", label: "REVISI", icon: IconAlertCircle },
-      diterima: { color: "teal", label: "DISETUJUI", icon: IconCheck },
-      ditolak: { color: "red", label: "DITOLAK", icon: IconX },
+      menunggu: { color: "var(--gs-primary)", label: "MENUNGGU", icon: IconClock },
+      revisi: { color: "var(--gs-warning)", label: "REVISI", icon: IconAlertCircle },
+      diterima: { color: "var(--gs-success)", label: "DISETUJUI", icon: IconCheck },
+      ditolak: { color: "var(--gs-danger)", label: "DITOLAK", icon: IconX },
     };
-    return configs[status] || { color: "gray", label: status.toUpperCase(), icon: IconFile };
+    return configs[status] || { color: "var(--gs-text-muted)", label: status.toUpperCase(), icon: IconFile };
   };
+
 
   const pendaftaranArray: PendaftaranUjian[] = Array.isArray(pendaftaranList)
     ? pendaftaranList
@@ -126,7 +127,7 @@ export function PendaftaranUjianList({ mahasiswaId }: { mahasiswaId: string }) {
       header: "Jenis Ujian",
       width: "15%",
       render: (row) => (
-        <Text size="sm" fw={700} c="indigo.8">
+        <Text size="sm" fw={700} className="text-gs-primary">
           {row.jenisUjian?.namaJenis || "-"}
         </Text>
       ),
@@ -155,11 +156,11 @@ export function PendaftaranUjianList({ mahasiswaId }: { mahasiswaId: string }) {
                   backgroundColor: "var(--mantine-color-gray-4)",
                 }}
               />
-              <Text size="10px" fw={800} c="dimmed" tt="uppercase" lts={0.5}>
+              <Text size="10px" fw={600} c="dimmed" tt="uppercase" lts={0.5}>
                 Pendaftaran
               </Text>
             </Group>
-            <Text size="xs" fw={700} pl={12}>
+            <Text size="xs" fw={600} pl={12}>
               {new Date(row.tanggalPendaftaran).toLocaleDateString("id-ID", {
                 day: "numeric",
                 month: "long",
@@ -177,27 +178,27 @@ export function PendaftaranUjianList({ mahasiswaId }: { mahasiswaId: string }) {
                     borderRadius: "50%",
                     backgroundColor:
                       row.status === "diterima"
-                        ? "var(--mantine-color-teal-5)"
+                        ? "var(--gs-success)"
                         : row.status === "ditolak"
-                          ? "var(--mantine-color-red-5)"
+                          ? "var(--gs-danger)"
                           : row.status === "revisi"
-                            ? "var(--mantine-color-orange-5)"
-                            : "var(--mantine-color-blue-4)",
+                            ? "var(--gs-warning)"
+                            : "var(--gs-primary)",
                   }}
                 />
                 <Text
                   size="10px"
-                  fw={800}
+                  fw={700}
                   tt="uppercase"
                   lts={0.5}
-                  c={
+                  className={
                     row.status === "diterima"
-                      ? "teal.6"
+                      ? "text-gs-success-text"
                       : row.status === "ditolak"
-                        ? "red.6"
+                        ? "text-gs-danger-text"
                         : row.status === "revisi"
-                          ? "orange.6"
-                          : "blue.6"
+                          ? "text-gs-warning-text"
+                          : "text-gs-primary-text"
                   }
                 >
                   {row.status === "diterima"
@@ -211,16 +212,16 @@ export function PendaftaranUjianList({ mahasiswaId }: { mahasiswaId: string }) {
               </Group>
               <Text
                 size="xs"
-                fw={600}
+                fw={700}
                 pl={12}
-                c={
+                className={
                   row.status === "diterima"
-                    ? "teal.8"
+                    ? "text-gs-success-text"
                     : row.status === "ditolak"
-                      ? "red.8"
+                      ? "text-gs-danger-text"
                       : row.status === "revisi"
-                        ? "orange.8"
-                        : "blue.8"
+                        ? "text-gs-warning-text"
+                        : "text-gs-primary-text"
                 }
               >
                 {row.status === "diterima"
@@ -243,7 +244,7 @@ export function PendaftaranUjianList({ mahasiswaId }: { mahasiswaId: string }) {
         <Group gap={8} justify="flex-end">
           <Menu shadow="sm" width={200} position="bottom-end" transitionProps={{ transition: 'pop-top-right' }} withinPortal>
             <Menu.Target>
-              <ActionIcon variant="subtle" color="gray" radius="md" size="lg">
+              <ActionIcon variant="subtle" color="var(--gs-text-muted)" radius="md" size="lg">
                 <IconDotsVertical size={18} stroke={1.5} />
               </ActionIcon>
             </Menu.Target>
@@ -266,7 +267,7 @@ export function PendaftaranUjianList({ mahasiswaId }: { mahasiswaId: string }) {
               <Menu.Divider />
               
               <Menu.Item
-                color="red"
+                color="var(--gs-danger)"
                 leftSection={<IconTrash size={14} />}
                 onClick={() => handleDelete(String(row.id))}
                 disabled={row.status === "diterima"}
@@ -286,11 +287,13 @@ export function PendaftaranUjianList({ mahasiswaId }: { mahasiswaId: string }) {
         title="Riwayat Pendaftaran Ujian"
         rightSection={
           <Button
-            leftSection={<IconPlus size={16} />}
+            leftSection={<IconPlus size={16} stroke={2} />}
             onClick={open}
-            color="indigo.8"
+            className="bg-gs-primary hover:bg-gs-primary-hover"
+            radius="md"
+            fw={700}
           >
-            Daftar Ujian Baru
+            DAFTAR UJIAN BARU
           </Button>
         }
         data={pendaftaranArray}
@@ -301,9 +304,9 @@ export function PendaftaranUjianList({ mahasiswaId }: { mahasiswaId: string }) {
           <Center
             py={50}
             style={{
-              border: "2px dashed var(--mantine-color-default-border)",
-              borderRadius: 12,
-              backgroundColor: "var(--mantine-color-body)",
+              border: "1px dashed var(--gs-border)",
+              borderRadius: 16,
+              backgroundColor: "var(--gs-bg-overlay)",
             }}
           >
             <Stack align="center" gap="sm">
@@ -311,12 +314,14 @@ export function PendaftaranUjianList({ mahasiswaId }: { mahasiswaId: string }) {
                 Anda belum memiliki riwayat pendaftaran ujian.
               </Text>
               <Button
-                variant="light"
-                color="indigo"
-                leftSection={<IconPlus size={16} />}
+                variant="outline"
+                color="var(--gs-primary)"
+                leftSection={<IconPlus size={16} stroke={2} />}
                 onClick={open}
+                radius="md"
+                fw={700}
               >
-                Daftar Ujian Sekarang
+                DAFTAR UJIAN SEKARANG
               </Button>
             </Stack>
           </Center>

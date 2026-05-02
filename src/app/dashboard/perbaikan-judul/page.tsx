@@ -39,7 +39,17 @@ export default function PerbaikanJudulPage() {
         {isLoadingRanpel ? (
           <Skeleton height={200} radius="lg" />
         ) : !currentTitle ? (
-          <Alert icon={<IconInfoCircle size={16} />} color="blue" variant="light" radius="lg">
+          <Alert 
+            icon={<IconInfoCircle size={16} stroke={1.5} />} 
+            variant="light" 
+            radius="lg"
+            styles={{
+              root: { backgroundColor: 'var(--gs-bg-overlay)', border: '1px solid var(--gs-border)' },
+              title: { color: 'var(--gs-text-primary)' },
+              icon: { color: 'var(--gs-primary)' },
+              message: { color: 'var(--gs-text-secondary)' }
+            }}
+          >
             Anda belum memiliki judul penelitian yang disetujui. Silakan selesaikan pengajuan Rancangan Penelitian (Ranpel) terlebih dahulu.
           </Alert>
         ) : (

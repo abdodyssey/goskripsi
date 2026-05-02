@@ -1,56 +1,210 @@
-@import url("https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,300,400&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 @import "@mantine/core/styles.css";
 @import "@mantine/notifications/styles.css";
 
-@variant dark (&:where([data-mantine-color-scheme="dark"], [data-mantine-color-scheme="dark"] *));
-
 @theme inline {
-  /* ─── Indigo palette (Mapped to Slate for Stealth Identity) ─── */
-  --color-indigo-50: #f8fafc;
-  --color-indigo-100: #f1f5f9;
-  --color-indigo-200: #e2e8f0;
-  --color-indigo-300: #cbd5e1;
-  --color-indigo-400: #94a3b8;
-  --color-indigo-500: #64748b;
-  --color-indigo-600: #475569;
-  --color-indigo-700: #334155;
-  --color-indigo-800: #1e293b;
-  --color-indigo-900: #0f172a;
+  --color-gs-primary: var(--gs-primary);
+  --color-gs-bg-base: var(--gs-bg-base);
+  --color-gs-bg-raised: var(--gs-bg-raised);
+  --color-gs-text-primary: var(--gs-text-primary);
+  --color-gs-text-secondary: var(--gs-text-secondary);
+  --color-gs-text-muted: var(--gs-text-muted);
+  --color-gs-border: var(--gs-border);
+  
+  /* Status */
+  --color-gs-success: var(--gs-success);
+  --color-gs-warning: var(--gs-warning);
+  --color-gs-danger: var(--gs-danger);
+  --color-gs-info: var(--gs-info);
+}
 
-  /* ─── Slate palette ─── */
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
-  --color-slate-950: #020617;
+:root {
+  /* === SURFACE === */
+  --gs-bg-base:      #F5F5F5;
+  --gs-bg-raised:    #FFFFFF;
+  --gs-bg-overlay:   #EFEFEF;
+  --gs-bg-hover:     #E8E8E8;
+  --gs-bg-subtle:    #E3E3E3;
 
-  /* ─── Mantine-driven semantic tokens ─── */
-  --color-primary: var(--mantine-primary-color-filled);
-  --color-primary-hover: var(--mantine-primary-color-filled-hover);
-  --color-primary-light: var(--mantine-primary-color-light);
-  --color-primary-light-hover: var(--mantine-primary-color-light-hover);
-  --color-primary-light-color: var(--mantine-primary-color-light-color);
+  /* === BORDER === */
+  --gs-border:        rgba(0, 0, 0, 0.08);
+  --gs-border-strong: rgba(0, 0, 0, 0.15);
+  --gs-border-focus:  #111111;
 
-  /* ─── Surface & text tokens (auto-switch via Mantine) ─── */
-  --color-surface: var(--mantine-color-body);
-  --color-surface-hover: var(--mantine-color-default-hover);
-  --color-border: var(--mantine-color-default-border);
-  --color-text: var(--mantine-color-text);
-  --color-text-dimmed: var(--mantine-color-dimmed);
+  /* === TEXT === */
+  --gs-text-primary:   #111111;
+  --gs-text-secondary: #555555;
+  --gs-text-muted:     #999999;
+  --gs-text-inverse:   #FFFFFF;
+
+  /* === PRIMARY ACTION === */
+  --gs-primary:        #111111;
+  --gs-primary-hover:  #2A2A2A;
+  --gs-primary-active: #000000;
+  --gs-primary-bg:     rgba(0, 0, 0, 0.05);
+  --gs-primary-border: rgba(0, 0, 0, 0.20);
+
+  /* === STATUS === */
+  --gs-success:      #1A7A5E;
+  --gs-success-bg:   #EDFAF4;
+  --gs-success-text: #155C47;
+  --gs-success-border: rgba(26, 122, 94, 0.20);
+
+  --gs-warning:      #A05C00;
+  --gs-warning-bg:   #FFF8EC;
+  --gs-warning-text: #7A4500;
+  --gs-warning-border: rgba(160, 92, 0, 0.20);
+
+  --gs-danger:       #C0392B;
+  --gs-danger-bg:    #FEF0EE;
+  --gs-danger-text:  #922B1F;
+  --gs-danger-border: rgba(192, 57, 43, 0.20);
+
+  --gs-info:         #1A5FAA;
+  --gs-info-bg:      #EEF5FF;
+  --gs-info-text:    #134A88;
+  --gs-info-border:  rgba(26, 95, 170, 0.20);
+
+  /* === COMPONENT SPECIFIC === */
+  --gs-sidebar-bg:    #111111;
+  --gs-sidebar-text:  rgba(255, 255, 255, 0.65);
+  --gs-sidebar-text-active: #FFFFFF;
+  --gs-sidebar-active-bg:   rgba(255, 255, 255, 0.10);
+  --gs-sidebar-active-border: #FFFFFF;
+  --gs-header-bg:     #FFFFFF;
+  --gs-modal-bg:      #FFFFFF;
+  --gs-input-bg:      #F0F0F0;
+
+  /* Typography Scale */
+  --fs-display:   clamp(1.75rem, 3vw, 2.25rem);
+  --fs-h1:        clamp(1.375rem, 2vw, 1.625rem);
+  --fs-h2:        clamp(1rem, 1.5vw, 1.125rem);
+  --fs-h3:        0.9375rem;
+  --fs-body:      0.875rem;
+  --fs-label:     0.8125rem;
+  --fs-caption:   0.75rem;
+  --fs-badge:     0.6875rem;
+  --fs-stat:      clamp(1.5rem, 2.5vw, 2rem);
+
+  --lh-display:  1.2;
+  --lh-heading:  1.35;
+  --lh-body:     1.6;
+  --lh-label:    1.4;
+
+  --ls-label:    0.01em;
+  --ls-caption:  0.02em;
+  --ls-display:  -0.01em;
+}
+
+[data-mantine-color-scheme="dark"] {
+  --gs-bg-base:      #141414;
+  --gs-bg-raised:    #1E1E1E;
+  --gs-bg-overlay:   #262626;
+  --gs-bg-hover:     #2E2E2E;
+  --gs-bg-subtle:    #333333;
+
+  --gs-border:        rgba(255, 255, 255, 0.07);
+  --gs-border-strong: rgba(255, 255, 255, 0.13);
+  --gs-border-focus:  #F0F0F0;
+
+  --gs-text-primary:   #F0F0F0;
+  --gs-text-secondary: #A0A0A0;
+  --gs-text-muted:     #606060;
+  --gs-text-inverse:   #111111;
+
+  --gs-primary:        #F0F0F0;
+  --gs-primary-hover:  #FFFFFF;
+  --gs-primary-active: #D0D0D0;
+  --gs-primary-bg:     rgba(255, 255, 255, 0.07);
+  --gs-primary-border: rgba(255, 255, 255, 0.20);
+
+  --gs-success:      #2ECC71;
+  --gs-success-bg:   rgba(46, 204, 113, 0.10);
+  --gs-success-text: #5DDBA0;
+  --gs-success-border: rgba(46, 204, 113, 0.20);
+
+  --gs-warning:      #E67E22;
+  --gs-warning-bg:   rgba(230, 126, 34, 0.10);
+  --gs-warning-text: #F0A060;
+  --gs-warning-border: rgba(230, 126, 34, 0.20);
+
+  --gs-danger:       #E74C3C;
+  --gs-danger-bg:    rgba(231, 76, 60, 0.10);
+  --gs-danger-text:  #F08070;
+  --gs-danger-border: rgba(231, 76, 60, 0.20);
+
+  --gs-info:         #3498DB;
+  --gs-info-bg:      rgba(52, 152, 219, 0.10);
+  --gs-info-text:    #70B8F0;
+  --gs-info-border:  rgba(52, 152, 219, 0.20);
+
+  --gs-sidebar-bg:    #0A0A0A;
+  --gs-sidebar-active-bg:     rgba(255, 255, 255, 0.08);
+  --gs-sidebar-active-border: #FFFFFF;
+  --gs-header-bg:     #1E1E1E;
+  --gs-modal-bg:      #1E1E1E;
+  --gs-input-bg:      #262626;
+}
+
+html { 
+  font-size: 16px; 
 }
 
 body {
-  font-family: "Satoshi", sans-serif;
+  font-family: 'Inter', sans-serif;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  background-color: var(--gs-bg-base);
+  color: var(--gs-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Premium Scrollbar ─── */
+.gs-display {
+  font-family: 'Inter', sans-serif !important;
+  font-size: var(--fs-display);
+  font-weight: 800;
+  line-height: var(--lh-display);
+  letter-spacing: -0.02em;
+}
+
+.gs-logo-text {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.gs-page-title {
+  font-family: 'Inter', sans-serif !important;
+  font-size: var(--fs-h1);
+  font-weight: 800;
+  line-height: var(--lh-heading);
+  letter-spacing: -0.02em;
+}
+
+.gs-stat {
+  font-family: 'Inter', sans-serif !important;
+  font-size: var(--fs-stat);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--gs-text-primary);
+}
+
+.academic-pattern {
+  background-color: var(--gs-sidebar-bg);
+  background-image: 
+    radial-gradient(circle at 100% 150%, var(--gs-sidebar-bg) 24%, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.05) 28%, var(--gs-sidebar-bg) 29%, var(--gs-sidebar-bg) 36%, rgba(255,255,255,0.05) 36%, rgba(255,255,255,0.05) 40%, transparent 40%, transparent),
+    radial-gradient(circle at 0    150%, var(--gs-sidebar-bg) 24%, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.05) 28%, var(--gs-sidebar-bg) 29%, var(--gs-sidebar-bg) 36%, rgba(255,255,255,0.05) 36%, rgba(255,255,255,0.05) 40%, transparent 40%, transparent),
+    radial-gradient(circle at 50%  100%, rgba(255,255,255,0.05) 10%, var(--gs-sidebar-bg) 11%, var(--gs-sidebar-bg) 23%, rgba(255,255,255,0.05) 24%, rgba(255,255,255,0.05) 30%, var(--gs-sidebar-bg) 31%, var(--gs-sidebar-bg) 43%, rgba(255,255,255,0.05) 44%, rgba(255,255,255,0.05) 50%, transparent 50%, transparent),
+    radial-gradient(circle at 100% 50%,  rgba(255,255,255,0.05) 5%, var(--gs-sidebar-bg) 6%, var(--gs-sidebar-bg) 15%, rgba(255,255,255,0.05) 16%, rgba(255,255,255,0.05) 20%, var(--gs-sidebar-bg) 21%, var(--gs-sidebar-bg) 30%, rgba(255,255,255,0.05) 31%, rgba(255,255,255,0.05) 35%, transparent 35%, transparent),
+    radial-gradient(circle at 0    50%,  rgba(255,255,255,0.05) 5%, var(--gs-sidebar-bg) 6%, var(--gs-sidebar-bg) 15%, rgba(255,255,255,0.05) 16%, rgba(255,255,255,0.05) 20%, var(--gs-sidebar-bg) 21%, var(--gs-sidebar-bg) 30%, rgba(255,255,255,0.05) 31%, rgba(255,255,255,0.05) 35%, transparent 35%, transparent);
+  background-size: 100px 50px;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -61,14 +215,50 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.1));
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   border: 3px solid transparent;
   background-clip: content-box;
 }
 
+[data-mantine-color-scheme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: light-dark(rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.2));
-  border: 3px solid transparent;
-  background-clip: content-box;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+[data-mantine-color-scheme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mantine-Loader-root[data-type="dots"] {
+  --loader-size: 24px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: auto !important;
+  height: auto !important;
+}
+
+.mantine-Loader-root[data-type="dots"] > span,
+.mantine-Loader-root[data-type="dots"] circle {
+  animation: dots-pulse 1.4s infinite ease-in-out both !important;
+  fill: currentColor !important;
+}
+
+.mantine-Loader-root[data-type="dots"] circle:nth-of-type(1) { animation-delay: -0.32s !important; }
+.mantine-Loader-root[data-type="dots"] circle:nth-of-type(2) { animation-delay: -0.16s !important; }
+
+@keyframes dots-pulse {
+  0%, 80%, 100% { 
+    transform: scale(0.3);
+    opacity: 0.3;
+  }
+  40% { 
+    transform: scale(1);
+    opacity: 1;
+  }
 }

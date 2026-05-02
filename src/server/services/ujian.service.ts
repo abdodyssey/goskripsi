@@ -86,10 +86,26 @@ const UJIAN_SELECT = {
 };
 
 export class UjianService {
-  async getAll(params: { skip?: number; take?: number } = {}) {
-    const { skip = 0, take = 10 } = params;
+  async getAll(
+    params: {
+      skip?: number;
+      take?: number;
+      prodiId?: number | null;
+      roles?: string[];
+      userId?: string;
+    } = {},
+  ) {
+    const { skip = 0, take = 10, prodiId, roles = [], userId } = params;
     try {
       const where: Prisma.UjianWhereInput = {};
+
+      // If user is not superadmin and has a prodiId, filter by mahasiswa's prodi
+      if (!roles.includes("superadmin") && prodiId) {
+        where.pendaftaranUjian = {
+          mahasiswa: { prodiId },
+        };
+      }
+
       const [list, total] = await Promise.all([
         prisma.ujian.findMany({
           where,
@@ -135,8 +151,8 @@ export class UjianService {
                     select: {
                       id: true,
                       peran: true,
-                      bobot: true
-                    }
+                      bobot: true,
+                    },
                   },
                 },
               },
@@ -166,8 +182,14 @@ export class UjianService {
     const where: Prisma.UjianWhereInput = {
       pendaftaranUjian: {
         mahasiswaId: Number(mahasiswaId),
-        ...(namaJenis ? { jenisUjian: { namaJenis: { contains: namaJenis, mode: 'insensitive' } } } : {})
-      }
+        ...(namaJenis
+          ? {
+              jenisUjian: {
+                namaJenis: { contains: namaJenis, mode: "insensitive" },
+              },
+            }
+          : {}),
+      },
     };
 
     const [list, total] = await Promise.all([
@@ -192,7 +214,9 @@ export class UjianService {
       data: {
         pendaftaranUjianId: Number(payload.pendaftaran_ujian_id),
         hariUjian: payload.hari_ujian,
-        jadwalUjian: payload.jadwal_ujian ? new Date(payload.jadwal_ujian) : null,
+        jadwalUjian: payload.jadwal_ujian
+          ? new Date(payload.jadwal_ujian)
+          : null,
         waktuMulai: payload.waktu_mulai,
         waktuSelesai: payload.waktu_selesai,
         ruanganId: payload.ruangan_id ? Number(payload.ruangan_id) : null,
@@ -204,15 +228,36 @@ export class UjianService {
   }
 
   async createScheduling(payload: any) {
+    const jadwalUjian = new Date(payload.jadwalUjian);
+    const waktuMulai = new Date(payload.waktuMulai);
+    const waktuSelesai = new Date(payload.waktuSelesai);
+    const ruanganId = Number(payload.ruanganId);
+    const dosenIds = payload.pengujiList
+      ? payload.pengujiList.map((p: any) => Number(p.dosenId))
+      : [];
+
+    const existingUjian = await prisma.ujian.findUnique({
+      where: { pendaftaranUjianId: Number(payload.pendaftaranUjianId) },
+    });
+
+    await this.checkConflicts(
+      jadwalUjian,
+      waktuMulai,
+      waktuSelesai,
+      ruanganId,
+      dosenIds,
+      existingUjian?.id,
+    );
+
     const result = await prisma.$transaction(async (tx) => {
       // 1. Create or Update Ujian record
       const ujianData = {
         pendaftaranUjianId: Number(payload.pendaftaranUjianId),
         hariUjian: payload.hariUjian,
-        jadwalUjian: new Date(payload.jadwalUjian),
-        waktuMulai: new Date(payload.waktuMulai),
-        waktuSelesai: new Date(payload.waktuSelesai),
-        ruanganId: Number(payload.ruanganId),
+        jadwalUjian,
+        waktuMulai,
+        waktuSelesai,
+        ruanganId,
         status: "dijadwalkan" as any,
       };
 
@@ -248,20 +293,87 @@ export class UjianService {
     return result;
   }
 
+  private async checkConflicts(
+    jadwalUjian: Date,
+    waktuMulai: Date,
+    waktuSelesai: Date,
+    ruanganId: number,
+    dosenIds: number[],
+    excludeUjianId?: number,
+  ) {
+    const startOfDay = new Date(jadwalUjian);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(jadwalUjian);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
+    const conflictingExams = await prisma.ujian.findMany({
+      where: {
+        jadwalUjian: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+        id: excludeUjianId ? { not: excludeUjianId } : undefined,
+      },
+      include: {
+        pengujiUjians: true,
+        pendaftaranUjian: {
+          include: { mahasiswa: { include: { user: true } } },
+        },
+      },
+    });
+
+    const isOverlap = (start1: Date, end1: Date, start2: Date, end2: Date) => {
+      const t1s = start1.getUTCHours() * 60 + start1.getUTCMinutes();
+      const t1e = end1.getUTCHours() * 60 + end1.getUTCMinutes();
+      const t2s = start2.getUTCHours() * 60 + start2.getUTCMinutes();
+      const t2e = end2.getUTCHours() * 60 + end2.getUTCMinutes();
+      return t1s < t2e && t1e > t2s;
+    };
+
+    const myMulai = new Date(waktuMulai);
+    const mySelesai = new Date(waktuSelesai);
+
+    for (const exam of conflictingExams) {
+      if (!exam.waktuMulai || !exam.waktuSelesai) continue;
+
+      if (isOverlap(myMulai, mySelesai, exam.waktuMulai, exam.waktuSelesai)) {
+        if (exam.ruanganId === ruanganId) {
+          throw new HttpError(
+            400,
+            `Ruangan bentrok. Ruangan ini sudah dipakai oleh mahasiswa ${exam.pendaftaranUjian?.mahasiswa?.user?.nama || "lain"}.`,
+          );
+        }
+
+        for (const p of exam.pengujiUjians) {
+          if (dosenIds.includes(p.dosenId)) {
+            const myDosen = await prisma.dosen.findUnique({
+              where: { id: p.dosenId },
+              include: { user: true },
+            });
+            throw new HttpError(
+              400,
+              `Jadwal bentrok. Dosen ${myDosen?.user?.nama || p.dosenId} sedang menguji mahasiswa ${exam.pendaftaranUjian?.mahasiswa?.user?.nama || "lain"} di waktu yang sama.`,
+            );
+          }
+        }
+      }
+    }
+  }
+
   private async sendSchedulingEmail(u: any) {
     if (u && u.pendaftaranUjian?.mahasiswa?.user?.email) {
       const m = u.pendaftaranUjian.mahasiswa;
-      
-      const tanggalStr = u.jadwalUjian 
-        ? new Date(u.jadwalUjian).toLocaleDateString('id-ID', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          }) 
+
+      const tanggalStr = u.jadwalUjian
+        ? new Date(u.jadwalUjian).toLocaleDateString("id-ID", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
         : "-";
-        
-      const waktuStr = `${u.waktuMulai ? new Date(u.waktuMulai).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : "-"} - ${u.waktuSelesai ? new Date(u.waktuSelesai).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : "-"}`;
+
+      const waktuStr = `${u.waktuMulai ? new Date(u.waktuMulai).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-"} - ${u.waktuSelesai ? new Date(u.waktuSelesai).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-"}`;
 
       await mailService.sendExamScheduledNotification({
         studentEmail: m.user.email,
@@ -278,11 +390,13 @@ export class UjianService {
 
   async update(id: string, payload: UpdateUjianInput) {
     const dataUpdate: any = { ...payload };
-    if (payload.jadwal_ujian) dataUpdate.jadwalUjian = new Date(payload.jadwal_ujian);
+    if (payload.jadwal_ujian)
+      dataUpdate.jadwalUjian = new Date(payload.jadwal_ujian);
     if (payload.pendaftaran_ujian_id)
       dataUpdate.pendaftaranUjianId = Number(payload.pendaftaran_ujian_id);
     if (payload.ruangan_id) dataUpdate.ruanganId = Number(payload.ruangan_id);
-    if (payload.keputusan_id) dataUpdate.keputusanId = Number(payload.keputusan_id);
+    if (payload.keputusan_id)
+      dataUpdate.keputusanId = Number(payload.keputusan_id);
 
     const result = await prisma.ujian.update({
       where: { id: Number(id) },
@@ -311,66 +425,75 @@ export class UjianService {
       where: { id: Number(id) },
       include: {
         pendaftaranUjian: {
-          select: { jenisUjianId: true }
+          select: { jenisUjianId: true },
         },
         penilaians: {
           include: {
             dosen: { include: { user: { select: { nama: true } } } },
             komponenPenilaian: {
-               include: { bobotKomponenPerans: true }
-            }
-          }
+              include: { bobotKomponenPerans: true },
+            },
+          },
         },
         pengujiUjians: {
           include: {
-            dosen: { include: { user: { select: { nama: true } } } }
-          }
-        }
-      }
+            dosen: { include: { user: { select: { nama: true } } } },
+          },
+        },
+      },
     });
 
     if (!ujian) throw new HttpError(404, "Ujian tidak ditemukan");
 
-    const myPengujiRecord = ujian.pengujiUjians.find(p => p.dosenId === uId);
-    if (!myPengujiRecord) throw new HttpError(403, "Anda tidak terdaftar sebagai penguji");
+    const myPengujiRecord = ujian.pengujiUjians.find((p) => p.dosenId === uId);
+    if (!myPengujiRecord)
+      throw new HttpError(403, "Anda tidak terdaftar sebagai penguji");
 
     const components = await prisma.komponenPenilaian.findMany({
-      where: { 
+      where: {
         jenisUjianId: ujian.pendaftaranUjian.jenisUjianId,
-        bobotKomponenPerans: { some: { peran: myPengujiRecord.peran, bobot: { gt: 0 } } }
+        bobotKomponenPerans: {
+          some: { peran: myPengujiRecord.peran, bobot: { gt: 0 } },
+        },
       },
-      include: { 
+      include: {
         bobotKomponenPerans: { where: { peran: myPengujiRecord.peran } },
         penilaians: {
-          where: { dosenId: uId, ujianId: Number(id) }
-        }
+          where: { dosenId: uId, ujianId: Number(id) },
+        },
       },
-      orderBy: { id: 'asc' }
+      orderBy: { id: "asc" },
     });
-    
+
     return {
-      sudahSubmit: components.length > 0 && components.every(c => c.penilaians.length > 0 && c.penilaians[0].sudahSubmit),
-      components: components.map(c => ({
+      sudahSubmit:
+        components.length > 0 &&
+        components.every(
+          (c) => c.penilaians.length > 0 && c.penilaians[0].sudahSubmit,
+        ),
+      components: components.map((c) => ({
         id: c.id,
         kriteria: c.kriteria,
         penilaians: c.penilaians,
-        bobotKomponenPerans: c.bobotKomponenPerans
+        bobotKomponenPerans: c.bobotKomponenPerans,
       })),
-      allScores: ujian.penilaians.map(p => ({
+      allScores: ujian.penilaians.map((p) => ({
         dosenId: p.dosenId,
         komponenPenilaianId: p.komponenPenilaianId,
         nilai: Number(p.nilai),
         sudahSubmit: p.sudahSubmit,
         dosen: p.dosen,
-        komponenPenilaian: p.komponenPenilaian
+        komponenPenilaian: p.komponenPenilaian,
       })),
-      penguji: myPengujiRecord ? {
-        dosenId: myPengujiRecord.dosenId,
-        dosen: myPengujiRecord.dosen
-      } : null,
+      penguji: myPengujiRecord
+        ? {
+            dosenId: myPengujiRecord.dosenId,
+            dosen: myPengujiRecord.dosen,
+          }
+        : null,
       ujian: {
-        nilaiDifinalisasi: ujian.nilaiDifinalisasi
-      }
+        nilaiDifinalisasi: ujian.nilaiDifinalisasi,
+      },
     };
   }
 
@@ -384,15 +507,15 @@ export class UjianService {
         ujian: {
           include: {
             pengujiUjians: {
-              include: { dosen: { include: { user: true } } }
-            }
-          }
-        }
-      }
+              include: { dosen: { include: { user: true } } },
+            },
+          },
+        },
+      },
     });
 
     if (!pendaftaran) throw new HttpError(404, "Pendaftaran tidak ditemukan");
-    
+
     const [rooms, lecturers] = await Promise.all([
       prisma.ruangan.findMany({ orderBy: { namaRuangan: "asc" } }),
       prisma.dosen.findMany({
@@ -410,7 +533,10 @@ export class UjianService {
 
     let defaultExaminers: { dosenId: number | string; peran: string }[] = [];
 
-    if (pendaftaran.ujian?.pengujiUjians && pendaftaran.ujian.pengujiUjians.length > 0) {
+    if (
+      pendaftaran.ujian?.pengujiUjians &&
+      pendaftaran.ujian.pengujiUjians.length > 0
+    ) {
       defaultExaminers = pendaftaran.ujian.pengujiUjians.map((p) => ({
         dosenId: p.dosenId,
         peran: p.peran,
@@ -445,7 +571,7 @@ export class UjianService {
 
   async getKeputusanOptions() {
     return await prisma.keputusan.findMany({
-      orderBy: { id: 'asc' }
+      orderBy: { id: "asc" },
     });
   }
 
@@ -455,7 +581,9 @@ export class UjianService {
         where: { id: ujianId },
         include: {
           pengujiUjians: { include: { dosen: true } },
-          pendaftaranUjian: { include: { jenisUjian: { include: { syarats: true } } } },
+          pendaftaranUjian: {
+            include: { jenisUjian: { include: { syarats: true } } },
+          },
         },
       });
 
@@ -478,8 +606,10 @@ export class UjianService {
       for (const px of ujian.pengujiUjians) {
         let dosenTotalScore = 0;
         for (const kp of komponenPenilaians) {
-          if (kp.kriteria.toLowerCase().includes("bimbingan") && 
-             (px.peran === "penguji_1" || px.peran === "penguji_2")) {
+          if (
+            kp.kriteria.toLowerCase().includes("bimbingan") &&
+            (px.peran === "penguji_1" || px.peran === "penguji_2")
+          ) {
             continue;
           }
 
@@ -487,7 +617,8 @@ export class UjianService {
           if (!bp) continue;
 
           const p = penilaians.find(
-            (val) => val.dosenId === px.dosenId && val.komponenPenilaianId === kp.id
+            (val) =>
+              val.dosenId === px.dosenId && val.komponenPenilaianId === kp.id,
           );
           const score = p ? Number(p.nilai) : 0;
           dosenTotalScore += score * (Number(bp.bobot) / 100);
@@ -496,7 +627,7 @@ export class UjianService {
       }
 
       const finalScore = totalWeightedScore / presentDosenIds.length;
-      
+
       let grade = "E";
       let hasil: "lulus" | "tidak_lulus" = "tidak_lulus";
 
@@ -524,28 +655,44 @@ export class UjianService {
     if (!u) return null;
     return {
       ...u,
-      pendaftaranUjian: u.pendaftaranUjian ? {
-        ...u.pendaftaranUjian,
-        mahasiswa: u.pendaftaranUjian.mahasiswa ? {
-          ...u.pendaftaranUjian.mahasiswa,
-          user: u.pendaftaranUjian.mahasiswa.user
-        } : null,
-        jenisUjian: u.pendaftaranUjian.jenisUjian,
-        rancanganPenelitian: u.pendaftaranUjian.rancanganPenelitian
-      } : null,
-      pendaftaran: u.pendaftaranUjian ? {
-        id: u.pendaftaranUjian.id,
-        mahasiswa_id: u.pendaftaranUjian.mahasiswaId,
-        mahasiswa: u.pendaftaranUjian.mahasiswa ? {
-          id: u.pendaftaranUjian.mahasiswa.id,
-          nim: u.pendaftaranUjian.mahasiswa.nim,
-          nama: u.pendaftaranUjian.mahasiswa.user?.nama,
-        } : null,
-        jenis_ujian: u.pendaftaranUjian.jenisUjian?.namaJenis,
-        judul: u.pendaftaranUjian.rancanganPenelitian?.judulPenelitian,
-      } : null,
-      ruangan: u.ruangan ? { id: u.ruangan.id, nama_ruangan: u.ruangan.namaRuangan, namaRuangan: u.ruangan.namaRuangan } : null,
-      keputusan: u.keputusan ? { id: u.keputusan.id, nama_keputusan: u.keputusan.namaKeputusan } : null,
+      pendaftaranUjian: u.pendaftaranUjian
+        ? {
+            ...u.pendaftaranUjian,
+            mahasiswa: u.pendaftaranUjian.mahasiswa
+              ? {
+                  ...u.pendaftaranUjian.mahasiswa,
+                  user: u.pendaftaranUjian.mahasiswa.user,
+                }
+              : null,
+            jenisUjian: u.pendaftaranUjian.jenisUjian,
+            rancanganPenelitian: u.pendaftaranUjian.rancanganPenelitian,
+          }
+        : null,
+      pendaftaran: u.pendaftaranUjian
+        ? {
+            id: u.pendaftaranUjian.id,
+            mahasiswa_id: u.pendaftaranUjian.mahasiswaId,
+            mahasiswa: u.pendaftaranUjian.mahasiswa
+              ? {
+                  id: u.pendaftaranUjian.mahasiswa.id,
+                  nim: u.pendaftaranUjian.mahasiswa.nim,
+                  nama: u.pendaftaranUjian.mahasiswa.user?.nama,
+                }
+              : null,
+            jenis_ujian: u.pendaftaranUjian.jenisUjian?.namaJenis,
+            judul: u.pendaftaranUjian.rancanganPenelitian?.judulPenelitian,
+          }
+        : null,
+      ruangan: u.ruangan
+        ? {
+            id: u.ruangan.id,
+            nama_ruangan: u.ruangan.namaRuangan,
+            namaRuangan: u.ruangan.namaRuangan,
+          }
+        : null,
+      keputusan: u.keputusan
+        ? { id: u.keputusan.id, nama_keputusan: u.keputusan.namaKeputusan }
+        : null,
       nilai_akhir: u.nilaiAkhir ? Number(u.nilaiAkhir) : 0,
       nilai_huruf: u.nilaiHuruf,
       nilai_difinalisasi: u.nilaiDifinalisasi,
@@ -626,7 +773,9 @@ export class UjianService {
     const components = await prisma.komponenPenilaian.findMany({
       where: {
         jenisUjianId: ujian.pendaftaranUjian.jenisUjianId,
-        bobotKomponenPerans: { some: { peran: penguji.peran, bobot: { gt: 0 } } },
+        bobotKomponenPerans: {
+          some: { peran: penguji.peran, bobot: { gt: 0 } },
+        },
       },
       include: {
         bobotKomponenPerans: { where: { peran: penguji.peran } },
@@ -717,26 +866,31 @@ export class UjianService {
 
         const targetDosenId =
           p.dosenId && p.dosenId !== userId && isKetua ? p.dosenId : userId;
-          
+
         // Re-check role of targetDosenId if not the same as userId
         let targetRole = me.peran;
         if (targetDosenId !== userId) {
-          const targetPenguji = await tx.pengujiUjian.findFirst({ where: { ujianId, dosenId: targetDosenId } });
+          const targetPenguji = await tx.pengujiUjian.findFirst({
+            where: { ujianId, dosenId: targetDosenId },
+          });
           targetRole = targetPenguji?.peran || me.peran;
         }
 
         // FILTER: Penguji 1 dan 2 tidak menilai Bimbingan
-        const comp = components.find(c => c.id === p.komponenPenilaianId);
-        if (comp?.kriteria === "Bimbingan" && (targetRole === "penguji_1" || targetRole === "penguji_2")) {
+        const comp = components.find((c) => c.id === p.komponenPenilaianId);
+        if (
+          comp?.kriteria === "Bimbingan" &&
+          (targetRole === "penguji_1" || targetRole === "penguji_2")
+        ) {
           // If already exists, delete it. If not, just skip.
           await tx.penilaian.deleteMany({
             where: {
               ujianId,
               dosenId: targetDosenId,
-              komponenPenilaianId: p.komponenPenilaianId
-            }
+              komponenPenilaianId: p.komponenPenilaianId,
+            },
           });
-          continue; 
+          continue;
         }
 
         await tx.penilaian.upsert({
@@ -808,10 +962,12 @@ export class UjianService {
 
     for (const p of penilaians) {
       const peran = rolesMap.get(p.dosenId);
-      
-      if (p.komponenPenilaian.kriteria.toLowerCase().includes("bimbingan") && 
-         (peran === "penguji_1" || peran === "penguji_2")) {
-         continue;
+
+      if (
+        p.komponenPenilaian.kriteria.toLowerCase().includes("bimbingan") &&
+        (peran === "penguji_1" || peran === "penguji_2")
+      ) {
+        continue;
       }
 
       const bobotData = p.komponenPenilaian.bobotKomponenPerans.find(

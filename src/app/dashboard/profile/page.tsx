@@ -106,7 +106,7 @@ export default function ProfilePage() {
       notifications.show({
         title: "Berhasil",
         message: "Profil berhasil diperbarui",
-        color: "green",
+        color: "var(--gs-success)",
       });
       close();
     } catch (error: unknown) {
@@ -117,7 +117,7 @@ export default function ProfilePage() {
       notifications.show({
         title: "Gagal",
         message: message,
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -127,7 +127,7 @@ export default function ProfilePage() {
       notifications.show({
         title: "Gagal",
         message: "Konfirmasi kata sandi tidak cocok",
-        color: "red",
+        color: "var(--gs-danger)",
       });
       return;
     }
@@ -180,8 +180,8 @@ export default function ProfilePage() {
         <Paper withBorder p="md" radius="md">
           <Group justify="space-between" align="flex-start">
             <Group align="center" gap="lg">
-              <Avatar size={80} radius="xl" color="indigo" variant="light">
-                <IconUser size={40} />
+              <Avatar size={80} radius="xl" color="var(--gs-primary)" variant="light" className="bg-gs-primary/5">
+                <IconUser size={40} stroke={1.5} className="text-gs-primary" />
               </Avatar>
               <Stack gap={0}>
                 <Title order={3}>{user?.nama}</Title>
@@ -190,64 +190,67 @@ export default function ProfilePage() {
                 </Text>
                 <Group gap={6} mt={8}>
                   {roles.map((role: string) => (
-                    <Badge key={role} variant="filled" color="indigo" size="xs" radius="sm">
+                    <Badge key={role} variant="filled" className="bg-gs-primary" size="xs" radius="sm" fw={700}>
                       {role.toUpperCase()}
                     </Badge>
                   ))}
                   <Badge
-                    variant="dot"
-                    color={displayStatus === "aktif" ? "green" : "gray"}
+                    variant="outline"
+                    color={displayStatus === "aktif" ? "var(--gs-success)" : "var(--gs-text-muted)"}
                     size="xs"
+                    fw={700}
                   >
-                    {displayStatus}
+                    {displayStatus.toUpperCase()}
                   </Badge>
                 </Group>
               </Stack>
             </Group>
 
             <Button
-              variant="light"
-              color="indigo"
+              variant="filled"
+              className="bg-gs-primary hover:bg-gs-primary-hover"
               size="xs"
               onClick={handleStartEditing}
-              leftSection={<IconEdit size={14} />}
+              leftSection={<IconEdit size={14} stroke={2} />}
+              radius="md"
+              fw={700}
             >
-              Edit Profil
+              EDIT PROFIL
             </Button>
           </Group>
         </Paper>
 
         <Paper withBorder p="md" radius="md">
-          <Text fw={800} size="sm" mb="md" tt="uppercase" lts={1} c="indigo">
+          <Text fw={700} size="xs" mb="md" tt="uppercase" lts={1} className="text-gs-text-primary">
             Informasi Personal
           </Text>
           
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} verticalSpacing="md" spacing="xl">
             <Stack gap={2}>
-              <Text fw={700} size="xs" c="dimmed" tt="uppercase">
+              <Text fw={600} size="xs" c="dimmed" tt="uppercase">
                 {isDosenOrKaprodi ? "NIP" : "NIM"}
               </Text>
               <Text size="sm" fw={600}>{nimNip}</Text>
             </Stack>
 
             <Stack gap={2}>
-              <Text fw={700} size="xs" c="dimmed" tt="uppercase">Program Studi</Text>
+              <Text fw={600} size="xs" c="dimmed" tt="uppercase">Program Studi</Text>
               <Text size="sm" fw={600}>{displayProdi}</Text>
             </Stack>
 
             <Stack gap={2}>
-              <Text fw={700} size="xs" c="dimmed" tt="uppercase">Email</Text>
+              <Text fw={600} size="xs" c="dimmed" tt="uppercase">Email</Text>
               <Text size="sm" fw={600}>{user?.email || "-"}</Text>
             </Stack>
 
             <Stack gap={2}>
-              <Text fw={700} size="xs" c="dimmed" tt="uppercase">Nomor HP</Text>
+              <Text fw={600} size="xs" c="dimmed" tt="uppercase">Nomor HP</Text>
               <Text size="sm" fw={600}>{user?.no_hp || "-"}</Text>
             </Stack>
 
             <Stack gap={12} style={{ gridColumn: "span 2" }}>
               <Stack gap={2}>
-                <Text fw={700} size="xs" c="dimmed" tt="uppercase">Alamat</Text>
+                <Text fw={600} size="xs" c="dimmed" tt="uppercase">Alamat</Text>
                 <Text size="sm" fw={600}>{user?.alamat || "-"}</Text>
               </Stack>
             </Stack>
@@ -258,30 +261,30 @@ export default function ProfilePage() {
               <Divider my="md" variant="dashed" />
               <SimpleGrid cols={{ base: 2, md: 4 }} spacing="lg">
                 <Stack gap={2}>
-                  <Text fw={700} size="xs" c="dimmed" tt="uppercase">Angkatan</Text>
+                  <Text fw={600} size="xs" c="dimmed" tt="uppercase">Angkatan</Text>
                   <Text size="sm" fw={600}>{user?.angkatan || "-"}</Text>
                 </Stack>
                 <Stack gap={2}>
-                  <Text fw={700} size="xs" c="dimmed" tt="uppercase">Semester</Text>
+                  <Text fw={600} size="xs" c="dimmed" tt="uppercase">Semester</Text>
                   <Text size="sm" fw={600}>{user?.semester || "-"}</Text>
                 </Stack>
                 <Stack gap={2}>
-                  <Text fw={700} size="xs" c="dimmed" tt="uppercase">IPK</Text>
+                  <Text fw={600} size="xs" c="dimmed" tt="uppercase">IPK</Text>
                   <Text size="sm" fw={600}>{user?.ipk || "-"}</Text>
                 </Stack>
                 <Stack gap={2}>
-                  <Text fw={700} size="xs" c="dimmed" tt="uppercase">Peminatan</Text>
+                  <Text fw={600} size="xs" c="dimmed" tt="uppercase">Peminatan</Text>
                   <Text size="sm" fw={600}>{user?.peminatan?.nama_peminatan || "-"}</Text>
                 </Stack>
               </SimpleGrid>
               
               <SimpleGrid cols={{ base: 1, md: 2 }} mt="md" spacing="lg">
                 <Stack gap={2}>
-                  <Text fw={700} size="xs" c="dimmed" tt="uppercase">Pembimbing Akademik</Text>
+                  <Text fw={600} size="xs" c="dimmed" tt="uppercase">Pembimbing Akademik</Text>
                   <Text size="sm" fw={600}>{user?.dosen_pa?.nama || "-"}</Text>
                 </Stack>
                 <Stack gap={2}>
-                  <Text fw={700} size="xs" c="dimmed" tt="uppercase">Pembimbing Skripsi</Text>
+                  <Text fw={600} size="xs" c="dimmed" tt="uppercase">Pembimbing Skripsi</Text>
                   <Text size="sm" fw={600}>
                     {user?.pembimbing_1?.nama || "-"} / {user?.pembimbing_2?.nama || "-"}
                   </Text>
@@ -295,11 +298,11 @@ export default function ProfilePage() {
               <Divider my="md" variant="dashed" />
               <SimpleGrid cols={{ base: 2, md: 3 }} spacing="lg">
                 <Stack gap={2}>
-                  <Text fw={700} size="xs" c="dimmed" tt="uppercase">NIDN</Text>
+                  <Text fw={600} size="xs" c="dimmed" tt="uppercase">NIDN</Text>
                   <Text size="sm" fw={600}>{user?.nidn || "-"}</Text>
                 </Stack>
                 <Stack gap={2}>
-                  <Text fw={700} size="xs" c="dimmed" tt="uppercase">Jabatan</Text>
+                  <Text fw={600} size="xs" c="dimmed" tt="uppercase">Jabatan</Text>
                   <Text size="sm" fw={600}>{user?.jabatan || "-"}</Text>
                 </Stack>
               </SimpleGrid>
@@ -310,7 +313,11 @@ export default function ProfilePage() {
         <Modal
           opened={opened}
           onClose={close}
-          title="Edit Profil"
+          title={
+            <Text fw={800} size="lg" className="text-gs-text-primary tracking-tight">
+              EDIT PROFIL
+            </Text>
+          }
           size="lg"
           radius="md"
         >
@@ -362,23 +369,25 @@ export default function ProfilePage() {
             )}
 
             <Group justify="flex-end" mt="md">
-              <Button variant="light" color="gray" onClick={close}>
-                Batal
+              <Button variant="subtle" color="var(--gs-text-secondary)" onClick={close} radius="md" fw={700}>
+                BATAL
               </Button>
               <Button
-                color="indigo"
+                className="bg-gs-primary hover:bg-gs-primary-hover"
                 onClick={handleUpdateProfile}
                 loading={isUpdatingProfile}
-                leftSection={<IconCheck size={16} />}
+                leftSection={<IconCheck size={16} stroke={2} />}
+                radius="md"
+                fw={700}
               >
-                Simpan Perubahan
+                SIMPAN PERUBAHAN
               </Button>
             </Group>
           </Stack>
         </Modal>
 
-        <Paper withBorder p="md" radius="md">
-          <Text fw={800} size="sm" mb="md" tt="uppercase" lts={1} c="indigo">
+        <Paper id="keamanan" withBorder p="md" radius="md" style={{ scrollMarginTop: "100px" }}>
+          <Text fw={700} size="xs" mb="md" tt="uppercase" lts={1} className="text-gs-text-primary">
             Keamanan Akun
           </Text>
           <Grid gutter="md">
@@ -412,13 +421,15 @@ export default function ProfilePage() {
             <Grid.Col span={12}>
               <Button
                 variant="filled"
-                color="indigo"
+                className="bg-gs-primary hover:bg-gs-primary-hover"
                 size="xs"
                 onClick={handleUpdatePassword}
                 loading={isChangingPassword}
-                leftSection={<IconCheck size={14} />}
+                leftSection={<IconCheck size={14} stroke={2} />}
+                radius="md"
+                fw={700}
               >
-                Ganti Kata Sandi
+                GANTI KATA SANDI
               </Button>
             </Grid.Col>
           </Grid>

@@ -59,12 +59,17 @@ import {
   IconCalendar,
   IconBooks,
   IconMail,
+  IconAdjustments,
+  IconTarget,
+  IconCertificate,
+  IconClipboardList,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader/PageHeader";
 import { StatCard } from "@/components/ui/stat-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DataTable } from "@/components/ui/data-table";
+import { useQuery } from "@tanstack/react-query";
 
 interface RanpelSubmission {
   id: string | number;
@@ -121,13 +126,13 @@ function SectionTitle({
 }) {
   return (
     <Group gap="xs" mb="lg">
-      <ThemeIcon variant="light" color="indigo" size="md" radius="md">
-        <Icon size={18} />
+      <ThemeIcon variant="light" color="dark" size="md" radius="md" className="bg-gs-primary/5">
+        <Icon size={18} className="text-gs-primary" />
       </ThemeIcon>
-      <Text size="sm" fw={800} tt="uppercase" lts={1.5} c="indigo.9" className="dark:text-indigo-2">
+      <Text size="xs" fw={700} tt="uppercase" lts={1.5} className="text-gs-text-primary">
         {title}
       </Text>
-      <Box style={{ flex: 1, height: 1, backgroundColor: "var(--mantine-color-default-border)", opacity: 0.5 }} />
+      <Box style={{ flex: 1, height: 1, backgroundColor: "var(--gs-border)", opacity: 0.5 }} />
     </Group>
   );
 }
@@ -154,8 +159,68 @@ export default function DashboardPage() {
     (user as { id?: string })?.id || "",
   );
 
+  const isAdmin = roles.includes("admin");
+  const isSuperAdmin = roles.includes("superadmin");
+
+  // Fetch Users for Admin Stats
+  const { data: usersResponse } = useQuery({
+    queryKey: ["admin-users-list"],
+    queryFn: async () => {
+      const res = await apiClient.get("/users?limit=5000");
+      return res.data;
+    },
+    enabled: isAuthenticated && (isAdmin || isSuperAdmin),
+  });
+
   useMantineColorScheme();
   const isMobile = useMediaQuery("(max-width: 48em)");
+
+  const userProdiId = user?.prodi_id;
+  const isSuperUser = roles.includes("superadmin") || roles.includes("admin");
+
+  // Filtered Datasets
+  const filteredMahasiswa = useMemo(() => {
+    const list = (mahasiswaList as Mahasiswa[]) || [];
+    if (isSuperUser || !userProdiId) return list;
+    return list.filter(m => Number(m.prodi_id || m.prodiId) === Number(userProdiId));
+  }, [mahasiswaList, userProdiId, isSuperUser]);
+
+  const filteredDosens = useMemo(() => {
+    const list = (dosensData as any[]) || [];
+    if (isSuperUser || !userProdiId) return list;
+    return list.filter(d => Number(d.prodi_id || d.prodiId) === Number(userProdiId));
+  }, [dosensData, userProdiId, isSuperUser]);
+
+  const filteredPengajuan = useMemo(() => {
+    const list = (pengajuanList as unknown as RanpelSubmission[]) || [];
+    if (isSuperUser || !userProdiId) return list;
+    return list.filter(p => {
+      const mhsProdi = p.mahasiswa as any;
+      const id = mhsProdi?.prodi_id || mhsProdi?.prodiId;
+      return Number(id) === Number(userProdiId);
+    });
+  }, [pengajuanList, userProdiId, isSuperUser]);
+
+  const filteredPendaftaran = useMemo(() => {
+    const baseList = (roles.includes("mahasiswa") ? studentPendaftaranList : pendaftaranList) as unknown as PendaftaranUjian[];
+    const list = baseList || [];
+    if (isSuperUser || !userProdiId || roles.includes("mahasiswa")) return list;
+    return list.filter(p => {
+      const mhsProdi = p.mahasiswa as any;
+      const id = mhsProdi?.prodi_id || mhsProdi?.prodiId;
+      return Number(id) === Number(userProdiId);
+    });
+  }, [pendaftaranList, studentPendaftaranList, roles, userProdiId, isSuperUser]);
+
+  const filteredAllUjian = useMemo(() => {
+    const list = (allUjianData?.data as Ujian[]) || [];
+    if (isSuperUser || !userProdiId) return list;
+    return list.filter(u => {
+      const mhsProdi = u.pendaftaranUjian?.mahasiswa as any;
+      const id = mhsProdi?.prodi_id || mhsProdi?.prodiId;
+      return Number(id) === Number(userProdiId);
+    });
+  }, [allUjianData, userProdiId, isSuperUser]);
 
   // Groups students by batch and their progress
   const progressData = useMemo(() => {
@@ -165,8 +230,8 @@ export default function DashboardPage() {
     > = {};
     const nimToAngkatan: Record<string, string> = {};
 
-    if (Array.isArray(mahasiswaList)) {
-      (mahasiswaList as Mahasiswa[]).forEach((m) => {
+    if (Array.isArray(filteredMahasiswa)) {
+      filteredMahasiswa.forEach((m) => {
         const batch = m.angkatan || "Lainnya";
         if (m.nim) nimToAngkatan[m.nim] = batch;
 
@@ -177,8 +242,8 @@ export default function DashboardPage() {
       });
     }
 
-    if (Array.isArray(pendaftaranList)) {
-      (pendaftaranList as unknown as PendaftaranUjian[]).forEach((p) => {
+    if (Array.isArray(filteredPendaftaran)) {
+      filteredPendaftaran.forEach((p) => {
         const nim = p.mahasiswa?.nim;
         const batch = nim ? nimToAngkatan[nim] : null;
 
@@ -210,11 +275,8 @@ export default function DashboardPage() {
   const [dosenChartRange, setDosenChartRange] = useState("30d");
   const [selectedExam, setSelectedExam] = useState<string>("all");
 
-  const pengajuanArray = useMemo(() => (pengajuanList as unknown as RanpelSubmission[]) || [], [pengajuanList]);
-  const pendaftaranArray = useMemo(() => 
-    ((roles.includes("mahasiswa") ? studentPendaftaranList : pendaftaranList) as unknown as PendaftaranUjian[]) || [], 
-    [roles, studentPendaftaranList, pendaftaranList]
-  );
+  const pengajuanArray = filteredPengajuan;
+  const pendaftaranArray = filteredPendaftaran;
 
   // Lecturer (Dosen PA) Specific Stats
   const dosenSubmissionsTrend = useMemo(() => {
@@ -264,7 +326,7 @@ export default function DashboardPage() {
     const filteredPengajuan = pengajuanArray;
     
     // Filter students assigned to this lecturer
-    const myStudents = (mahasiswaList as Mahasiswa[] || []).filter(m => {
+    const myStudents = filteredMahasiswa.filter(m => {
       const getDosenId = (d: unknown) => (typeof d === "object" && d !== null ? (d as {id: number}).id : d as number);
       const paId = getDosenId(m?.dosen_pa) || m?.dosenPa?.id;
       const p1Id = getDosenId(m?.pembimbing_1) || m?.pembimbing1?.id;
@@ -313,18 +375,38 @@ export default function DashboardPage() {
     };
   }, [roles, user?.id, pengajuanArray, mahasiswaList, pendaftaranArray, selectedExam]);
 
+  // Admin User Stats
+  const userStats = useMemo(() => {
+    const users = (usersResponse?.data || []) as any[];
+    return {
+      total: users.length,
+      mahasiswa: users.filter(u => String(u.role).toLowerCase() === "mahasiswa").length,
+      dosen: users.filter(u => String(u.role).toLowerCase() === "dosen").length,
+      admin: users.filter(u => ["admin", "superadmin", "admin_prodi"].includes(String(u.role).toLowerCase())).length,
+      others: users.filter(u => ["kaprodi", "sekprodi"].includes(String(u.role).toLowerCase())).length,
+    };
+  }, [usersResponse]);
+
+  const examResultStats = useMemo(() => {
+    const exams = filteredAllUjian;
+    const lulus = exams.filter(u => u.nilaiDifinalisasi && (u.pendaftaranUjian?.ujian?.hasil || "").toLowerCase() === "lulus").length;
+    const tidakLulus = exams.filter(u => u.nilaiDifinalisasi && (u.pendaftaranUjian?.ujian?.hasil || "").toLowerCase() === "tidak lulus").length;
+    return { lulus, tidakLulus };
+  }, [filteredAllUjian]);
+
   if (!isAuthenticated || !userResponse || !user) return null;
 
   const isMahasiswa = roles.includes("mahasiswa");
   const isDosen = roles.includes("dosen");
   const isKaprodi = roles.includes("kaprodi");
+  const isSekprodi = roles.includes("sekprodi");
   const isAdminProdi = roles.includes("admin_prodi");
 
+
+
   // Calculate Kaprodi Stats
-  const totalMahasiswa = Array.isArray(mahasiswaList)
-    ? mahasiswaList.length
-    : 0;
-  const totalDosen = (dosensData?.data as unknown[])?.length || 0;
+  const totalMahasiswa = filteredMahasiswa.length;
+  const totalDosen = filteredDosens.length;
 
   const ranpelDiterimaCount = pengajuanArray.filter(
     (p) => p.status === "diterima",
@@ -360,7 +442,7 @@ export default function DashboardPage() {
       countByJenis("munaqasyah"),
   };
 
-  const upcomingUjians = (allUjianData?.data as Ujian[])
+  const upcomingUjians = filteredAllUjian
     ?.filter((u) => new Date(u.tanggalUjian) >= new Date())
     .sort(
       (a, b) =>
@@ -375,7 +457,7 @@ export default function DashboardPage() {
       ? (studentPengajuan[0] as unknown as RanpelSubmission)
       : null;
 
-  const finalizedUjianCount = (allUjianData?.data as Ujian[])?.filter(
+  const finalizedUjianCount = filteredAllUjian?.filter(
     (u) => u.nilaiDifinalisasi,
   ).length;
 
@@ -389,16 +471,17 @@ export default function DashboardPage() {
         rightSection={
           <Group gap="xs" wrap="nowrap">
             <Stack gap={0} align="flex-end" visibleFrom="sm">
-              <Text size="xs" fw={700} c="indigo.7">Selamat Datang,</Text>
-              <Text size="sm" fw={800} truncate maw={150}>{user.nama}</Text>
+              <Text size="xs" fw={500} className="text-gs-text-secondary">Selamat Datang,</Text>
+              <Text size="sm" fw={700} truncate maw={150} className="text-gs-text-primary">{user.nama}</Text>
             </Stack>
             <Badge 
-              variant="light" 
-              color="indigo" 
+              variant="outline" 
+              color="var(--gs-border-strong)" 
               radius="sm" 
               size="lg"
               tt="uppercase"
-              fw={800}
+              fw={700}
+              className="text-gs-text-primary"
             >
               {(roles[roles.length - 1] || "User")}
             </Badge>
@@ -411,18 +494,24 @@ export default function DashboardPage() {
         {isKaprodi && (
           <Box>
             {/* Overview Section */}
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mb="xl">
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" mb="xl">
               <StatCard
                 title="Total Mahasiswa"
                 value={totalMahasiswa}
                 icon={IconUsers}
-                color="indigo"
+                color="dark"
               />
               <StatCard
                 title="Total Dosen"
                 value={totalDosen}
                 icon={IconUserCheck}
-                color="blue"
+                color="dark"
+              />
+              <StatCard
+                title="Total Ranpel"
+                value={pengajuanArray.length}
+                icon={IconFileText}
+                color="dark"
               />
             </SimpleGrid>
 
@@ -446,17 +535,17 @@ export default function DashboardPage() {
                       {
                         name: "proposal",
                         label: "Lulus Proposal",
-                        color: "blue.5",
+                        color: "gray.7",
                       },
                       {
                         name: "hasil",
                         label: "Lulus Hasil",
-                        color: "teal.5",
+                        color: "gray.9",
                       },
                       {
                         name: "skripsi",
                         label: "Lulus Skripsi",
-                        color: "indigo.6",
+                        color: "dark.9",
                       },
                     ]}
                     tickLine="y"
@@ -481,14 +570,14 @@ export default function DashboardPage() {
                     <Paper p="md" withBorder radius="md">
                       <Group justify="space-between">
                         <Stack gap={2}>
-                          <Text size="xs" fw={700} c="dimmed">
+                          <Text size="xs" fw={600} c="dimmed">
                             MENUNGGU VERIFIKASI
                           </Text>
-                          <Text fw={900} fz="xl">
+                          <Text className="gs-stat">
                             {ranpelDiverifikasiCount}
                           </Text>
                         </Stack>
-                        <ThemeIcon color="orange" variant="light" size="xl">
+                        <ThemeIcon color="dark" variant="light" size="xl">
                           <IconClipboardCheck size={24} />
                         </ThemeIcon>
                       </Group>
@@ -496,14 +585,14 @@ export default function DashboardPage() {
                     <Paper p="md" withBorder radius="md">
                       <Group justify="space-between">
                         <Stack gap={2}>
-                          <Text size="xs" fw={700} c="dimmed">
+                          <Text size="xs" fw={600} c="dimmed">
                             TELAH DISETUJUI
                           </Text>
-                          <Text fw={900} fz="xl">
+                          <Text className="gs-stat">
                             {ranpelDiterimaCount}
                           </Text>
                         </Stack>
-                        <ThemeIcon color="teal" variant="light" size="xl">
+                        <ThemeIcon color="dark" variant="light" size="xl">
                           <IconCheck size={24} />
                         </ThemeIcon>
                       </Group>
@@ -522,7 +611,7 @@ export default function DashboardPage() {
                       py="xs"
                       bg="light-dark(gray.0, dark.7)"
                     >
-                      <Text size="xs" fw={800} tt="uppercase" opacity={0.6}>
+                      <Text size="xs" fw={600} tt="uppercase" opacity={0.6}>
                         Pengajuan Terbaru
                       </Text>
                       <Button
@@ -543,11 +632,11 @@ export default function DashboardPage() {
                           header: "Mahasiswa",
                           render: (row: RanpelSubmission) => (
                             <Group gap="xs" wrap="nowrap">
-                              <Avatar size="sm" radius="xl" color="indigo">
+                              <Avatar size="sm" radius="xl" color="dark">
                                 {row.mahasiswa?.nama?.charAt(0)}
                               </Avatar>
                               <Stack gap={0}>
-                                <Text size="xs" fw={700} truncate>
+                                <Text size="xs" fw={600} truncate>
                                   {row.mahasiswa?.nama || "-"}
                                 </Text>
                                 <Text size="10px" c="dimmed">
@@ -591,21 +680,21 @@ export default function DashboardPage() {
                           {
                             label: "SEMINAR PROPOSAL",
                             value: statsUjian.proposal,
-                            color: "blue",
+                            color: "dark",
                           },
                           {
                             label: "UJIAN HASIL",
                             value: statsUjian.ujianHasil,
-                            color: "teal",
+                            color: "dark",
                           },
                           {
                             label: "UJIAN SKRIPSI",
                             value: statsUjian.ujianSkripsi,
-                            color: "indigo",
+                            color: "dark",
                           },
                         ].map((stat) => (
                           <Group key={stat.label} justify="space-between">
-                            <Text size="xs" fw={800} c="dimmed">
+                            <Text size="xs" fw={600} c="dimmed">
                               {stat.label}
                             </Text>
                             <Badge color={stat.color} variant="light" size="sm">
@@ -640,7 +729,7 @@ export default function DashboardPage() {
                             >
                               <Group justify="space-between" wrap="nowrap">
                                 <Stack gap={0} style={{ flex: 1 }}>
-                                  <Text size="xs" fw={700} lineClamp={1}>
+                                  <Text size="xs" fw={600} lineClamp={1}>
                                     {u.pendaftaranUjian?.mahasiswa?.nama}
                                   </Text>
                                   <Text size="10px" c="dimmed">
@@ -648,7 +737,7 @@ export default function DashboardPage() {
                                   </Text>
                                 </Stack>
                                 <Stack gap={0} align="end">
-                                  <Text size="10px" fw={700}>
+                                  <Text size="10px" fw={600}>
                                     {new Date(
                                       u.tanggalUjian,
                                     ).toLocaleDateString("id-ID", {
@@ -679,7 +768,7 @@ export default function DashboardPage() {
                         component={Link}
                         href="/dashboard/manajemen-ranpel"
                         variant="light"
-                        color="indigo"
+                        color="dark"
                         radius="md"
                         size="sm"
                         justify="space-between"
@@ -689,9 +778,21 @@ export default function DashboardPage() {
                       </Button>
                       <Button
                         component={Link}
+                        href="/dashboard/master-data/syarat"
+                        variant="light"
+                        color="dark"
+                        radius="md"
+                        size="sm"
+                        justify="space-between"
+                        rightSection={<IconArrowRight size={16} />}
+                      >
+                        Kelola Syarat
+                      </Button>
+                      <Button
+                        component={Link}
                         href="/dashboard/rekap-bimbingan"
                         variant="light"
-                        color="blue"
+                        color="dark"
                         radius="md"
                         size="sm"
                         justify="space-between"
@@ -707,6 +808,148 @@ export default function DashboardPage() {
           </Box>
         )}
 
+        {/* Sekprodi Section */}
+        {isSekprodi && (
+          <Box>
+            <Grid gutter="xl">
+              {/* Group 1: Administrasi Ujian & Jadwal */}
+              <Grid.Col span={{ base: 12, lg: 8 }}>
+                <Box>
+                  <SectionTitle title="Administrasi Ujian" icon={IconBooks} />
+                  <Paper p="md" withBorder radius="lg" mt="xs">
+                    <Stack gap="sm">
+                      {[
+                        {
+                          label: "SEMINAR PROPOSAL",
+                          value: statsUjian.proposal,
+                          color: "dark",
+                        },
+                        {
+                          label: "UJIAN HASIL",
+                          value: statsUjian.ujianHasil,
+                          color: "dark",
+                        },
+                        {
+                          label: "UJIAN SKRIPSI",
+                          value: statsUjian.ujianSkripsi,
+                          color: "dark",
+                        },
+                      ].map((stat) => (
+                        <Group key={stat.label} justify="space-between">
+                          <Text size="sm" fw={600} c="dimmed">
+                            {stat.label}
+                          </Text>
+                          <Badge color={stat.color} variant="light" size="lg">
+                            {isLoadingUjian ? "..." : stat.value} Mahasiswa
+                          </Badge>
+                        </Group>
+                      ))}
+                    </Stack>
+                  </Paper>
+                </Box>
+
+                <Box mt="xl">
+                  <SectionTitle
+                    title="Jadwal Ujian Terdekat"
+                    icon={IconCalendar}
+                  />
+                  <Paper p="md" withBorder radius="lg" mt="xs">
+                    {isLoadingAllUjian ? (
+                      <Text size="xs" c="dimmed">
+                        Memuat jadwal...
+                      </Text>
+                    ) : upcomingUjians?.length > 0 ? (
+                      <Stack gap="xs">
+                        {upcomingUjians.map((u) => (
+                          <Box
+                            key={u.id}
+                            style={{
+                              borderBottom:
+                                "1px solid var(--mantine-color-default-border)",
+                              paddingBottom: 8,
+                            }}
+                          >
+                            <Group justify="space-between" wrap="nowrap">
+                              <Stack gap={0} style={{ flex: 1 }}>
+                                <Text size="sm" fw={600} lineClamp={1}>
+                                  {u.pendaftaranUjian?.mahasiswa?.nama}
+                                </Text>
+                                <Text size="xs" c="dimmed">
+                                  {u.pendaftaranUjian?.jenisUjian?.namaJenis}
+                                </Text>
+                              </Stack>
+                              <Stack gap={0} align="end">
+                                <Text size="xs" fw={600}>
+                                  {new Date(
+                                    u.tanggalUjian,
+                                  ).toLocaleDateString("id-ID", {
+                                    day: "numeric",
+                                    month: "short",
+                                  })}
+                                </Text>
+                                <Text size="xs" c="dimmed">
+                                  {u.jamMulai} WITA
+                                </Text>
+                              </Stack>
+                            </Group>
+                          </Box>
+                        ))}
+                      </Stack>
+                    ) : (
+                      <Text size="xs" c="dimmed">
+                        Tidak ada jadwal ujian terdekat.
+                      </Text>
+                    )}
+                  </Paper>
+                </Box>
+              </Grid.Col>
+
+              {/* Group 2: Quick Actions */}
+              <Grid.Col span={{ base: 12, lg: 4 }}>
+                <SectionTitle title="Akses Cepat" icon={IconTrendingUp} />
+                <Stack gap="xs" mt="xs">
+                  <Button
+                    component={Link}
+                    href="/dashboard/verifikasi-pendaftaran"
+                    variant="light"
+                    color="dark"
+                    radius="md"
+                    size="md"
+                    justify="space-between"
+                    rightSection={<IconArrowRight size={16} />}
+                  >
+                    Verifikasi Pendaftaran
+                  </Button>
+                  <Button
+                    component={Link}
+                    href="/dashboard/penjadwalan-ujian"
+                    variant="light"
+                    color="dark"
+                    radius="md"
+                    size="md"
+                    justify="space-between"
+                    rightSection={<IconArrowRight size={16} />}
+                  >
+                    Penjadwalan Ujian
+                  </Button>
+                  <Button
+                    component={Link}
+                    href="/dashboard/manajemen-perbaikan-judul"
+                    variant="light"
+                    color="dark"
+                    radius="md"
+                    size="md"
+                    justify="space-between"
+                    rightSection={<IconArrowRight size={16} />}
+                  >
+                    Perbaikan Judul
+                  </Button>
+                </Stack>
+              </Grid.Col>
+            </Grid>
+          </Box>
+        )}
+
         {/* Admin Prodi Section */}
         {isAdminProdi && (
           <Box>
@@ -716,7 +959,7 @@ export default function DashboardPage() {
                 title="Total Mahasiswa"
                 value={totalMahasiswa}
                 icon={IconUsers}
-                color="indigo"
+                color="dark"
               />
               <StatCard
                 title="Ujian Terjadwal"
@@ -724,19 +967,19 @@ export default function DashboardPage() {
                   pendaftaranArray.filter((p) => p.status === "diterima").length
                 }
                 icon={IconCalendar}
-                color="blue"
+                color="dark"
               />
               <StatCard
                 title="Nilai Final"
                 value={finalizedUjianCount}
                 icon={IconFileText}
-                color="teal"
+                color="dark"
               />
             </SimpleGrid>
 
             <Paper p="xl" radius="md" withBorder>
               <Stack gap="md" align="center" ta="center">
-                <ThemeIcon size={60} radius="md" color="indigo" variant="light">
+                <ThemeIcon size={60} radius="md" color="dark" variant="light">
                   <IconFileText size={32} />
                 </ThemeIcon>
                 <div>
@@ -750,7 +993,7 @@ export default function DashboardPage() {
                   component={Link}
                   href="/dashboard/rekapitulasi-nilai"
                   variant="filled"
-                  color="indigo"
+                  color="dark"
                   size="md"
                   radius="md"
                   rightSection={<IconArrowRight size={18} />}
@@ -805,10 +1048,10 @@ export default function DashboardPage() {
                   />
                   <Stepper.Completed>
                     <Stack align="center" gap="xs" py="xl">
-                      <ThemeIcon size={60} radius="xl" color="teal" variant="light">
+                      <ThemeIcon size={60} radius="xl" color="dark" variant="light">
                         <IconCheck size={32} />
                       </ThemeIcon>
-                      <Text fw={800} size="lg">Selamat! Anda Telah Menyelesaikan Skripsi</Text>
+                      <Text fw={600} size="lg">Selamat! Anda Telah Menyelesaikan Skripsi</Text>
                       <Text c="dimmed" size="sm">Silahkan urus administrasi kelulusan Anda di Bagian Akademik.</Text>
                     </Stack>
                   </Stepper.Completed>
@@ -816,12 +1059,12 @@ export default function DashboardPage() {
 
                 <Divider variant="dashed" />
 
-                <Group justify="space-between" align="center" wrap="wrap">
-                  <Box style={{ flex: 1, minWidth: 250 }}>
+                <Group justify="space-between" align="center" wrap="wrap" gap="xl">
+                  <Box style={{ flex: 1, minWidth: 280 }}>
                     {latestRanpel ? (
-                      <Group gap="lg" wrap="wrap">
-                        <Stack gap={2}>
-                          <Text fz={10} fw={800} c="dimmed" tt="uppercase">Judul Saat Ini</Text>
+                      <Group gap="xl" wrap="nowrap">
+                        <Stack gap={4}>
+                          <Text size="xs" fw={600} c="dimmed" tt="uppercase">Judul Saat Ini</Text>
                           <Tooltip 
                             label={latestRanpel.ranpel?.judul_penelitian || latestRanpel.rancanganPenelitian?.judulPenelitian} 
                             multiline 
@@ -829,14 +1072,14 @@ export default function DashboardPage() {
                             withArrow 
                             radius="md"
                           >
-                            <Text fw={700} size="sm" lineClamp={1} maw={{ base: "100%", sm: 400 }} style={{ cursor: "help" }}>
+                            <Text fw={600} size="sm" lineClamp={1} maw={{ base: "100%", sm: 500 }} style={{ cursor: "help" }}>
                               {latestRanpel.ranpel?.judul_penelitian || latestRanpel.rancanganPenelitian?.judulPenelitian}
                             </Text>
                           </Tooltip>
                         </Stack>
-                        <Divider orientation="vertical" visibleFrom="xs" />
-                        <Stack gap={2}>
-                          <Text fz={10} fw={800} c="dimmed" tt="uppercase">Status Terakhir</Text>
+                        <Divider orientation="vertical" h={40} visibleFrom="sm" />
+                        <Stack gap={4}>
+                          <Text size="xs" fw={600} c="dimmed" tt="uppercase">Status Terakhir</Text>
                           <StatusBadge 
                             status={
                               latestRanpel.statusKaprodi === "diterima" ? "diterima" :
@@ -856,7 +1099,7 @@ export default function DashboardPage() {
                     component={Link}
                     href="/dashboard/pengajuan-ranpel"
                     variant="light"
-                    color="indigo"
+                    color="dark"
                     radius="md"
                     fullWidth={isMobile}
                     rightSection={<IconArrowRight size={18} />}
@@ -878,7 +1121,7 @@ export default function DashboardPage() {
                 <Stack gap="md">
                   <Group justify="space-between" align="center">
                     <Stack gap={0}>
-                      <Text fw={800} fz="lg">
+                      <Text fw={600} fz="lg">
                         Tren Pengajuan
                       </Text>
                       <Text size="xs" c="dimmed">30 Hari Terakhir</Text>
@@ -901,7 +1144,7 @@ export default function DashboardPage() {
                       h={250}
                       data={dosenSubmissionsTrend}
                       dataKey="date"
-                      series={[{ name: "total", color: "indigo.6" }]}
+                      series={[{ name: "total", color: "dark.9" }]}
                       curveType="monotone"
                       tickLine="xy"
                       gridAxis="xy"
@@ -916,7 +1159,7 @@ export default function DashboardPage() {
                 <Stack gap="md">
                   <Group justify="space-between" align="center">
                     <Stack gap={0}>
-                      <Text fw={800} fz="lg">
+                      <Text fw={600} fz="lg">
                         Progres Mahasiswa
                       </Text>
                       <Text size="xs" c="dimmed">Status kelulusan tiap tahap ujian</Text>
@@ -930,10 +1173,10 @@ export default function DashboardPage() {
                     onChange={(val) => setSelectedExam(val || "all")}
                   >
                     <Tabs.List grow>
-                      <Tabs.Tab value="all" fz={10} fw={700}>SEMUA</Tabs.Tab>
-                      <Tabs.Tab value="proposal" fz={10} fw={700}>SEMPRO</Tabs.Tab>
-                      <Tabs.Tab value="hasil" fz={10} fw={700}>HASIL</Tabs.Tab>
-                      <Tabs.Tab value="skripsi" fz={10} fw={700}>SKRIPSI</Tabs.Tab>
+                      <Tabs.Tab value="all" fz={10} fw={600}>SEMUA</Tabs.Tab>
+                      <Tabs.Tab value="proposal" fz={10} fw={600}>SEMPRO</Tabs.Tab>
+                      <Tabs.Tab value="hasil" fz={10} fw={600}>HASIL</Tabs.Tab>
+                      <Tabs.Tab value="skripsi" fz={10} fw={600}>SKRIPSI</Tabs.Tab>
                     </Tabs.List>
                   </Tabs>
                   
@@ -941,12 +1184,12 @@ export default function DashboardPage() {
                     <DonutChart
                       h={250}
                       data={selectedExam === "all" ? [
-                        { name: "Sempro", value: dosenSubmissionsSummary.sempro || 0, color: "blue.6" },
-                        { name: "Ujian Hasil", value: dosenSubmissionsSummary.hasil || 0, color: "teal.6" },
-                        { name: "Ujian Skripsi", value: dosenSubmissionsSummary.skripsi || 0, color: "indigo.6" },
+                        { name: "Sempro", value: dosenSubmissionsSummary.sempro || 0, color: "gray.6" },
+                        { name: "Ujian Hasil", value: dosenSubmissionsSummary.hasil || 0, color: "gray.8" },
+                        { name: "Ujian Skripsi", value: dosenSubmissionsSummary.skripsi || 0, color: "dark.9" },
                       ] : [
-                        { name: "Lulus", value: dosenSubmissionsSummary.passedCount || 0, color: "teal.6" },
-                        { name: "Dalam Proses", value: dosenSubmissionsSummary.processingCount || 0, color: "orange.6" },
+                        { name: "Lulus", value: dosenSubmissionsSummary.passedCount || 0, color: "dark.9" },
+                        { name: "Dalam Proses", value: dosenSubmissionsSummary.processingCount || 0, color: "gray.5" },
                       ]}
                       withLabelsLine
                       withLabels
@@ -956,6 +1199,323 @@ export default function DashboardPage() {
                 </Stack>
               </Paper>
             </SimpleGrid>
+          </Box>
+        )}
+        {/* Admin & Superadmin Section */}
+        {(isAdmin || isSuperAdmin) && (
+          <Box>
+            <SectionTitle title="Statistik & Monitoring Sistem" icon={IconAdjustments} />
+            
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md" mb="xl">
+              <StatCard
+                title="Total Akun Pengguna"
+                value={userStats.total}
+                icon={IconUsers}
+                color="dark"
+              />
+              <StatCard
+                title="Ujian Terjadwal"
+                value={pendaftaranArray.filter(p => p.status === "diterima").length}
+                icon={IconCalendar}
+                color="dark"
+              />
+              <StatCard
+                title="Nilai Final"
+                value={finalizedUjianCount}
+                icon={IconFileText}
+                color="dark"
+              />
+              <StatCard
+                title="Total Judul Skripsi"
+                value={pengajuanArray.filter(p => p.status === "diterima").length}
+                icon={IconBooks}
+                color="dark"
+              />
+            </SimpleGrid>
+
+            <Grid gutter="md">
+              <Grid.Col span={{ base: 12, md: 4 }}>
+                <Paper radius="xl" p="xl" withBorder shadow="sm">
+                  <Stack gap="md">
+                    <Text fw={700} size="lg">Komposisi Pengguna</Text>
+                    <Center h={200}>
+                      <DonutChart
+                        h={200}
+                        data={[
+                          { name: "Mahasiswa", value: userStats.mahasiswa, color: "gray.5" },
+                          { name: "Dosen", value: userStats.dosen, color: "gray.7" },
+                          { name: "Admin", value: userStats.admin, color: "gray.9" },
+                          { name: "Lainnya", value: userStats.others, color: "dark.9" },
+                        ]}
+                        withLabels
+                        withLabelsLine
+                        chartLabel="User Role"
+                      />
+                    </Center>
+                    <Divider variant="dashed" />
+                    <Stack gap={4}>
+                      <Group justify="space-between">
+                        <Text size="xs" fw={600} c="dimmed">MAHASISWA</Text>
+                        <Badge variant="light" color="gray" size="xs">{userStats.mahasiswa}</Badge>
+                      </Group>
+                      <Group justify="space-between">
+                        <Text size="xs" fw={600} c="dimmed">DOSEN</Text>
+                        <Badge variant="light" color="gray" size="xs">{userStats.dosen}</Badge>
+                      </Group>
+                      <Group justify="space-between">
+                        <Text size="xs" fw={600} c="dimmed">ADMIN/STAF</Text>
+                        <Badge variant="light" color="gray" size="xs">{userStats.admin}</Badge>
+                      </Group>
+                    </Stack>
+                  </Stack>
+                </Paper>
+              </Grid.Col>
+
+              <Grid.Col span={{ base: 12, md: 4 }}>
+                <Paper radius="xl" p="xl" withBorder shadow="sm">
+                  <Stack gap="md">
+                    <Text fw={700} size="lg">Statistik Kelulusan</Text>
+                    <Center h={200}>
+                      <DonutChart
+                        h={200}
+                        data={[
+                          { name: "Lulus", value: examResultStats.lulus, color: "dark.9" },
+                          { name: "Tidak Lulus", value: examResultStats.tidakLulus, color: "gray.4" },
+                        ]}
+                        withLabels
+                        withLabelsLine
+                        chartLabel="Ujian Final"
+                      />
+                    </Center>
+                    <Divider variant="dashed" />
+                    <Stack gap={4}>
+                      <Group justify="space-between">
+                        <Text size="xs" fw={600} c="dimmed">LULUS</Text>
+                        <Badge variant="filled" color="dark" size="xs">{examResultStats.lulus}</Badge>
+                      </Group>
+                      <Group justify="space-between">
+                        <Text size="xs" fw={600} c="dimmed">TIDAK LULUS</Text>
+                        <Badge variant="light" color="gray" size="xs">{examResultStats.tidakLulus}</Badge>
+                      </Group>
+                    </Stack>
+                  </Stack>
+                </Paper>
+              </Grid.Col>
+
+              <Grid.Col span={{ base: 12, md: 4 }}>
+                <Paper radius="xl" p="xl" withBorder shadow="sm" h="100%">
+                  <Stack gap="md">
+                    <Group justify="space-between">
+                      <Text fw={700} size="lg">Pengguna Terbaru</Text>
+                      <Button component={Link} href="/dashboard/users" variant="subtle" size="xs">
+                        Semua
+                      </Button>
+                    </Group>
+                    <Stack gap="xs">
+                      {(usersResponse?.data || []).slice(0, 5).map((u: any, i: number) => (
+                        <Group key={i} gap="sm" wrap="nowrap">
+                          <Avatar radius="xl" size="sm" color="dark">
+                            {u.nama?.charAt(0)}
+                          </Avatar>
+                          <Stack gap={0} style={{ flex: 1 }}>
+                            <Text size="xs" fw={700} truncate>{u.nama}</Text>
+                            <Text size="10px" c="dimmed">{u.role?.toUpperCase()}</Text>
+                          </Stack>
+                          <Badge size="xs" variant="outline" color="gray">
+                            {dayjs(u.createdAt).fromNow(true)}
+                          </Badge>
+                        </Group>
+                      ))}
+                    </Stack>
+                  </Stack>
+                </Paper>
+              </Grid.Col>
+            </Grid>
+
+            <Box mt="xl">
+              <SectionTitle title="Manajemen Data Master" icon={IconUsers} />
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mt="xs">
+                <Paper
+                  p="lg"
+                  radius="lg"
+                  withBorder
+                  className="hover:border-gs-primary transition-all duration-300 group cursor-pointer"
+                  component={Link}
+                  href="/dashboard/master-data/mahasiswa"
+                  bg="var(--gs-bg-overlay)"
+                >
+                  <Group justify="space-between" align="center">
+                    <Group gap="md">
+                      <ThemeIcon size={48} radius="md" variant="light" color="dark">
+                        <IconUsers size={24} />
+                      </ThemeIcon>
+                      <div>
+                        <Text fw={700}>Data Mahasiswa</Text>
+                        <Text size="xs" c="dimmed">Kelola biodata, NIM, dan status akademik</Text>
+                      </div>
+                    </Group>
+                    <IconArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  </Group>
+                </Paper>
+
+                <Paper
+                  p="lg"
+                  radius="lg"
+                  withBorder
+                  className="hover:border-gs-primary transition-all duration-300 group cursor-pointer"
+                  component={Link}
+                  href="/dashboard/master-data/dosen"
+                  bg="var(--gs-bg-overlay)"
+                >
+                  <Group justify="space-between" align="center">
+                    <Group gap="md">
+                      <ThemeIcon size={48} radius="md" variant="light" color="dark">
+                        <IconUserCheck size={24} />
+                      </ThemeIcon>
+                      <div>
+                        <Text fw={700}>Data Dosen</Text>
+                        <Text size="xs" c="dimmed">Kelola NIDN, NIP, dan beban bimbingan</Text>
+                      </div>
+                    </Group>
+                    <IconArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  </Group>
+                </Paper>
+                <Paper
+                  p="lg"
+                  radius="lg"
+                  withBorder
+                  className="hover:border-gs-primary transition-all duration-300 group cursor-pointer"
+                  component={Link}
+                  href="/dashboard/master-data/peminatan"
+                  bg="var(--gs-bg-overlay)"
+                >
+                  <Group justify="space-between" align="center">
+                    <Group gap="md">
+                      <ThemeIcon size={48} radius="md" variant="light" color="dark">
+                        <IconTarget size={24} />
+                      </ThemeIcon>
+                      <div>
+                        <Text fw={700}>Data Peminatan</Text>
+                        <Text size="xs" c="dimmed">Kelola bidang konsentrasi program studi</Text>
+                      </div>
+                    </Group>
+                    <IconArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  </Group>
+                </Paper>
+
+                <Paper
+                  p="lg"
+                  radius="lg"
+                  withBorder
+                  className="hover:border-gs-primary transition-all duration-300 group cursor-pointer"
+                  component={Link}
+                  href="/dashboard/master-data/jenis-ujian"
+                  bg="var(--gs-bg-overlay)"
+                >
+                  <Group justify="space-between" align="center">
+                    <Group gap="md">
+                      <ThemeIcon size={48} radius="md" variant="light" color="dark">
+                        <IconCertificate size={24} />
+                      </ThemeIcon>
+                      <div>
+                        <Text fw={700}>Jenis Ujian</Text>
+                        <Text size="xs" c="dimmed">Kelola jenis-jenis ujian skripsi</Text>
+                      </div>
+                    </Group>
+                    <IconArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  </Group>
+                </Paper>
+
+                <Paper
+                  p="lg"
+                  radius="lg"
+                  withBorder
+                  className="hover:border-gs-primary transition-all duration-300 group cursor-pointer"
+                  component={Link}
+                  href="/dashboard/master-data/syarat"
+                  bg="var(--gs-bg-overlay)"
+                >
+                  <Group justify="space-between" align="center">
+                    <Group gap="md">
+                      <ThemeIcon size={48} radius="md" variant="light" color="dark">
+                        <IconClipboardList size={24} />
+                      </ThemeIcon>
+                      <div>
+                        <Text fw={700}>Syarat Ujian</Text>
+                        <Text size="xs" c="dimmed">Kelola dokumen syarat ujian</Text>
+                      </div>
+                    </Group>
+                    <IconArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  </Group>
+                </Paper>
+
+                <Paper
+                  p="lg"
+                  radius="lg"
+                  withBorder
+                  className="hover:border-gs-primary transition-all duration-300 group cursor-pointer"
+                  component={Link}
+                  href="/dashboard/master-data/komponen-penilaian"
+                  bg="var(--gs-bg-overlay)"
+                >
+                  <Group justify="space-between" align="center">
+                    <Group gap="md">
+                      <ThemeIcon size={48} radius="md" variant="light" color="dark">
+                        <IconClipboardCheck size={24} />
+                      </ThemeIcon>
+                      <div>
+                        <Text fw={700}>Komponen Penilaian</Text>
+                        <Text size="xs" c="dimmed">Kelola kriteria dan indikator skor ujian</Text>
+                      </div>
+                    </Group>
+                    <IconArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  </Group>
+                </Paper>
+              </SimpleGrid>
+            </Box>
+
+            <Box mt="xl">
+              <SectionTitle title="Jadwal Ujian Akan Datang" icon={IconCalendar} />
+              <Paper withBorder radius="lg" p={0} style={{ overflow: "hidden" }}>
+                <DataTable
+                  data={upcomingUjians}
+                  loading={isLoadingAllUjian}
+                  columns={[
+                    {
+                      header: "Mahasiswa",
+                      render: (row) => (
+                        <Group gap="xs">
+                          <Avatar size="sm" radius="xl" color="dark">{row.pendaftaranUjian?.mahasiswa?.nama?.charAt(0)}</Avatar>
+                          <Stack gap={0}>
+                            <Text size="xs" fw={600}>{row.pendaftaranUjian?.mahasiswa?.nama}</Text>
+                            <Text size="10px" c="dimmed">{row.pendaftaranUjian?.mahasiswa?.nim}</Text>
+                          </Stack>
+                        </Group>
+                      )
+                    },
+                    {
+                      header: "Jenis Ujian",
+                      render: (row) => <Badge variant="light" color="dark" size="xs">{row.pendaftaranUjian?.jenisUjian?.namaJenis}</Badge>
+                    },
+                    {
+                      header: "Waktu & Ruangan",
+                      render: (row) => (
+                        <Stack gap={0}>
+                          <Text size="xs" fw={600}>{dayjs(row.tanggalUjian).format('DD MMM YYYY')}</Text>
+                          <Text size="10px" c="dimmed">{row.jamMulai} WITA</Text>
+                        </Stack>
+                      )
+                    },
+                    {
+                      header: "Status",
+                      render: (row) => (
+                        <StatusBadge status={row.nilaiDifinalisasi ? "selesai" : "terjadwal"} size="xs" />
+                      )
+                    }
+                  ]}
+                />
+              </Paper>
+            </Box>
           </Box>
         )}
       </Stack>

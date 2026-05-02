@@ -34,7 +34,7 @@ export default function KeputusanPage() {
       key: "jenisUjianId",
       label: "Jenis Ujian",
       render: (val: any) => {
-        if (!val) return <Badge color="gray">Semua</Badge>;
+        if (!val) return <Badge variant="outline" color="var(--gs-text-muted)" size="sm" radius="sm" fw={700}>SEMUA</Badge>;
         const j = jenisUjian.find((item: any) => item.id === val);
         return j ? j.namaJenis : val;
       },

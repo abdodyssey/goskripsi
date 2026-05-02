@@ -7,10 +7,21 @@ export async function POST(request: Request) {
     const result = await authService.login(body);
     return NextResponse.json(result);
   } catch (error: any) {
-    console.error("LOGIN_ERROR:", error);
+    const isAuthError = 
+      error.message?.includes("Kredensial") || 
+      error.message?.includes("User tidak ditemukan") ||
+      error.message?.includes("salah");
+
+    if (!isAuthError) {
+      console.error("LOGIN_ERROR:", error);
+    }
+
     return NextResponse.json(
-      { message: error.message || "Internal Server Error", success: false },
-      { status: error.message?.includes("kredensial") ? 401 : 500 },
+      { 
+        message: isAuthError ? "Username atau password salah" : (error.message || "Internal Server Error"), 
+        success: false 
+      },
+      { status: isAuthError ? 401 : 500 },
     );
   }
 }

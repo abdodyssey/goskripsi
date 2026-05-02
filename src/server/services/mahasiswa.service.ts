@@ -34,34 +34,49 @@ const MAHASISWA_SELECT = {
 };
 
 export class MahasiswaService {
-  async getAll(params: { userId?: string; roles?: string[]; skip?: number; take?: number }) {
-    const { userId, roles = [], skip = 0, take = 10 } = params;
-    
+  async getAll(params: {
+    userId?: string;
+    roles?: string[];
+    skip?: number;
+    take?: number;
+    prodiId?: number | null;
+  }) {
+    const { userId, roles = [], skip = 0, take = 10, prodiId } = params;
+
     // Guard Clause for invalid ID
     if (userId && isNaN(Number(userId))) {
-       return { data: [], meta: createPaginationMeta(0, 1, take) };
+      return { data: [], meta: createPaginationMeta(0, 1, take) };
     }
 
     let whereClause: Prisma.MahasiswaWhereInput = {};
 
     if (userId) {
       const uId = Number(userId);
-      const isDosen = roles.includes("dosen") || roles.includes("kaprodi") || roles.includes("sekprodi");
-      
+      const isDosen =
+        roles.includes("dosen") ||
+        roles.includes("kaprodi") ||
+        roles.includes("sekprodi");
+
       if (isDosen) {
         // If the requester is a Dosen/Staff, show students they mentor/advise
         whereClause = {
-          OR: [
-            { dosenPa: uId },
-            { pembimbing1: uId },
-            { pembimbing2: uId },
-          ],
+          OR: [{ dosenPa: uId }, { pembimbing1: uId }, { pembimbing2: uId }],
         };
       } else if (roles.includes("mahasiswa")) {
         // If the requester is a student, show only their own record
         whereClause = { id: uId };
       }
       // Admins/Superadmins get all records (whereClause remains {})
+      // But if admin/kaprodi/sekprodi has a prodiId, filter by prodi
+      if (
+        (roles.includes("admin") ||
+          roles.includes("kaprodi") ||
+          roles.includes("sekprodi")) &&
+        !roles.includes("superadmin") &&
+        prodiId
+      ) {
+        whereClause.prodiId = prodiId;
+      }
     }
 
     const [list, total] = await Promise.all([
@@ -179,8 +194,12 @@ export class MahasiswaService {
     }));
   }
 
-  async uploadDocument(mahasiswaId: string, payload: { jenis: string; fileUrl: string }) {
-    if (!mahasiswaId || isNaN(Number(mahasiswaId))) throw new Error("ID Mahasiswa tidak valid");
+  async uploadDocument(
+    mahasiswaId: string,
+    payload: { jenis: string; fileUrl: string },
+  ) {
+    if (!mahasiswaId || isNaN(Number(mahasiswaId)))
+      throw new Error("ID Mahasiswa tidak valid");
 
     return await prisma.dokumenMahasiswa.upsert({
       where: {
@@ -202,7 +221,8 @@ export class MahasiswaService {
   }
 
   async deleteDocument(mahasiswaId: string, jenis: string) {
-    if (!mahasiswaId || isNaN(Number(mahasiswaId))) throw new Error("ID Mahasiswa tidak valid");
+    if (!mahasiswaId || isNaN(Number(mahasiswaId)))
+      throw new Error("ID Mahasiswa tidak valid");
 
     try {
       return await prisma.dokumenMahasiswa.delete({
@@ -215,7 +235,7 @@ export class MahasiswaService {
       });
     } catch (error: any) {
       // If record not found, we consider it deleted (idempotent)
-      if (error.code === 'P2025') {
+      if (error.code === "P2025") {
         return { message: "Document already deleted or not found" };
       }
       throw error;

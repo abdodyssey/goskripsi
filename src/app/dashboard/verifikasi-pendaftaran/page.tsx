@@ -74,6 +74,8 @@ export default function VerifikasiPendaftaranPage() {
 
   const roles = userResponse?.user?.roles || userResponse?.roles || [];
   const isSekprodi = roles.includes("sekprodi");
+  const isSuperUser = roles.includes("superadmin") || roles.includes("admin");
+  const userProdiId = userResponse?.user?.prodi_id;
 
   // Fetch all pendaftaran ujian
   const { data, isLoading, isError } = useQuery({
@@ -117,14 +119,22 @@ export default function VerifikasiPendaftaranPage() {
   if (!isSekprodi) {
     return (
       <Container size="xl" pt="md">
-        <Text c="red">
+        <Text className="text-gs-danger" fw={700}>
           Hanya Sekretaris Prodi yang memiliki akses ke halaman ini.
         </Text>
       </Container>
     );
   }
 
-  const pendaftaranList = data?.data || [];
+  const pendaftaranList = useMemo(() => {
+    const list = data?.data || [];
+    if (isSuperUser || !userProdiId) return list;
+    return list.filter(p => {
+      const mhsProdi = p.mahasiswa as any;
+      const id = mhsProdi?.prodi_id || mhsProdi?.prodiId;
+      return Number(id) === Number(userProdiId);
+    });
+  }, [data?.data, isSuperUser, userProdiId]);
 
   const summary = {
     menunggu: pendaftaranList.filter((p) => p.status === "menunggu").length,
@@ -158,7 +168,7 @@ export default function VerifikasiPendaftaranPage() {
         </Text>
       ),
       labels: { confirm: "Setujui", cancel: "Batal" },
-      confirmProps: { color: "teal" },
+      confirmProps: { color: "var(--gs-success)" },
       onConfirm: async () => {
         try {
           await reviewMutation.mutateAsync({
@@ -168,14 +178,14 @@ export default function VerifikasiPendaftaranPage() {
           notifications.show({
             title: "Berhasil",
             message: "Pendaftaran berhasil disetuju",
-            color: "green",
+            color: "var(--gs-success)",
           });
           closeDetail();
         } catch {
           notifications.show({
             title: "Gagal",
             message: "Terjadi kesalahan saat menyetujui",
-            color: "red",
+            color: "var(--gs-danger)",
           });
         }
       },
@@ -205,7 +215,7 @@ export default function VerifikasiPendaftaranPage() {
         </Stack>
       ),
       labels: { confirm: "Kirim Revisi", cancel: "Batal" },
-      confirmProps: { color: "orange" },
+      confirmProps: { color: "var(--gs-warning)" },
       onConfirm: async () => {
         try {
           await reviewMutation.mutateAsync({
@@ -216,14 +226,14 @@ export default function VerifikasiPendaftaranPage() {
           notifications.show({
             title: "Berhasil",
             message: "Permintaan revisi berhasil dikirim",
-            color: "orange",
+            color: "var(--gs-warning)",
           });
           closeDetail();
         } catch {
           notifications.show({
             title: "Gagal",
             message: "Terjadi kesalahan saat mengirim revisi",
-            color: "red",
+            color: "var(--gs-danger)",
           });
         }
       },
@@ -253,7 +263,7 @@ export default function VerifikasiPendaftaranPage() {
         </Stack>
       ),
       labels: { confirm: "Tolak", cancel: "Batal" },
-      confirmProps: { color: "red" },
+      confirmProps: { color: "var(--gs-danger)" },
       onConfirm: async () => {
         try {
           await reviewMutation.mutateAsync({
@@ -264,14 +274,14 @@ export default function VerifikasiPendaftaranPage() {
           notifications.show({
             title: "Berhasil",
             message: "Pendaftaran berhasil ditolak",
-            color: "red",
+            color: "var(--gs-danger)",
           });
           closeDetail();
         } catch {
           notifications.show({
             title: "Gagal",
             message: "Terjadi kesalahan saat menolak",
-            color: "red",
+            color: "var(--gs-danger)",
           });
         }
       },
@@ -280,13 +290,13 @@ export default function VerifikasiPendaftaranPage() {
 
   const getStatusBadge = (status: string) => {
     const map: Record<string, string> = {
-      draft: "gray",
-      menunggu: "blue",
-      revisi: "orange",
-      diterima: "green",
-      ditolak: "red",
+      draft: "var(--gs-text-muted)",
+      menunggu: "var(--gs-primary)",
+      revisi: "var(--gs-warning)",
+      diterima: "var(--gs-success)",
+      ditolak: "var(--gs-danger)",
     };
-    return map[status] || "gray";
+    return map[status] || "var(--gs-text-muted)";
   };
 
   const columns: DataTableColumn<PendaftaranUjianItem>[] = [
@@ -318,10 +328,10 @@ export default function VerifikasiPendaftaranPage() {
                 h={6}
                 style={{
                   borderRadius: "50%",
-                  backgroundColor: "var(--mantine-color-gray-4)",
+                  backgroundColor: "var(--gs-bg-subtle)",
                 }}
               />
-              <Text size="10px" fw={800} c="dimmed" tt="uppercase" lts={0.5}>
+              <Text size="10px" fw={700} c="dimmed" tt="uppercase" lts={0.5}>
                 Pengajuan
               </Text>
             </Group>
@@ -343,27 +353,27 @@ export default function VerifikasiPendaftaranPage() {
                     borderRadius: "50%",
                     backgroundColor:
                       row.status === "diterima"
-                        ? "var(--mantine-color-teal-5)"
+                        ? "var(--gs-success)"
                         : row.status === "ditolak"
-                          ? "var(--mantine-color-red-5)"
+                          ? "var(--gs-danger)"
                           : row.status === "revisi"
-                            ? "var(--mantine-color-orange-5)"
-                            : "var(--mantine-color-blue-4)",
+                            ? "var(--gs-warning)"
+                            : "var(--gs-primary)",
                   }}
                 />
                 <Text
                   size="10px"
-                  fw={800}
+                  fw={700}
                   tt="uppercase"
                   lts={0.5}
-                  c={
+                  className={
                     row.status === "diterima"
-                      ? "teal.6"
+                      ? "text-gs-success-text"
                       : row.status === "ditolak"
-                        ? "red.6"
+                        ? "text-gs-danger-text"
                         : row.status === "revisi"
-                          ? "orange.6"
-                          : "blue.6"
+                          ? "text-gs-warning-text"
+                          : "text-gs-primary-text"
                   }
                 >
                   {row.status === "diterima"
@@ -377,16 +387,16 @@ export default function VerifikasiPendaftaranPage() {
               </Group>
               <Text
                 size="xs"
-                fw={600}
+                fw={700}
                 pl={12}
-                c={
+                className={
                   row.status === "diterima"
-                    ? "teal.8"
+                    ? "text-gs-success-text"
                     : row.status === "ditolak"
-                      ? "red.8"
+                      ? "text-gs-danger-text"
                       : row.status === "revisi"
-                        ? "orange.8"
-                        : "blue.8"
+                        ? "text-gs-warning-text"
+                        : "text-gs-primary-text"
                 }
               >
                 {row.status === "diterima"
@@ -404,7 +414,19 @@ export default function VerifikasiPendaftaranPage() {
     },
     {
       header: "Berkas",
-      render: (row) => <Text size="xs">{row.berkas?.length || 0} file</Text>,
+      render: (row) => {
+        const count = row.berkas?.length || 0;
+        return (
+          <Badge
+            variant="light"
+            color={count > 0 ? "var(--gs-primary)" : "var(--gs-danger)"}
+            size="xs"
+            fw={700}
+          >
+            {count} File
+          </Badge>
+        );
+      },
     },
     {
       header: "Aksi",
@@ -431,22 +453,22 @@ export default function VerifikasiPendaftaranPage() {
                 <Menu.Divider />
                 <Menu.Label>Verifikasi</Menu.Label>
                 <Menu.Item 
-                  color="teal"
-                  leftSection={<IconCheck size={16} stroke={1.5} />} 
+                  color="var(--gs-success)"
+                  leftSection={<IconCheck size={16} stroke={2} />} 
                   onClick={() => handleApprove(row.id)}
                 >
                   Setujui
                 </Menu.Item>
                 <Menu.Item 
-                  color="orange"
-                  leftSection={<IconClipboardCheck size={16} stroke={1.5} />} 
+                  color="var(--gs-warning)"
+                  leftSection={<IconClipboardCheck size={16} stroke={2} />} 
                   onClick={() => handleMintaRevisi(row.id)}
                 >
                   Minta Revisi
                 </Menu.Item>
                 <Menu.Item 
-                  color="red"
-                  leftSection={<IconX size={16} stroke={1.5} />} 
+                  color="var(--gs-danger)"
+                  leftSection={<IconX size={16} stroke={2} />} 
                   onClick={() => handleReject(row.id)}
                 >
                   Tolak
@@ -477,30 +499,39 @@ export default function VerifikasiPendaftaranPage() {
         variant="pills"
         radius="xl"
         mb="xl"
-        color="indigo"
+        color="var(--gs-primary)"
+        styles={{
+          tab: {
+            border: '1px solid var(--gs-border)',
+            fontWeight: 700,
+            fontSize: '11px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }
+        }}
       >
         <Tabs.List>
           <Tabs.Tab 
             value="menunggu" 
-            leftSection={<Badge size="xs" circle color="blue">{summary.menunggu}</Badge>}
+            leftSection={<Badge size="xs" circle color="var(--gs-primary)">{summary.menunggu}</Badge>}
           >
             Belum ACC
           </Tabs.Tab>
           <Tabs.Tab 
             value="diterima" 
-            leftSection={<Badge size="xs" circle color="teal">{summary.diterima}</Badge>}
+            leftSection={<Badge size="xs" circle color="var(--gs-success)">{summary.diterima}</Badge>}
           >
             Diterima
           </Tabs.Tab>
           <Tabs.Tab 
             value="revisi" 
-            leftSection={<Badge size="xs" circle color="orange">{summary.revisi}</Badge>}
+            leftSection={<Badge size="xs" circle color="var(--gs-warning)">{summary.revisi}</Badge>}
           >
             Revisi
           </Tabs.Tab>
           <Tabs.Tab 
             value="ditolak" 
-            leftSection={<Badge size="xs" circle color="red">{summary.ditolak}</Badge>}
+            leftSection={<Badge size="xs" circle color="var(--gs-danger)">{summary.ditolak}</Badge>}
           >
             Ditolak
           </Tabs.Tab>
@@ -527,8 +558,8 @@ export default function VerifikasiPendaftaranPage() {
         opened={detailOpened}
         onClose={closeDetail}
         title={
-          <Text fw={700} size="lg">
-            Detail Pendaftaran Ujian
+          <Text fw={800} size="lg" className="text-gs-text-primary tracking-tight">
+            DETAIL PENDAFTARAN UJIAN
           </Text>
         }
         size="lg"
@@ -536,7 +567,7 @@ export default function VerifikasiPendaftaranPage() {
         radius="lg"
         styles={{
           header: {
-            borderBottom: "1px solid var(--mantine-color-default-border)",
+            borderBottom: "1px solid var(--gs-border)",
             paddingBottom: "var(--mantine-spacing-md)",
             marginBottom: "var(--mantine-spacing-md)",
           },
@@ -552,8 +583,8 @@ export default function VerifikasiPendaftaranPage() {
               radius="md"
               p="md"
               mb="lg"
-              bg="gray.0"
-              className="dark:bg-slate-900/40"
+              bg="var(--gs-bg-overlay)"
+              className="border-gs-border"
             >
               <Grid gutter="lg">
                 <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -562,12 +593,12 @@ export default function VerifikasiPendaftaranPage() {
                       size="xs"
                       c="dimmed"
                       tt="uppercase"
-                      fw={800}
+                      fw={700}
                       lts={0.5}
                     >
                       Mahasiswa
                     </Text>
-                    <Text size="sm" fw={700}>
+                    <Text size="sm" fw={700} className="text-gs-text-primary">
                       {(selectedItem.mahasiswa?.nama as string) || "-"}
                     </Text>
                     <Text size="xs" c="dimmed">
@@ -582,15 +613,17 @@ export default function VerifikasiPendaftaranPage() {
                       size="xs"
                       c="dimmed"
                       tt="uppercase"
-                      fw={800}
+                      fw={700}
                       lts={0.5}
                     >
                       Status Verifikasi
                     </Text>
                     <Badge
                       color={getStatusBadge(selectedItem.status)}
-                      variant="light"
+                      variant="filled"
                       size="md"
+                      radius="sm"
+                      fw={700}
                     >
                       {selectedItem.status.replace("_", " ").toUpperCase()}
                     </Badge>
@@ -603,12 +636,12 @@ export default function VerifikasiPendaftaranPage() {
                       size="xs"
                       c="dimmed"
                       tt="uppercase"
-                      fw={800}
+                      fw={700}
                       lts={0.5}
                     >
                       Jenis Ujian
                     </Text>
-                    <Text size="sm" fw={600}>
+                    <Text size="sm" fw={700} className="text-gs-text-primary">
                       {selectedItem.jenisUjian?.namaJenis || "-"}
                     </Text>
                   </Stack>
@@ -620,15 +653,15 @@ export default function VerifikasiPendaftaranPage() {
                       size="xs"
                       c="dimmed"
                       tt="uppercase"
-                      fw={800}
+                      fw={700}
                       lts={0.5}
                     >
                       Keterangan (Catatan)
                     </Text>
                     <Text
                       size="sm"
-                      fw={500}
-                      c={selectedItem.keterangan ? "inherit" : "dimmed"}
+                      fw={700}
+                      className={selectedItem.keterangan ? "text-gs-text-primary" : "text-gs-text-muted"}
                     >
                       {selectedItem.keterangan || "-"}
                     </Text>
@@ -641,12 +674,12 @@ export default function VerifikasiPendaftaranPage() {
                       size="xs"
                       c="dimmed"
                       tt="uppercase"
-                      fw={800}
+                      fw={700}
                       lts={0.5}
                     >
                       Judul Rancangan Penelitian
                     </Text>
-                    <Text size="sm" fw={600} style={{ fontStyle: "italic" }}>
+                    <Text size="sm" fw={700} className="text-gs-text-primary" style={{ fontStyle: "italic" }}>
                       &quot;
                       {selectedItem.rancanganPenelitian?.judulPenelitian || "-"}
                       &quot;
@@ -657,7 +690,7 @@ export default function VerifikasiPendaftaranPage() {
             </Paper>
 
             <Box mb="xl">
-              <Text size="sm" fw={700} mb="sm" c="indigo.7">
+              <Text size="sm" fw={800} mb="sm" className="text-gs-primary" tt="uppercase" lts={1}>
                 Berkas yang Diunggah
               </Text>
               {selectedItem.berkas && selectedItem.berkas.length > 0 ? (
@@ -668,7 +701,7 @@ export default function VerifikasiPendaftaranPage() {
                       withBorder
                       p="sm"
                       radius="md"
-                      className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                      className="hover:bg-gs-bg-hover transition-colors border-gs-border"
                     >
                       <Group justify="space-between" wrap="nowrap">
                         <Group
@@ -679,10 +712,8 @@ export default function VerifikasiPendaftaranPage() {
                           <Center
                             w={32}
                             h={32}
+                            className="bg-gs-bg-overlay text-gs-primary border border-gs-border"
                             style={{
-                              backgroundColor:
-                                "var(--mantine-color-indigo-light)",
-                              color: "var(--mantine-color-indigo-filled)",
                               borderRadius: "8px",
                             }}
                           >
@@ -704,12 +735,14 @@ export default function VerifikasiPendaftaranPage() {
                           component="a"
                           href={b.filePath}
                           target="_blank"
-                          variant="light"
+                          variant="subtle"
                           size="xs"
-                          color="indigo"
-                          leftSection={<IconEye size={14} />}
+                          color="var(--gs-primary)"
+                          leftSection={<IconEye size={14} stroke={2} />}
+                          radius="md"
+                          fw={700}
                         >
-                          Lihat
+                          LIHAT
                         </Button>
                       </Group>
                     </Paper>
@@ -720,8 +753,8 @@ export default function VerifikasiPendaftaranPage() {
                   withBorder
                   p="xl"
                   radius="md"
-                  bg="gray.0"
-                  className="dark:bg-gray-900/40"
+                  bg="var(--gs-bg-overlay)"
+                  className="border-gs-border"
                 >
                   <Center>
                     <Text size="sm" c="dimmed">
@@ -737,37 +770,40 @@ export default function VerifikasiPendaftaranPage() {
                 mt="xl"
                 pt="md"
                 style={{
-                  borderTop: "1px solid var(--mantine-color-default-border)",
+                  borderTop: "1px solid var(--gs-border)",
                 }}
               >
                 <Group justify="flex-end" gap="sm">
                   <Button
-                    color="orange"
+                    color="var(--gs-warning)"
                     variant="outline"
                     radius="md"
+                    fw={700}
                     onClick={() => handleMintaRevisi(selectedItem.id)}
                     leftSection={
-                      <IconClipboardCheck style={{ width: 16, height: 16 }} />
+                      <IconClipboardCheck style={{ width: 16, height: 16 }} stroke={2} />
                     }
                   >
-                    Minta Revisi
+                    MINTA REVISI
                   </Button>
                   <Button
-                    color="red"
+                    color="var(--gs-danger)"
                     variant="outline"
                     radius="md"
+                    fw={700}
                     onClick={() => handleReject(selectedItem.id)}
-                    leftSection={<IconX size={16} />}
+                    leftSection={<IconX size={16} stroke={2} />}
                   >
-                    Tolak
+                    TOLAK
                   </Button>
                   <Button
-                    color="teal"
+                    className="bg-gs-primary hover:bg-gs-primary-hover"
                     radius="md"
+                    fw={700}
                     onClick={() => handleApprove(selectedItem.id)}
-                    leftSection={<IconCheck size={16} />}
+                    leftSection={<IconCheck size={16} stroke={2} />}
                   >
-                    Setujui Pendaftaran
+                    SETUJUI PENDAFTARAN
                   </Button>
                 </Group>
               </Box>

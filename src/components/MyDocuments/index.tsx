@@ -131,14 +131,14 @@ export function MyDocuments() {
 
   return (
     <Paper withBorder p="xl" radius="md">
-      <Title order={3} mb="md">
-        Dokumen Saya
+      <Title order={3} mb="md" className="text-gs-text-primary" fw={800} lts={-0.5}>
+        Dokumen Akademik
       </Title>
       <Text size="sm" c="dimmed" mb="xl">
         Unggah dokumen wajib untuk persyaratan pendaftaran ujian. Format yang
         diperbolehkan: PDF, JPG, PNG (Maks 2MB).
       </Text>
-      <Divider mb="xl" />
+      <Divider mb="xl" className="border-gs-border" />
 
       <Stack gap="md">
         {DOCUMENT_TYPES.map((type) => {
@@ -146,19 +146,25 @@ export function MyDocuments() {
           const isUploading = uploading === type.key;
 
           return (
-            <Paper key={type.key} withBorder p="md" radius="sm" bg="gray.0">
+            <Paper key={type.key} withBorder p="md" radius="md" bg="var(--gs-bg-overlay)" className="border-gs-border hover:border-gs-border-strong transition-colors">
               <Group justify="space-between" align="center">
                 <Group>
                   <IconFileText
                     size={24}
-                    color="var(--mantine-color-indigo-6)"
+                    stroke={1.5}
+                    className="text-gs-primary"
                   />
-                  <Stack gap={0}>
-                    <Text fw={600} size="sm">
+                   <Stack gap={0}>
+                    <Text fw={700} size="sm" className="text-gs-text-primary">
                       {type.label}
                     </Text>
-                    <Badge color={status.color} size="xs" variant="light">
-                      {status.label}
+                    <Badge 
+                      variant="outline" 
+                      color={status.status === "uploaded" ? "var(--gs-success)" : "var(--gs-text-muted)"} 
+                      size="xs"
+                      fw={700}
+                    >
+                      {status.label.toUpperCase()}
                     </Badge>
                   </Stack>
                 </Group>
@@ -197,18 +203,19 @@ export function MyDocuments() {
                       <Button
                         {...props}
                         variant="subtle"
-                        color="indigo"
+                        color="var(--gs-primary)"
                         size="xs"
+                        fw={700}
                         leftSection={
                           isUploading ? (
-                            <Loader size={12} />
+                            <Loader size={12} color="var(--gs-primary)" />
                           ) : (
-                            <IconUpload size={14} />
+                            <IconUpload size={14} stroke={1.5} />
                           )
                         }
                         loading={isUploading}
                       >
-                        {status.status === "uploaded" ? "Ganti" : "Unggah"}
+                        {status.status === "uploaded" ? "GANTI" : "UNGGAH"}
                       </Button>
                     )}
                   </FileButton>

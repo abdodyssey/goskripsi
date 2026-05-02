@@ -1,6 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { ujianService } from "@/features/ujian/api/ujian.service";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 
 import {
   Modal,
@@ -43,6 +44,12 @@ export function StudentProfileModal({
     queryFn: () => ujianService.getByMahasiswa(student!.id.toString()),
     enabled: !!student && opened,
   });
+
+  const { userResponse } = useAuth();
+  const user = userResponse?.user;
+  const rawRoles = user?.roles || userResponse?.roles || [];
+  const roles = Array.isArray(rawRoles) ? rawRoles.map(String) : [];
+  const isMahasiswa = roles.includes("mahasiswa");
 
   if (!student) return null;
 
@@ -94,10 +101,10 @@ export function StudentProfileModal({
         <Group gap="xs">
           <IconUser
             size={20}
-            stroke={2}
-            color="var(--mantine-primary-color-filled)"
+            stroke={2.5}
+            className="text-gs-primary"
           />
-          <Text fw={700} fz="lg">
+          <Text fw={600} fz="lg">
             Profil Mahasiswa
           </Text>
         </Group>
@@ -117,21 +124,22 @@ export function StudentProfileModal({
         {/* Profile Header Card */}
         <Paper withBorder p="xl" radius="md">
           <Group gap="xl" wrap="nowrap" align="center">
-            <Avatar size={100} radius={100} color="indigo" variant="filled">
-              <IconUser size={50} />
+            <Avatar size={100} radius={100} className="bg-gs-primary" variant="filled">
+              <IconUser size={50} stroke={1.5} />
             </Avatar>
             <Stack gap={4} flex={1}>
-              <Text fz={24} fw={800} style={{ lineHeight: 1.2 }}>
+              <Text fz={24} fw={600} style={{ lineHeight: 1.2 }}>
                 {student.nama || "-"}
               </Text>
               <Group gap="xs">
-                <Badge variant="filled" color="indigo" radius="sm">
+                <Badge variant="filled" className="bg-gs-primary" radius="sm" fw={800}>
                   MAHASISWA
                 </Badge>
                 <Badge
                   variant="dot"
-                  color={status === "aktif" ? "teal" : "gray"}
+                  color={status === "aktif" ? "var(--gs-success)" : "var(--gs-text-muted)"}
                   radius="sm"
+                  fw={700}
                 >
                   {status.toUpperCase()}
                 </Badge>
@@ -151,9 +159,9 @@ export function StudentProfileModal({
                   </Badge>
                 ) : (
                   [
-                    { id: 1, label: "SEM-PROP", color: "blue" },
-                    { id: 2, label: "UJIAN-HASIL", color: "cyan" },
-                    { id: 3, label: "SKRIPSI", color: "teal" },
+                    { id: 1, label: "SEM-PROP", color: "var(--gs-primary)" },
+                    { id: 2, label: "UJIAN-HASIL", color: "var(--gs-primary)" },
+                    { id: 3, label: "SKRIPSI", color: "var(--gs-primary)" },
                   ].map((stage) => {
                     const exam = getExamForStage(stage.id);
                     const isPassed = student.passed_exams?.includes(stage.id);
@@ -173,7 +181,7 @@ export function StudentProfileModal({
                         >
                           {stage.label}
                         </Badge>
-                        {exam && (
+                        {exam && isMahasiswa && (
                           <Box
                             component="a"
                             href={`${baseUrl}/api/ujian/${exam.id}/pdf/bulk`}
@@ -199,7 +207,7 @@ export function StudentProfileModal({
 
         {/* Detailed Info Grid */}
         <Box>
-          <Text fw={700} fz="sm" c="dimmed" tt="uppercase" mb="md" mt="sm">
+          <Text fw={600} fz="sm" c="dimmed" tt="uppercase" mb="md" mt="sm">
             Data Akademik & Kontak
           </Text>
           <Grid gutter="lg">
@@ -208,7 +216,7 @@ export function StudentProfileModal({
                 <Group gap="md">
                   <Box
                     p={8}
-                    bg="var(--mantine-primary-color-light)"
+                    bg="var(--gs-bg-overlay)"
                     style={{
                       borderRadius: "8px",
                       display: "flex",
@@ -218,7 +226,7 @@ export function StudentProfileModal({
                   >
                     <item.icon
                       size={20}
-                      color="var(--mantine-primary-color-filled)"
+                      className="text-gs-primary"
                     />
                   </Box>
                   <Stack gap={0}>
@@ -239,7 +247,7 @@ export function StudentProfileModal({
 
         {/* Supervision Info */}
         <Box>
-          <Text fw={700} fz="sm" c="dimmed" tt="uppercase" mb="md">
+          <Text fw={600} fz="sm" c="dimmed" tt="uppercase" mb="md">
             Dosen Pembimbing
           </Text>
           <Grid gutter="lg">
@@ -247,7 +255,7 @@ export function StudentProfileModal({
               <Paper withBorder p="md" radius="md">
                 <Stack gap="sm">
                   <Group justify="space-between">
-                    <Text fz="sm" fw={700}>
+                    <Text fz="sm" fw={600}>
                       Dosen PA
                     </Text>
                     <Text fz="sm" c="dimmed">
@@ -258,7 +266,7 @@ export function StudentProfileModal({
                   </Group>
                   <Divider variant="dotted" />
                   <Group justify="space-between">
-                    <Text fz="sm" fw={700}>
+                    <Text fz="sm" fw={600}>
                       Pembimbing 1
                     </Text>
                     <Text fz="sm" c="dimmed">
@@ -268,7 +276,7 @@ export function StudentProfileModal({
                     </Text>
                   </Group>
                   <Group justify="space-between">
-                    <Text fz="sm" fw={700}>
+                    <Text fz="sm" fw={600}>
                       Pembimbing 2
                     </Text>
                     <Text fz="sm" c="dimmed">
@@ -285,7 +293,7 @@ export function StudentProfileModal({
 
         {/* Address */}
         <Box>
-          <Text fw={700} fz="sm" c="dimmed" tt="uppercase" mb="xs">
+          <Text fw={600} fz="sm" c="dimmed" tt="uppercase" mb="xs">
             Alamat Domisili
           </Text>
           <Group gap="xs" align="flex-start" wrap="nowrap">
@@ -301,8 +309,8 @@ export function StudentProfileModal({
         </Box>
 
         <Group justify="flex-end" mt="xl">
-          <Button onClick={onClose} variant="light" radius="md">
-            Tutup
+          <Button onClick={onClose} variant="subtle" color="var(--gs-text-secondary)" radius="md" fw={700}>
+            TUTUP
           </Button>
         </Group>
       </Stack>

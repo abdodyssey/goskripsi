@@ -327,7 +327,7 @@ export function PenilaianTab({
             diubah lagi sampai ketua melakukan finalisasi.
           </Text>
           {isKetua && (
-            <Text fw={700} c="red" mt="xs">
+            <Text fw={600} c="red" mt="xs">
               PENTING: Sebagai Ketua, Anda juga akan mensubmit nilai untuk
               seluruh penguji lainnya.
             </Text>
@@ -439,7 +439,7 @@ export function PenilaianTab({
         <Alert
           icon={<IconLock size={20} />}
           title="Sesi Penilaian Terkunci"
-          color="red"
+          color="var(--gs-danger)"
           variant="filled"
           radius="md"
         >
@@ -451,13 +451,13 @@ export function PenilaianTab({
       {/* Main Stats Summary for Chairperson */}
       {formData?.allScores && (
         <Group grow align="stretch" gap="sm">
-          <Paper withBorder p="md" radius="md">
+          <Paper withBorder p="md" radius="md" bg="var(--gs-bg-overlay)" style={{ borderColor: 'var(--gs-border)' }}>
             <Group justify="space-between" align="center">
               <Stack gap={0}>
-                <Text size="xs" fw={700} c="dimmed" tt="uppercase">
+                <Text size="10px" fw={700} c="dimmed" tt="uppercase" lts={0.5}>
                   Progres Penilaian
                 </Text>
-                <Title order={3}>
+                <Title order={3} lts={-0.5} className="text-gs-text-primary">
                   {
                     Object.values(groupedScores).filter(
                       (g: GroupedScoreEntry) =>
@@ -470,19 +470,19 @@ export function PenilaianTab({
                   </Text>
                 </Title>
               </Stack>
-              <Badge color="blue" variant="light" size="sm">
-                In Progress
+              <Badge color="var(--gs-primary)" variant="light" size="sm" radius="sm" fw={700}>
+                IN PROGRESS
               </Badge>
             </Group>
           </Paper>
 
-          <Paper withBorder p="md" radius="md" bg="indigo.0">
+          <Paper withBorder p="md" radius="md" bg="var(--gs-bg-base)" style={{ borderColor: 'var(--gs-border-strong)' }}>
             <Group justify="space-between" align="center">
               <Stack gap={0}>
-                <Text size="xs" fw={700} c="indigo.8" tt="uppercase">
+                <Text size="10px" fw={700} className="text-gs-primary" tt="uppercase" lts={0.5}>
                   Nilai Rata-rata
                 </Text>
-                <Title order={3} c="indigo.9">
+                <Title order={3} className="text-gs-text-primary" lts={-1}>
                   {Number(getCalculationResult().average || 0).toFixed(2)}
                 </Title>
               </Stack>
@@ -490,7 +490,9 @@ export function PenilaianTab({
                 <Badge
                   size="sm"
                   variant="filled"
-                  color={getCalculationResult().passes ? "green" : "red"}
+                  className={getCalculationResult().passes ? "bg-gs-success" : "bg-gs-danger"}
+                  radius="sm"
+                  fw={800}
                 >
                   {getCalculationResult().passes ? "LULUS" : "TIDAK LULUS"}
                 </Badge>
@@ -503,7 +505,7 @@ export function PenilaianTab({
       {isFinalized &&
         getCalculationResult().average >= 60 &&
         !getCalculationResult().passes && (
-          <Alert color="red" radius="md" title="Kriteria Tidak Terpenuhi">
+          <Alert color="var(--gs-danger)" radius="md" title="Kriteria Tidak Terpenuhi">
             Meskipun rata-rata memenuhi syarat, terdapat kriteria penilaian
             individu yang berada di bawah nilai minimal (60). Sesuai ketentuan,
             mahasiswa dinyatakan tidak lulus.
@@ -524,16 +526,18 @@ export function PenilaianTab({
             </Title>
             {isAlreadyFinal ? (
               <Badge
-                color="green"
+                color="var(--gs-success)"
                 size="sm"
                 variant="light"
-                leftSection={<IconSend size={12} />}
+                radius="sm"
+                fw={700}
+                leftSection={<IconSend size={12} stroke={2} />}
               >
-                Sudah Disubmit
+                SUDAH DISUBMIT
               </Badge>
             ) : (
-              <Badge color="orange" size="sm" variant="light">
-                Draf
+              <Badge color="var(--gs-warning)" size="sm" variant="light" radius="sm" fw={700}>
+                DRAF
               </Badge>
             )}
           </Group>
@@ -569,7 +573,7 @@ export function PenilaianTab({
                     </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Badge variant="dot" color="indigo" size="sm">
+                    <Badge variant="outline" color="var(--gs-primary)" size="sm" radius="sm" fw={700}>
                       {s.bobot}%
                     </Badge>
                   </Table.Td>
@@ -609,24 +613,27 @@ export function PenilaianTab({
             >
               <Button
                 variant="subtle"
-                color="gray"
-                size="xs"
-                leftSection={<IconDeviceFloppy size={16} />}
+                color="var(--gs-text-secondary)"
+                size="sm"
+                leftSection={<IconDeviceFloppy size={18} stroke={1.5} />}
+                radius="md"
+                fw={700}
                 loading={isSaving}
                 onClick={handleSaveDraft}
               >
-                Simpan Draf
+                SIMPAN DRAF
               </Button>
               <Button
-                color="indigo"
+                className="bg-gs-primary hover:bg-gs-primary-hover"
                 radius="md"
-                size="xs"
-                px="lg"
-                leftSection={<IconSend size={16} />}
+                size="sm"
+                px="xl"
+                leftSection={<IconSend size={18} stroke={1.5} />}
+                fw={800}
                 loading={isSubmitting}
                 onClick={handleSubmitFinal}
               >
-                Submit Nilai
+                SUBMIT NILAI
               </Button>
             </Group>
           )}
@@ -669,7 +676,7 @@ export function PenilaianTab({
                     <Group justify="space-between" pr="md">
                       <Group gap="sm">
                         <Stack gap={0}>
-                          <Text size="xs" c="dimmed" fw={700}>
+                          <Text size="xs" c="dimmed" fw={600}>
                             {label}
                           </Text>
                           <Text fw={600}>{group.dosen.user.nama}</Text>
@@ -677,19 +684,19 @@ export function PenilaianTab({
                       </Group>
                       <Group gap="xl">
                         <Stack gap={0} align="flex-end">
-                          <Text size="xs" c="dimmed">
+                          <Text size="10px" c="dimmed" fw={700} tt="uppercase" lts={0.5}>
                             Nilai Rata-rata
                           </Text>
-                          <Text fw={700} c="indigo">
+                          <Text fw={800} className="text-gs-primary">
                             {Number(group.totalNilai || 0).toFixed(2)}
                           </Text>
                         </Stack>
                         {group.isFinal ? (
-                          <Badge color="green" variant="light">
+                          <Badge color="var(--gs-success)" variant="light" radius="sm" fw={700}>
                             FINAL
                           </Badge>
                         ) : (
-                          <Badge color="gray" variant="light">
+                          <Badge color="var(--gs-text-muted)" variant="light" radius="sm" fw={700}>
                             DRAF
                           </Badge>
                         )}
@@ -779,7 +786,7 @@ export function PenilaianTab({
                                           }
                                         />
                                       ) : (
-                                        <Text size="xs" fw={700}>
+                                        <Text size="xs" fw={600}>
                                           {Number(sc.nilai)}
                                         </Text>
                                       )}

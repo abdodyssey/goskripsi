@@ -65,7 +65,7 @@ export function AbsensiTab({ ujian, onSubmit, isSubmitting }: AbsensiTabProps) {
       notifications.show({
         title: "Berhasil",
         message: "Absensi telah disubmit.",
-        color: "green",
+        color: "var(--gs-success)",
       });
     } catch (error: any) {
       notifications.show({
@@ -73,7 +73,7 @@ export function AbsensiTab({ ujian, onSubmit, isSubmitting }: AbsensiTabProps) {
         message:
           error.response?.data?.message ||
           "Terjadi kesalahan saat submit absensi.",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -84,8 +84,9 @@ export function AbsensiTab({ ujian, onSubmit, isSubmitting }: AbsensiTabProps) {
         <Alert
           icon={<IconInfoCircle size={16} />}
           title="Informasi"
-          color="blue"
+          color="var(--gs-primary)"
           variant="light"
+          radius="md"
         >
           Absensi sudah disubmit dan tidak dapat diubah lagi.
         </Alert>
@@ -112,7 +113,7 @@ export function AbsensiTab({ ujian, onSubmit, isSubmitting }: AbsensiTabProps) {
                 <Text fw={600} size="sm">{item.nama}</Text>
               </Table.Td>
               <Table.Td>
-                <Badge variant="light" color="indigo" size="xs">
+                <Badge variant="outline" color="var(--gs-primary)" size="xs" radius="xs" fw={700}>
                   {PERAN_MAP[item.peran] || item.peran}
                 </Badge>
               </Table.Td>
@@ -122,7 +123,7 @@ export function AbsensiTab({ ujian, onSubmit, isSubmitting }: AbsensiTabProps) {
                   onChange={() => handleToggle(item.pengujiUjianId)}
                   disabled={isAlreadySubmitted || isSubmitting}
                   size="sm"
-                  color="teal"
+                  color="var(--gs-primary)"
                 />
               </Table.Td>
             </Table.Tr>
@@ -133,14 +134,16 @@ export function AbsensiTab({ ujian, onSubmit, isSubmitting }: AbsensiTabProps) {
       {!isAlreadySubmitted && (
         <Group justify="flex-end">
           <Button
-            leftSection={<IconCheck size={16} />}
-            color="teal"
-            size="xs"
-            px="lg"
+            leftSection={<IconCheck size={16} stroke={1.5} />}
+            className="bg-gs-primary hover:bg-gs-primary-hover"
+            size="sm"
+            px="xl"
+            radius="md"
+            fw={700}
             loading={isSubmitting}
             onClick={handleSubmit}
           >
-            Submit Absensi
+            SUBMIT ABSENSI
           </Button>
         </Group>
       )}

@@ -84,7 +84,7 @@ export function PengajuanRanpelList({
       notifications.show({
         title: "Gagal",
         message: "Terjadi kesalahan saat mengunduh file",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -112,20 +112,20 @@ export function PengajuanRanpelList({
         </Text>
       ),
       labels: { confirm: "Hapus", cancel: "Batal" },
-      confirmProps: { color: "red" },
+      confirmProps: { color: "var(--gs-danger)" },
       onConfirm: async () => {
         try {
           await deletePengajuan(id);
           notifications.show({
             title: "Berhasil",
             message: "Pengajuan berhasil dihapus",
-            color: "green",
+            color: "var(--gs-success)",
           });
         } catch (error) {
           notifications.show({
             title: "Gagal",
             message: (error as Error).message || "Terjadi kesalahan",
-            color: "red",
+            color: "var(--gs-danger)",
           });
         }
       },
@@ -152,7 +152,7 @@ export function PengajuanRanpelList({
             withArrow 
             radius="md"
           >
-            <Text size="sm" fw={700} lineClamp={2} style={{ lineHeight: 1.4, cursor: "help" }}>
+            <Text size="sm" fw={600} lineClamp={2} style={{ lineHeight: 1.4, cursor: "help" }}>
               {row.rancanganPenelitian?.judulPenelitian || "Tidak Ada Judul"}
             </Text>
           </Tooltip>
@@ -167,9 +167,9 @@ export function PengajuanRanpelList({
           <Box>
             <Group gap={6} mb={2}>
               <Box w={6} h={6} style={{ borderRadius: "50%", backgroundColor: "var(--mantine-color-gray-4)" }} />
-              <Text size="10px" fw={800} c="dimmed" tt="uppercase" lts={0.5}>Pengajuan</Text>
+              <Text size="10px" fw={600} c="dimmed" tt="uppercase" lts={0.5}>Pengajuan</Text>
             </Group>
-            <Text size="xs" fw={700} pl={12}>
+            <Text size="xs" fw={600} pl={12}>
               {row.tanggalPengajuan
                 ? new Date(row.tanggalPengajuan).toLocaleDateString("id-ID", {
                     day: "numeric",
@@ -182,10 +182,10 @@ export function PengajuanRanpelList({
           {row.statusKaprodi === "diterima" && row.tanggalReviewKaprodi && (
             <Box>
               <Group gap={6} mb={2}>
-                <Box w={6} h={6} style={{ borderRadius: "50%", backgroundColor: "var(--mantine-color-teal-5)" }} />
-                <Text size="10px" fw={800} c="teal.7" tt="uppercase" lts={0.5}>Disetujui</Text>
+                <Box w={6} h={6} style={{ borderRadius: "50%", backgroundColor: "var(--gs-success)" }} />
+                <Text size="10px" fw={700} className="text-gs-success-text" tt="uppercase" lts={0.5}>Disetujui</Text>
               </Group>
-              <Text size="xs" fw={800} c="teal.9" pl={12}>
+              <Text size="xs" fw={700} className="text-gs-success-text" pl={12}>
                 {new Date(row.tanggalReviewKaprodi).toLocaleDateString("id-ID", {
                   day: "numeric",
                   month: "long",
@@ -205,10 +205,10 @@ export function PengajuanRanpelList({
         if (row.statusKaprodi === "ditolak" || row.statusDosenPa === "ditolak") {
           status = "ditolak";
         } else if (
-          row.statusDosenPa === "diterima" &&
+          row.statusDosenPa === "diverifikasi" &&
           row.statusKaprodi === "menunggu"
         ) {
-          status = "proses";
+          status = "diverifikasi";
         } else if (row.statusDosenPa === "menunggu") {
           status = "menunggu";
         }
@@ -225,7 +225,7 @@ export function PengajuanRanpelList({
                   size="sm"
                   onClick={() => {
                     modals.open({
-                      title: <Text fw={800}>Catatan & Tinjauan</Text>,
+                      title: <Text fw={600}>Catatan & Tinjauan</Text>,
                       radius: "lg",
                       children: (
                         <Stack gap="md" py="md">
@@ -234,13 +234,13 @@ export function PengajuanRanpelList({
                               p="md" 
                               withBorder 
                               radius="md" 
-                              bg="light-dark(indigo.0, dark.8)"
+                              bg="var(--gs-bg-overlay)"
                             >
                               <Group justify="space-between" mb={8}>
-                                <Badge color="indigo" size="xs">PEMBIMBING</Badge>
-                                <Text size="10px" fw={800} c="dimmed">DIREVIEW</Text>
+                                <Badge color="var(--gs-primary)" variant="outline" size="xs" radius="xs" fw={700}>PEMBIMBING</Badge>
+                                <Text size="10px" fw={700} c="dimmed" tt="uppercase">DIREVIEW</Text>
                               </Group>
-                              <Text size="sm" fw={500} className="italic text-gray-700">"{row.catatanDosenPa}"</Text>
+                              <Text size="sm" fw={600} className="italic text-gs-text-primary">"{row.catatanDosenPa}"</Text>
                             </Paper>
                           )}
                           {row.catatanKaprodi && (
@@ -248,13 +248,13 @@ export function PengajuanRanpelList({
                               p="md" 
                               withBorder 
                               radius="md" 
-                              bg="light-dark(teal.0, dark.8)"
+                              bg="var(--gs-bg-base)"
                             >
                               <Group justify="space-between" mb={8}>
-                                <Badge color="teal" size="xs">KAPRODI</Badge>
-                                <Text size="10px" fw={800} c="dimmed">DIREVIEW</Text>
+                                <Badge color="var(--gs-success)" variant="outline" size="xs" radius="xs" fw={700}>KAPRODI</Badge>
+                                <Text size="10px" fw={700} c="dimmed" tt="uppercase">DIREVIEW</Text>
                               </Group>
-                              <Text size="sm" fw={500} className="italic text-gray-700">"{row.catatanKaprodi}"</Text>
+                              <Text size="sm" fw={600} className="italic text-gs-text-primary">"{row.catatanKaprodi}"</Text>
                             </Paper>
                           )}
                         </Stack>
@@ -313,7 +313,7 @@ export function PengajuanRanpelList({
             </Menu.Item>
             <Menu.Divider />
             <Menu.Item
-              color="red"
+              color="var(--gs-danger)"
               onClick={() => handleDelete(row.id.toString())}
               leftSection={
                 <IconTrash
@@ -348,16 +348,16 @@ export function PengajuanRanpelList({
         rightSection={
           <Group gap="sm">
             <Button
-              leftSection={<IconPlus size={18} />}
+              leftSection={<IconPlus size={18} stroke={2} />}
               onClick={handleCreateNew}
               variant="filled"
-              color="indigo"
+              className="bg-gs-primary hover:bg-gs-primary-hover active:scale-95 transition-all"
               radius="md"
               h={42}
-              px="lg"
-              className="active:scale-95 transition-all"
+              px="xl"
+              fw={700}
             >
-              Buat Pengajuan Baru
+              BUAT PENGAJUAN BARU
             </Button>
           </Group>
         }
@@ -379,12 +379,13 @@ export function PengajuanRanpelList({
               </Text>
               <Button
                 variant="light"
-                color="indigo"
-                leftSection={<IconPlus size={16} />}
+                className="text-gs-primary bg-gs-bg-hover"
+                leftSection={<IconPlus size={16} stroke={2} />}
                 onClick={handleCreateNew}
                 radius="md"
+                fw={700}
               >
-                Mulai Ajukan Sekarang
+                MULAI AJUKAN SEKARANG
               </Button>
             </Stack>
           </Center>

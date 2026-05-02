@@ -17,7 +17,7 @@ export default function ManajemenPerbaikanJudulPage() {
   if (!isAdmin) {
     return (
       <Container size="xl" pt="md">
-        <Text c="red" fw={700}>Akses Dibatasi. Halaman ini hanya untuk Sekretaris Prodi dan Kaprodi.</Text>
+        <Text className="text-gs-danger" fw={700}>Akses Dibatasi. Halaman ini hanya untuk Sekretaris Prodi dan Kaprodi.</Text>
       </Container>
     );
   }

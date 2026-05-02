@@ -26,15 +26,16 @@ export async function GET(request: Request) {
   try {
     // Get roles of the authenticated user to determine filtering logic
     const roles = await authService.getUserRoles(user.id);
-    
+
     const result = await mahasiswaService.getAll({
       // Default to current user's ID if no specific user_id is requested
       userId: userId || user.id,
       roles,
+      prodiId: user.prodiId,
       skip,
       take: limit,
     });
-    
+
     return NextResponse.json({ ...result, success: true });
   } catch (error: any) {
     console.error("ERROR in GET /api/mahasiswa:", error.message);

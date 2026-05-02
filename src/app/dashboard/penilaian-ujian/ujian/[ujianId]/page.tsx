@@ -82,7 +82,7 @@ export default function UjianExecutionPage() {
   if (isErrorUjian || isErrorForm || isErrorOptions) {
     return (
       <Container size="xl" py="lg">
-        <Alert color="red" title="Gagal Memuat Data">
+        <Alert color="var(--gs-danger)" title="Gagal Memuat Data" radius="md">
           Terjadi kesalahan saat mengambil data ujian. Pastikan Anda memiliki
           hak akses sebagai penguji.
         </Alert>
@@ -93,7 +93,7 @@ export default function UjianExecutionPage() {
   if (!ujianData?.data || !formRes?.data) {
     return (
       <Container size="xl" py="lg">
-        <Alert color="orange" title="Data Tidak Ditemukan">
+        <Alert color="var(--gs-warning)" title="Data Tidak Ditemukan" radius="md">
           Data pelaksanaan ujian atau form penilaian tidak tersedia.
         </Alert>
       </Container>
@@ -108,7 +108,7 @@ export default function UjianExecutionPage() {
 
   if (!me) {
     return (
-      <Alert color="red">
+      <Alert color="var(--gs-danger)" radius="md">
         Anda tidak terdaftar sebagai penguji pada ujian ini (ID: {currentUserId}
         ).
       </Alert>
@@ -130,23 +130,25 @@ export default function UjianExecutionPage() {
         <Paper withBorder p="lg" radius="md" bg="gray.0">
           <Group justify="space-between" align="flex-start">
             <Stack gap={4}>
-              <Badge size="sm" variant="dot" color="indigo">
+              <Badge size="sm" variant="outline" className="border-gs-primary text-gs-primary" radius="sm" fw={700}>
                 {ujian.pendaftaranUjian.jenisUjian.namaJenis}
               </Badge>
-              <Title order={3}>
+              <Title order={3} className="text-gs-text-primary">
                 {ujian.pendaftaranUjian.mahasiswa.user.nama}
               </Title>
-              <Text size="sm" c="dimmed" fw={500}>
+              <Text size="sm" c="dimmed" fw={600}>
                 NIM: {ujian.pendaftaranUjian.mahasiswa.nim}
               </Text>
-              <Text size="xs" mt={4} fw={500} fs="italic" c="indigo.8">
+              <Text size="xs" mt={4} fw={700} fs="italic" className="text-gs-primary">
                 &quot;{ujian.pendaftaranUjian.rancanganPenelitian.judulPenelitian}&quot;
               </Text>
             </Stack>
             <Badge
               size="lg"
               variant="filled"
-              color={ujian.status === "selesai" ? "green" : "indigo"}
+              className={ujian.status === "selesai" ? "bg-gs-success" : "bg-gs-primary"}
+              radius="sm"
+              fw={800}
             >
               {ujian.status.toUpperCase()}
             </Badge>
@@ -155,9 +157,15 @@ export default function UjianExecutionPage() {
 
         <Tabs
           defaultValue={isKetua ? "absensi" : "penilaian"}
-          color="indigo"
+          color="var(--gs-primary)"
           variant="pills"
           radius="md"
+          styles={{
+            tab: {
+              fontWeight: 700,
+              '&[data-active]': { backgroundColor: 'var(--gs-primary)' }
+            }
+          }}
         >
           <Tabs.List>
             {isKetua && (

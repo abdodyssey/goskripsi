@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useForm } from "@mantine/form";
 import { LoginInput } from "../schemas/auth.schema";
 import { useAuth } from "../hooks/use-auth";
@@ -13,9 +12,9 @@ import {
   Text,
   Stack,
   Box,
-  Alert,
+  ThemeIcon,
 } from "@mantine/core";
-import { IconUser, IconLock } from "@tabler/icons-react";
+import { IconUser, IconLock, IconInfoCircle } from "@tabler/icons-react";
 
 export function AuthForm() {
   const { login, isLoggingIn } = useAuth();
@@ -37,109 +36,108 @@ export function AuthForm() {
 
   return (
     <Paper
-      radius="24px"
-      p={32}
-      className="w-full bg-white dark:bg-slate-900 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)]"
+      radius="28px"
+      p={40}
+      className="w-full bg-white border border-gs-border shadow-[0_40px_80px_-15px_rgba(0,0,0,0.08)]"
     >
-      <Box mb={32}>
-        <div className="flex items-center gap-3 mb-8 lg:hidden">
-          <Image src="/uin-logo.png" alt="UIN Logo" width={32} height={32} className="object-contain" />
-          <span className="text-slate-900 dark:text-white font-bold text-xl tracking-tight">
-            GoSkripsi
-          </span>
-        </div>
-
+      <Box mb={40}>
         <Title
           order={1}
-          fw={800}
-          fz={28}
-          className="tracking-tight text-slate-900 dark:text-white mb-2"
-          style={{ letterSpacing: "-0.03em" }}
+          className="text-3xl text-gs-text-primary mb-3"
+          fw={400}
         >
           Selamat Datang
         </Title>
-        <Text c="dimmed" size="sm" style={{ lineHeight: 1.6, maxWidth: "340px" }}>
-          Gunakan NIM dan kata sandi Anda untuk mengakses portal manajemen
-          skripsi secara aman.
+        <Text size="sm" className="text-gs-text-secondary font-medium leading-relaxed max-w-[320px]">
+          Silakan masuk dengan akun sistem informasi akademik Anda untuk melanjutkan.
         </Text>
       </Box>
 
       <form onSubmit={form.onSubmit(onSubmit)}>
-        <Stack gap="md">
+        <Stack gap="xl">
           <TextInput
-            label="Username"
-            placeholder="Contoh: 23051450225"
-            size="sm"
-            radius="md"
+            label="Username / NIM"
+            placeholder="Masukkan nomor induk"
+            size="md"
+            radius="lg"
             leftSection={
-              <IconUser size={16} stroke={1.5} className="text-indigo-500" />
+              <IconUser size={18} stroke={2} className="text-gs-text-muted" />
             }
             styles={{
               input: {
-                backgroundColor: "var(--mantine-color-gray-0)",
-                border: "none",
+                backgroundColor: "var(--gs-bg-overlay)",
+                border: "1.5px solid transparent",
+                height: "54px",
+                transition: "all 0.2s ease",
               },
               label: {
-                marginBottom: 6,
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--mantine-color-slate-7)",
+                marginBottom: 8,
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--gs-text-primary)",
               },
             }}
+            className="focus-within:scale-[1.01] transition-transform duration-200"
             {...form.getInputProps("username")}
           />
 
           <PasswordInput
             label="Kata Sandi"
             placeholder="Masukkan kata sandi"
-            size="sm"
-            radius="md"
+            size="md"
+            radius="lg"
             leftSection={
-              <IconLock size={16} stroke={1.5} className="text-indigo-500" />
+              <IconLock size={18} stroke={2} className="text-gs-text-muted" />
             }
             styles={{
               input: {
-                backgroundColor: "var(--mantine-color-gray-0)",
-                border: "none",
+                backgroundColor: "var(--gs-bg-overlay)",
+                border: "1.5px solid transparent",
+                height: "54px",
+                transition: "all 0.2s ease",
+              },
+              innerInput: {
+                height: "50px",
               },
               label: {
-                marginBottom: 6,
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--mantine-color-slate-7)",
+                marginBottom: 8,
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--gs-text-primary)",
               },
             }}
+            className="focus-within:scale-[1.01] transition-transform duration-200"
             {...form.getInputProps("password")}
           />
 
-          <Box mt="xs">
+          <Box mt="md">
             <Button
               type="submit"
               fullWidth
-              size="sm"
-              radius="md"
-              h={48}
+              size="md"
+              radius="lg"
+              h={56}
               loading={isLoggingIn}
-              className="bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 shadow-lg shadow-indigo-200 dark:shadow-none"
+              className="bg-gs-primary hover:bg-gs-primary-hover transition-all duration-300 shadow-xl shadow-gs-primary/10 active:scale-[0.98]"
               styles={{
-                label: { fontSize: 14, fontWeight: 600 },
+                label: { fontSize: 16, fontWeight: 500 },
               }}
             >
-              Masuk 
+              Autentikasi Sekarang
             </Button>
           </Box>
 
-          <Alert color="blue" radius="md" variant="light" p="xs">
-            <Text size="xs" c="blue.9" style={{ lineHeight: 1.5 }}>
-              <b>Informasi Login Mahasiswa:</b>
-              <br />
-              Gunakan <b>NIM</b> sebagai Username & Password awal.
-            </Text>
-          </Alert>
-
-          <Text ta="center" size="xs" c="dimmed">
-            &copy; {new Date().getFullYear()} FST UIN Raden Fatah
-          </Text>
+          <div className="flex gap-4 p-4 rounded-2xl bg-gs-bg-overlay border border-gs-border">
+            <ThemeIcon color="dark" variant="light" size="lg" radius="md" className="bg-gs-primary/5">
+              <IconInfoCircle size={20} className="text-gs-text-primary" />
+            </ThemeIcon>
+            <div className="flex flex-col">
+              <Text size="xs" fw={600} className="text-gs-text-primary mb-0.5">Petunjuk Akses</Text>
+              <Text size="xs" className="text-gs-text-secondary" fw={500} style={{ lineHeight: 1.4 }}>
+                Mahasiswa baru dapat menggunakan <b>NIM</b> sebagai username dan password awal.
+              </Text>
+            </div>
+          </div>
         </Stack>
       </form>
     </Paper>

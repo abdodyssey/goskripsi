@@ -97,14 +97,14 @@ export function MahasiswaList() {
       notifications.show({
         title: "Berhasil",
         message: "Data mahasiswa berhasil diupdate",
-        color: "green",
+        color: "var(--gs-success)",
       });
       close();
     } catch (error) {
       notifications.show({
         title: "Gagal",
         message: (error as Error).message || "Terjadi kesalahan",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -134,7 +134,7 @@ export function MahasiswaList() {
           onClick={() => handleShowStudentProfile(row)}
         >
           <Tooltip label="Klik untuk lihat profil">
-            <Text size="sm" fw={700} c="indigo">
+            <Text size="sm" fw={700} className="text-gs-primary">
               {row.nama || "-"}
             </Text>
           </Tooltip>
@@ -210,7 +210,7 @@ export function MahasiswaList() {
         onClose={close}
         title={
           <Stack gap={0}>
-            <Text fw={700} fz="lg" className="dark:text-white">
+            <Text fw={600} fz="lg" className="">
               Edit Data Mahasiswa
             </Text>
             <Text size="xs" c="dimmed">
@@ -324,21 +324,23 @@ export function MahasiswaList() {
             <Group justify="flex-end" mt="md" gap="md">
               <Button
                 variant="subtle"
-                color="slate.4"
+                color="var(--gs-text-secondary)"
                 onClick={close}
                 radius="md"
+                fw={600}
               >
                 Batal
               </Button>
               <Button
-                color="indigo"
+                className="bg-gs-primary hover:bg-gs-primary-hover"
                 type="submit"
                 loading={isUpdating}
                 radius="md"
                 px="xl"
+                fw={700}
                 h={rem(42)}
               >
-                Simpan Perubahan
+                SIMPAN PERUBAHAN
               </Button>
             </Group>
           </Stack>

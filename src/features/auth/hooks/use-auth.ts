@@ -27,7 +27,14 @@ export const useAuth = () => {
         localStorage.removeItem("token");
       }
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
-      router.push("/dashboard");
+
+      // Redirect based on role
+      const roles = res.user?.roles || [];
+      if (roles.includes("admin")) {
+        router.push("/dashboard/users"); // Or a specific admin page
+      } else {
+        router.push("/dashboard");
+      }
     },
     onError: () => {
       notifications.show({

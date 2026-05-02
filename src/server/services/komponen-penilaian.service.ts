@@ -6,7 +6,9 @@ import {
 
 export class KomponenPenilaianService {
   async getAll() {
-    return await prisma.komponenPenilaian.findMany();
+    return await prisma.komponenPenilaian.findMany({
+      orderBy: { jenisUjianId: "asc" },
+    });
   }
 
   async getById(id: string) {
@@ -19,7 +21,7 @@ export class KomponenPenilaianService {
     return await prisma.komponenPenilaian.create({
       data: {
         jenisUjianId: Number(payload.jenis_ujian_id),
-        kriteria: payload.nama_komponen,
+        kriteria: payload.kriteria,
       },
     });
   }
@@ -30,8 +32,8 @@ export class KomponenPenilaianService {
       dataUpdate.jenisUjianId = payload.jenis_ujian_id
         ? Number(payload.jenis_ujian_id)
         : null;
-    if (payload.nama_komponen !== undefined)
-      dataUpdate.kriteria = payload.nama_komponen;
+    if (payload.kriteria !== undefined)
+      dataUpdate.kriteria = payload.kriteria;
 
     return await prisma.komponenPenilaian.update({
       where: { id: Number(id) },

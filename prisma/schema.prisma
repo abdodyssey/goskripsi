@@ -22,6 +22,7 @@ model Prodi {
   fakultasId Int         @map("fakultas_id")
   dosens     Dosen[]
   mahasiswas Mahasiswa[]
+  users      User[]
   peminatans Peminatan[]
   fakultas   Fakultas    @relation(fields: [fakultasId], references: [id])
   ruangans   Ruangan[]
@@ -80,6 +81,8 @@ model User {
   status    StatusAkun @default(aktif)
   dosen     Dosen?
   mahasiswa Mahasiswa?
+  prodiId   Int?       @map("prodi_id")
+  prodi     Prodi?     @relation(fields: [prodiId], references: [id])
   role      Role       @relation(fields: [roleId], references: [id])
 
   @@map("user")
@@ -178,9 +181,9 @@ model PengajuanRancanganPenelitian {
   mahasiswaId           Int                 @map("mahasiswa_id")
   tanggalPengajuan      DateTime            @default(now()) @map("tanggal_pengajuan")
   statusDosenPa         StatusPengajuan     @default(menunggu) @map("status_dosen_pa")
+  statusKaprodi         StatusPengajuan     @default(menunggu) @map("status_kaprodi")
   catatanDosenPa        String?             @map("catatan_dosen_pa")
   tanggalReviewPa       DateTime?           @map("tanggal_review_pa")
-  statusKaprodi         StatusPengajuan     @default(menunggu) @map("status_kaprodi")
   catatanKaprodi        String?             @map("catatan_kaprodi")
   tanggalReviewKaprodi  DateTime?           @map("tanggal_review_kaprodi")
   komenKprData          String?             @map("komen_kpr_data")
@@ -370,6 +373,7 @@ enum StatusDosen {
 
 enum StatusPengajuan {
   menunggu
+  diverifikasi
   diterima
   ditolak
 }

@@ -19,6 +19,12 @@ const DOSEN_SELECT = {
   email: true,
   status: true,
   prodi: { select: { id: true, namaProdi: true, fakultasId: true } },
+  _count: {
+    select: {
+      mahasiswaPemb1: true,
+      mahasiswaPemb2: true,
+    },
+  },
   user: { 
     select: { 
       id: true, 
@@ -156,6 +162,9 @@ export class DosenService {
       urlTtd: d.urlTtd,
       foto: d.foto,
       role: d.user?.role?.name,
+      p1Count: d._count?.mahasiswaPemb1 || 0,
+      p2Count: d._count?.mahasiswaPemb2 || 0,
+      bimbinganCount: (d._count?.mahasiswaPemb1 || 0) + (d._count?.mahasiswaPemb2 || 0),
       // legacy support
       no_hp: d.noHp,
       tempat_tanggal_lahir: d.tempatTanggalLahir,

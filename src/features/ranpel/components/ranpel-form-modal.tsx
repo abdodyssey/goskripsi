@@ -93,14 +93,14 @@ export function RanpelFormModal({
         notifications.show({
           title: "Berhasil",
           message: "Data Ranpel berhasil diperbarui.",
-          color: "teal",
+          color: "var(--gs-success)",
         });
       } else {
         await createPengajuan(values);
         notifications.show({
           title: "Berhasil",
           message: "Pengajuan Ranpel berhasil dibuat.",
-          color: "teal",
+          color: "var(--gs-success)",
         });
       }
       form.reset();
@@ -113,7 +113,7 @@ export function RanpelFormModal({
           error?.response?.data?.message ||
           (err as Error)?.message ||
           "Terjadi kesalahan",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -124,10 +124,10 @@ export function RanpelFormModal({
       onClose={onClose}
       title={
         <Stack gap={0}>
-          <MantineText fw={700} fz="lg" className="dark:text-white">
-            {editData ? "Edit Ranpel" : "Form Pengajuan Ranpel"}
+          <MantineText fw={800} fz="lg" className="text-gs-text-primary tracking-tight">
+            {editData ? "EDIT RANPEL" : "FORM PENGAJUAN RANPEL"}
           </MantineText>
-          <MantineText size="xs" c="dimmed">
+          <MantineText size="xs" c="dimmed" fw={600}>
             {editData
               ? "Perbarui detail rancangan penelitian Anda"
               : "Lengkapi detail rancangan penelitian Anda"}
@@ -135,7 +135,7 @@ export function RanpelFormModal({
         </Stack>
       }
       size="xl"
-      radius="lg"
+      radius="md"
       overlayProps={{
         backgroundOpacity: 0.5,
         blur: 4,
@@ -164,8 +164,10 @@ export function RanpelFormModal({
               label: {
                 marginBottom: 8,
                 fontSize: 13,
-                fontWeight: 600,
-                color: "#475569",
+                fontWeight: 700,
+                color: "var(--gs-text-secondary)",
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
               },
             }}
           />
@@ -205,22 +207,24 @@ export function RanpelFormModal({
           <Group justify="flex-end" mt="xl" gap="md">
             <Button
               variant="subtle"
-              color="slate.4"
+              color="var(--gs-text-secondary)"
               onClick={onClose}
               disabled={isCreating || isUpdating}
               radius="md"
+              fw={700}
             >
-              Batal
+              BATAL
             </Button>
             <Button
               type="submit"
               loading={isCreating || isUpdating}
-              color="indigo.9"
+              className="bg-gs-primary hover:bg-gs-primary-hover"
               radius="md"
               px="xl"
               h={42}
+              fw={700}
             >
-              {editData ? "Simpan Perubahan" : "Ajukan Ranpel"}
+              {editData ? "SIMPAN PERUBAHAN" : "AJUKAN RANPEL"}
             </Button>
           </Group>
         </Stack>

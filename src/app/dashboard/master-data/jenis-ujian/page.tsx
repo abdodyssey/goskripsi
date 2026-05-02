@@ -5,6 +5,8 @@ import { IconCertificate } from "@tabler/icons-react";
 import { PageHeader } from "@/components/PageHeader/PageHeader";
 import { MasterDataList } from "@/features/master-data/components/MasterDataList";
 
+import { StatusBadge } from "@/components/ui/status-badge";
+
 export default function JenisUjianPage() {
   const fields: any[] = [
     { name: "nama_jenis", label: "Nama Jenis Ujian", type: "text" },
@@ -16,7 +18,11 @@ export default function JenisUjianPage() {
     { key: "id", label: "ID" },
     { key: "namaJenis", label: "Nama Jenis Ujian" },
     { key: "deskripsi", label: "Deskripsi" },
-    { key: "aktif", label: "Status" },
+    { 
+      key: "aktif", 
+      label: "Status",
+      render: (val: any) => <StatusBadge status={val ? "aktif" : "tidak_aktif"} />
+    },
   ];
 
   return (

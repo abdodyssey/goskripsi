@@ -116,10 +116,11 @@ export default function MahasiswaJadwalUjianPage() {
         <Tooltip label="Detail">
           <ActionIcon
             variant="subtle"
-            color="indigo"
+            color="var(--gs-primary)"
             onClick={() => handleViewDetail(row)}
+            radius="md"
           >
-            <IconEye size={18} />
+            <IconEye size={18} stroke={1.5} />
           </ActionIcon>
         </Tooltip>
       ),
@@ -160,7 +161,10 @@ export default function MahasiswaJadwalUjianPage() {
               <Alert
                 icon={<IconAlertCircle size={16} />}
                 title="Kesalahan"
-                color="red"
+                color="var(--gs-danger)"
+                variant="light"
+                radius="lg"
+                className="bg-gs-danger-bg border-gs-danger-border text-gs-danger-text"
               >
                 {(myUjianError as { response?: { data?: { message?: string } } })
                   ?.response?.data?.message || "Gagal memuat jadwal Anda"}
@@ -171,8 +175,14 @@ export default function MahasiswaJadwalUjianPage() {
               <Alert
                 icon={<IconInfoCircle size={16} />}
                 title="Informasi"
-                color="blue"
                 variant="light"
+                radius="lg"
+                styles={{
+                  root: { backgroundColor: 'var(--gs-bg-overlay)', border: '1px solid var(--gs-border)' },
+                  title: { color: 'var(--gs-text-primary)' },
+                  icon: { color: 'var(--gs-primary)' },
+                  message: { color: 'var(--gs-text-secondary)' }
+                }}
               >
                 Jadwal ujian Anda belum tersedia. Silakan cek kembali setelah
                 pendaftaran Anda disetujui.
@@ -195,7 +205,7 @@ export default function MahasiswaJadwalUjianPage() {
       <Modal
         opened={detailOpened}
         onClose={closeDetail}
-        title={<Text fw={700}>Detail Jadwal Ujian</Text>}
+        title={<Text fw={600}>Detail Jadwal Ujian</Text>}
         size="lg"
         radius="lg"
       >

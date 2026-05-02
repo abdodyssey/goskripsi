@@ -13,9 +13,9 @@ import {
   ThemeIcon,
   Divider,
   ScrollArea,
-  useMantineColorScheme,
   Alert,
   Paper,
+  Box,
 } from "@mantine/core";
 import {
   IconCircleCheck,
@@ -48,9 +48,6 @@ export function PendaftaranUjianRevisiModal({
     {},
   );
 
-  const { colorScheme } = useMantineColorScheme();
-  const isDark = colorScheme === "dark";
-
   const { data: syaratData, isLoading: isLoadingSyarat } = useQuery({
     queryKey: ["syarat-jenis-ujian", pendaftaran?.jenisUjianId],
     queryFn: () =>
@@ -73,11 +70,11 @@ export function PendaftaranUjianRevisiModal({
 
     const filesToUpload = Object.values(syaratFiles).filter(Boolean);
     if (filesToUpload.length === 0) {
-      notifications.show({
-        title: "Peringatan",
-        message: "Silakan pilih setidaknya satu berkas untuk diunggah ulang",
-        color: "orange",
-      });
+        notifications.show({
+          title: "Peringatan",
+          message: "Silakan pilih setidaknya satu berkas untuk diunggah ulang",
+          color: "var(--gs-warning)",
+        });
       return;
     }
 
@@ -101,7 +98,7 @@ export function PendaftaranUjianRevisiModal({
         message: pendaftaran.status === "revisi" 
           ? "Berkas revisi berhasil diunggah dan status kembali menunggu."
           : "Berkas pendaftaran berhasil diperbarui.",
-        color: "teal",
+        color: "var(--gs-success)",
       });
       onClose();
     } catch (err: unknown) {
@@ -115,7 +112,7 @@ export function PendaftaranUjianRevisiModal({
           error?.response?.data?.message ||
           error?.message ||
           "Terjadi kesalahan",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -130,90 +127,101 @@ export function PendaftaranUjianRevisiModal({
       <Paper
         key={syarat.id}
         withBorder
-        radius="sm"
-        p="xs"
-        bg={
-          hasNewFile
-            ? isDark
-              ? "var(--mantine-color-teal-9)"
-              : "var(--mantine-color-teal-0)"
-            : isDark
-              ? "var(--mantine-color-dark-7)"
-              : "var(--mantine-color-white)"
-        }
+        radius="lg"
+        p="md"
+        className="transition-all duration-200"
+        bg={hasNewFile ? "var(--gs-bg-overlay)" : "var(--gs-bg-raised)"}
         style={{
-          borderColor: hasNewFile
-            ? isDark
-              ? "var(--mantine-color-teal-8)"
-              : "var(--mantine-color-teal-3)"
-            : "var(--mantine-color-default-border)",
+          borderColor: hasNewFile 
+            ? "var(--gs-success)" 
+            : "var(--gs-border)",
+          borderWidth: hasNewFile ? "2px" : "1px",
         }}
       >
-        <Group gap="xs" align="flex-start" wrap="nowrap">
-          <ThemeIcon
-            variant="light"
-            color={
-              hasNewFile
-                ? "teal"
-                : hasExistingFile
-                  ? "blue"
-                  : isWajib
-                    ? "orange"
-                    : "gray"
-            }
-            size="xs"
-            radius="xl"
-            mt={3}
-          >
-            {hasNewFile ? (
-              <IconCircleCheck size={10} />
-            ) : hasExistingFile ? (
-              <IconFile size={10} />
-            ) : (
-              <IconCircleDashed size={10} />
-            )}
-          </ThemeIcon>
-          <div style={{ flex: 1 }}>
-            <Group gap={6} align="center" mb={4}>
-              <Text
-                size="xs"
-                fw={isWajib ? 500 : 400}
-                c={isWajib ? undefined : "dimmed"}
+        <Stack gap="xs">
+          <Group justify="space-between" align="flex-start" wrap="nowrap">
+            <Group gap="sm" align="flex-start" wrap="nowrap" style={{ flex: 1 }}>
+              <ThemeIcon
+                variant="light"
+                color={hasNewFile ? "var(--gs-success)" : "var(--gs-text-muted)"}
+                size="md"
+                radius="md"
+                className={hasNewFile ? "" : "bg-gs-bg-overlay"}
               >
-                {idx + 1}. {syarat.namaSyarat}
-              </Text>
-
-              {isWajib && (
-                <Badge size="xs" variant="filled" color="red">
-                  Wajib
-                </Badge>
-              )}
-              {hasExistingFile && !hasNewFile && (
-                <Badge 
-                  size="xs" 
-                  variant="light" 
-                  color="blue" 
-                  className="cursor-pointer hover:bg-blue-1"
-                  onClick={() => {
-                    const existing = pendaftaran?.pemenuhanSyarats?.find(ps => ps.syaratId === syarat.id);
-                    if (existing?.fileBukti) window.open(existing.fileBukti, '_blank');
-                  }}
+                {hasNewFile ? (
+                  <IconCircleCheck size={18} stroke={2} />
+                ) : hasExistingFile ? (
+                  <IconFile size={18} stroke={1.5} />
+                ) : (
+                  <IconCircleDashed size={18} stroke={1.5} />
+                )}
+              </ThemeIcon>
+              
+              <Stack gap={4}>
+                <Text
+                  size="sm"
+                  fw={700}
+                  className="leading-snug text-gs-text-primary"
                 >
-                  Lihat Berkas Aktif
-                </Badge>
-              )}
+                  {syarat.namaSyarat}
+                </Text>
+                
+                <Group gap="xs" mt={2}>
+                  {isWajib && (
+                    <Badge size="xs" variant="filled" color="var(--gs-danger)" radius="xs" h={18}>
+                      WAJIB
+                    </Badge>
+                  )}
+                  {hasExistingFile && (
+                    <Button 
+                      size="compact-xs" 
+                      variant="subtle" 
+                      color="var(--gs-primary)" 
+                      radius="xs"
+                      h={18}
+                      leftSection={<IconFile size={12} stroke={1.5} />}
+                      className="px-1.5 hover:bg-gs-bg-overlay"
+                      onClick={() => {
+                        const existing = pendaftaran?.pemenuhanSyarats?.find(ps => ps.syaratId === syarat.id);
+                        if (existing?.fileBukti) window.open(existing.fileBukti, '_blank');
+                      }}
+                      styles={{
+                        section: { marginRight: 4 }
+                      }}
+                    >
+                      <Text size="10px" fw={700} lts={0.5} className="text-gs-text-secondary">LIHAT BERKAS</Text>
+                    </Button>
+                  )}
+                </Group>
+              </Stack>
             </Group>
-            <FileInput
-              size="xs"
-              placeholder="Ganti Berkas / Upload Ulang"
-              value={syaratFiles[syarat.id] || null}
-              onChange={(file) => handleFileChange(String(syarat.id), file)}
-              clearable
-              leftSection={<IconFile size={16} />}
-              accept=".pdf"
-            />
-          </div>
-        </Group>
+
+            {hasNewFile && (
+              <Badge color="var(--gs-success)" variant="light" radius="sm">Berkas Baru Disiapkan</Badge>
+            )}
+          </Group>
+
+          <FileInput
+            size="sm"
+            placeholder="Ganti Berkas / Upload Baru (PDF)"
+            value={syaratFiles[syarat.id] || null}
+            onChange={(file) => handleFileChange(String(syarat.id), file)}
+            clearable
+            leftSection={<IconFile size={18} stroke={1.5} className="text-gs-text-muted" />}
+            accept=".pdf"
+            variant="filled"
+            radius="md"
+            styles={{
+              input: {
+                backgroundColor: 'var(--gs-bg-overlay)',
+                border: '1px solid var(--gs-border)',
+                fontWeight: 500,
+                fontSize: 'var(--fs-caption)',
+                color: 'var(--gs-text-primary)',
+              }
+            }}
+          />
+        </Stack>
       </Paper>
     );
   };
@@ -222,66 +230,92 @@ export function PendaftaranUjianRevisiModal({
     <Modal
       opened={opened}
       onClose={onClose}
-      title={pendaftaran?.status === "revisi" ? "Upload Revisi Berkas" : "Kelola Berkas Pendaftaran"}
+      title={
+        <Stack gap={4}>
+          <Text className="gs-page-title" size="lg">
+            {pendaftaran?.status === "revisi" ? "Unggah Revisi Dokumen" : "Kelola Berkas Pendaftaran"}
+          </Text>
+          <Text size="xs" className="text-gs-text-secondary" fw={500}>
+            Pastikan berkas yang diunggah dalam format PDF yang jelas dan terbaca.
+          </Text>
+        </Stack>
+      }
       size="lg"
+      radius="xl"
       scrollAreaComponent={ScrollArea.Autosize}
+      padding="xl"
     >
-      <Stack gap="md">
+      <Stack gap="lg">
         {pendaftaran?.status === "revisi" && pendaftaran?.keterangan && (
           <Alert
-            icon={<IconInfoCircle size={16} />}
-            title="Catatan Revisi"
-            color="orange"
+            icon={<IconInfoCircle size={20} stroke={1.5} />}
+            title="Instruksi Revisi"
+            color="var(--gs-warning)"
             variant="light"
+            radius="lg"
           >
-            {pendaftaran.keterangan}
+            <Text size="xs" fw={500} className="text-gs-warning-text">{pendaftaran.keterangan}</Text>
           </Alert>
         )}
 
-        <Paper withBorder p="md" radius="md">
-          <Text fw={700} size="sm" mb="xs">
-            📋 Berkas Pendaftaran
-          </Text>
-          <Text size="xs" c="dimmed" mb="md">
-            {pendaftaran?.status === "revisi" 
-              ? "Gunakan fitur ini untuk mengunggah ulang berkas yang perlu diperbaiki sesuai catatan di atas."
-              : "Anda dapat melihat dan mengganti berkas pendaftaran Anda di bawah ini."}
-          </Text>
-
+        <Box>
           {isLoadingSyarat ? (
-            <Center py="xl">
-              <Loader size="sm" />
+            <Center py={60}>
+              <Loader size="md" />
             </Center>
           ) : (
-            <Stack gap="xs">
-              {wajibSyarat.map((syarat, idx) =>
-                renderSyaratItem(syarat, idx, true),
-              )}
-              {opsionalSyarat.length > 0 && (
-                <>
-                  <Divider
-                    my="xs"
-                    label="Syarat Opsional"
-                    labelPosition="center"
-                  />
-                  {opsionalSyarat.map((syarat, idx) =>
-                    renderSyaratItem(syarat, idx, false),
-                  )}
-                </>
-              )}
+            <Stack gap="md">
+              <Group justify="space-between">
+                <Text size="sm" fw={700} tt="uppercase" lts={1} className="text-gs-text-secondary">
+                  📋 Daftar Persyaratan
+                </Text>
+                <Badge variant="outline" color="var(--gs-primary)">Total {syaratList.length} Berkas</Badge>
+              </Group>
+
+              <Stack gap="sm">
+                {wajibSyarat.map((syarat, idx) =>
+                  renderSyaratItem(syarat, idx, true),
+                )}
+                
+                {opsionalSyarat.length > 0 && (
+                  <>
+                    <Divider
+                      my="md"
+                      label={
+                        <Text size="xs" fw={700} tt="uppercase" lts={1} px="sm" className="text-gs-text-muted">
+                          Dokumen Pendukung
+                        </Text>
+                      }
+                      labelPosition="center"
+                    />
+                    {opsionalSyarat.map((syarat, idx) =>
+                      renderSyaratItem(syarat, idx, false),
+                    )}
+                  </>
+                )}
+              </Stack>
             </Stack>
           )}
-        </Paper>
+        </Box>
 
-        <Button
-          onClick={handleSubmit}
-          color={pendaftaran?.status === "revisi" ? "orange" : "indigo"}
-          fullWidth
-          loading={isUploading}
-          leftSection={<IconCircleCheck size={18} />}
-        >
-          {pendaftaran?.status === "revisi" ? "Kirim Berkas Revisi" : "Simpan Perubahan Berkas"}
-        </Button>
+        <Group justify="flex-end" pt="md" style={{ borderTop: '1px solid var(--gs-border)' }}>
+          <Button variant="subtle" color="var(--gs-text-secondary)" onClick={onClose} radius="md">
+            Tutup
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            variant="filled"
+            className={pendaftaran?.status === "revisi" ? "bg-gs-warning hover:bg-gs-warning-hover" : "bg-gs-primary hover:bg-gs-primary-hover"}
+            radius="md"
+            h={42}
+            fw={700}
+            loading={isUploading}
+            leftSection={<IconCircleCheck size={18} stroke={2} />}
+            px="xl"
+          >
+            {pendaftaran?.status === "revisi" ? "KIRIM PERBAIKAN" : "SIMPAN PERUBAHAN"}
+          </Button>
+        </Group>
       </Stack>
     </Modal>
   );

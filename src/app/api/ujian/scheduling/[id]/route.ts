@@ -11,9 +11,9 @@ export async function PUT(
   if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
   try {
-    const { id } = await params;
     const body = await request.json();
-    const data = await ujianService.update(id, body);
+    // Use createScheduling for full replacement of schedule and penguji list, which also runs conflict validation.
+    const data = await ujianService.createScheduling(body);
     return NextResponse.json({ data, success: true });
   } catch (error: any) {
     const status = error instanceof HttpError ? error.statusCode : 500;

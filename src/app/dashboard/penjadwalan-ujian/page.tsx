@@ -34,7 +34,7 @@ import {
   IconRotate2,
 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { notifications } from "@mantine/notifications";
 import { useUjian } from "@/features/ujian/hooks/use-ujian";
 import { pendaftaranUjianService } from "@/features/pendaftaran-ujian/api/pendaftaran-ujian.service";
@@ -79,6 +79,8 @@ export default function PenjadwalanUjianPage() {
   const user = userResponse?.user;
   const roles = user?.roles || userResponse?.roles || [];
   const isSekprodi = roles.some((r) => r.toLowerCase() === "sekprodi");
+  const isSuperUser = roles.some(r => ["superadmin", "admin"].includes(r.toLowerCase()));
+  const userProdiId = user?.prodi_id;
 
   // ---- Modals ----
   const [formOpened, { open: openForm, close: closeForm }] =
@@ -112,9 +114,17 @@ export default function PenjadwalanUjianPage() {
       enabled: isAuthenticated && isSekprodi,
     });
 
-  const pendaftaranAll = Array.isArray(pendaftaranResponse?.data)
-    ? pendaftaranResponse.data
-    : [];
+  const pendaftaranAll = useMemo(() => {
+    const list = Array.isArray(pendaftaranResponse?.data)
+      ? pendaftaranResponse.data
+      : [];
+    if (isSuperUser || !userProdiId) return list;
+    return list.filter(p => {
+      const mhsProdi = p.mahasiswa as any;
+      const id = mhsProdi?.prodi_id || mhsProdi?.prodiId;
+      return Number(id) === Number(userProdiId);
+    });
+  }, [pendaftaranResponse?.data, isSuperUser, userProdiId]);
 
   // Filter for tabs
   const belumDijadwalkan = pendaftaranAll.filter(
@@ -130,6 +140,18 @@ export default function PenjadwalanUjianPage() {
   const selesaiDijadwalkan = pendaftaranAll.filter(
     (p) => p.ujian?.status === "selesai",
   );
+
+  const filteredJadwal = useMemo(() => {
+    if (!formTanggal) return [];
+    return sudahDijadwalkan.filter(p => {
+      if (!p.ujian?.jadwalUjian) return false;
+      const dateStr = new Date(p.ujian.jadwalUjian).toISOString().split('T')[0];
+      return dateStr === formTanggal;
+    }).sort((a, b) => {
+      if (!a.ujian?.waktuMulai || !b.ujian?.waktuMulai) return 0;
+      return new Date(a.ujian.waktuMulai).getTime() - new Date(b.ujian.waktuMulai).getTime();
+    });
+  }, [sudahDijadwalkan, formTanggal]);
 
   // Scheduling Form Data
   const [schedulingFormData, setSchedulingFormData] =
@@ -159,11 +181,11 @@ export default function PenjadwalanUjianPage() {
       }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      notifications.show({
-        title: "Gagal",
-        message: error?.response?.data?.message || "Gagal memuat form data",
-        color: "red",
-      });
+        notifications.show({
+          title: "Gagal",
+          message: error?.response?.data?.message || "Gagal memuat form data",
+          color: "var(--gs-danger)",
+        });
     } finally {
       setIsLoadingForm(false);
     }
@@ -246,7 +268,7 @@ export default function PenjadwalanUjianPage() {
       notifications.show({
         title: "Peringatan",
         message: "Semua field jadwal wajib diisi",
-        color: "orange",
+        color: "var(--gs-warning)",
       });
       return;
     }
@@ -262,7 +284,7 @@ export default function PenjadwalanUjianPage() {
       notifications.show({
         title: "Peringatan",
         message: "Ke-4 penguji wajib dipilih",
-        color: "orange",
+        color: "var(--gs-warning)",
       });
       return;
     }
@@ -295,21 +317,20 @@ export default function PenjadwalanUjianPage() {
         notifications.show({
           title: "Berhasil",
           message: "Jadwal berhasil diperbarui",
-          color: "teal",
+          color: "var(--gs-success)",
         });
       } else {
         await createScheduling(payload);
         notifications.show({
           title: "Berhasil",
           message: "Jadwal berhasil dibuat",
-          color: "teal",
+          color: "var(--gs-success)",
         });
       }
       queryClient.invalidateQueries({ queryKey: ["pendaftaran-all"] });
       closeForm();
       resetForm();
     } catch (err: unknown) {
-      console.error("Scheduling Error:", err);
       const error = err as {
         response?: { data?: { message?: string } };
         message?: string;
@@ -321,7 +342,7 @@ export default function PenjadwalanUjianPage() {
       notifications.show({
         title: "Gagal",
         message: msg,
-        color: "red",
+        color: "var(--gs-danger)",
         autoClose: 5000,
       });
     }
@@ -342,21 +363,21 @@ export default function PenjadwalanUjianPage() {
         </Text>
       ),
       labels: { confirm: "Ya, Batalkan", cancel: "Batal" },
-      confirmProps: { color: "red" },
+      confirmProps: { className: "bg-gs-danger hover:bg-gs-danger-hover", radius: "md" },
       onConfirm: async () => {
         try {
           await deleteScheduling(String(ujianId));
           notifications.show({
             title: "Berhasil",
             message: "Penjadwalan berhasil dibatalkan",
-            color: "teal",
+            color: "var(--gs-success)",
           });
         } catch (err: any) {
           notifications.show({
             title: "Gagal",
             message:
               err?.response?.data?.message || "Gagal membatalkan penjadwalan",
-            color: "red",
+            color: "var(--gs-danger)",
           });
         }
       },
@@ -378,7 +399,7 @@ export default function PenjadwalanUjianPage() {
       notifications.show({
         title: "Gagal",
         message: "Terjadi kesalahan saat mendownload PDF",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -401,7 +422,7 @@ export default function PenjadwalanUjianPage() {
       notifications.show({
         title: "Gagal",
         message: "Terjadi kesalahan saat mendownload Undangan",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     }
   };
@@ -467,7 +488,7 @@ export default function PenjadwalanUjianPage() {
           withinPortal
         >
           <Menu.Target>
-            <ActionIcon variant="subtle" color="gray" radius="md" size="lg">
+            <ActionIcon variant="subtle" color="var(--gs-text-muted)" radius="md" size="lg">
               <IconDotsVertical size={18} stroke={1.5} />
             </ActionIcon>
           </Menu.Target>
@@ -478,7 +499,7 @@ export default function PenjadwalanUjianPage() {
               leftSection={<IconCalendarPlus size={16} stroke={1.5} />}
               onClick={() => handleOpenScheduleForm(row)}
             >
-              Jadwalkan Ujian
+              JADWALKAN UJIAN
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>
@@ -554,7 +575,7 @@ export default function PenjadwalanUjianPage() {
           withinPortal
         >
           <Menu.Target>
-            <ActionIcon variant="subtle" color="gray" radius="md" size="lg">
+            <ActionIcon variant="subtle" color="var(--gs-text-muted)" radius="md" size="lg">
               <IconDotsVertical size={18} stroke={1.5} />
             </ActionIcon>
           </Menu.Target>
@@ -565,7 +586,7 @@ export default function PenjadwalanUjianPage() {
               leftSection={<IconCalendarEvent size={16} stroke={1.5} />}
               onClick={() => handleOpenEditForm(row)}
             >
-              Edit Jadwal
+              EDIT JADWAL
             </Menu.Item>
             <Menu.Item
               leftSection={<IconPrinter size={16} stroke={1.5} />}
@@ -573,14 +594,14 @@ export default function PenjadwalanUjianPage() {
                 handleDownloadUndangan(row.id, row.mahasiswa?.nim || "MHS")
               }
             >
-              Cetak Undangan
+              CETAK UNDANGAN
             </Menu.Item>
             <Menu.Item
-              leftSection={<IconRotate2 size={16} stroke={1.5} />}
-              color="red"
+              leftSection={<IconRotate2 size={16} stroke={2} />}
+              color="var(--gs-danger)"
               onClick={() => handleUndoSchedule(row)}
             >
-              Batalkan Penjadwalan
+              BATALKAN PENJADWALAN
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>
@@ -592,7 +613,7 @@ export default function PenjadwalanUjianPage() {
   if (!isSekprodi) {
     return (
       <Container size="xl" pt="md">
-        <Text c="red">
+        <Text className="text-gs-danger" fw={700}>
           Hanya Sekretaris Prodi yang memiliki akses ke halaman ini.
         </Text>
       </Container>
@@ -611,104 +632,96 @@ export default function PenjadwalanUjianPage() {
         icon={IconCalendarPlus}
         rightSection={
           <Button
-            variant="outline"
-            color="indigo"
+            variant="filled"
+            className="bg-gs-primary hover:bg-gs-primary-hover"
             radius="md"
-            leftSection={<IconPrinter size={18} stroke={1.5} />}
+            fw={700}
+            leftSection={<IconPrinter size={18} stroke={2} />}
             onClick={handleDownloadPdf}
-            style={{ borderWidth: "1.5px" }}
           >
-            Cetak Jadwal PDF
+            CETAK JADWAL PDF
           </Button>
         }
       />
 
       <Stack gap="xl">
-        <Paper 
-          withBorder 
-          radius="xl" 
-          p={0} 
-          shadow="xs" 
-          style={{ 
-            overflow: "hidden",
-            borderColor: "var(--mantine-color-gray-2)",
-            backgroundColor: "var(--mantine-color-white)"
+        <Tabs
+          value={activeTab}
+          onChange={(val) => setActiveTab(val || "belum")}
+          variant="pills"
+          radius="xl"
+          color="var(--gs-primary)"
+          styles={{
+            tab: {
+              border: '1px solid var(--gs-border)',
+              fontWeight: 700,
+              fontSize: '11px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }
           }}
         >
-          <Tabs
-            value={activeTab}
-            onChange={(val) => setActiveTab(val || "belum")}
-            variant="pills"
-            radius="md"
-          >
-            <Tabs.List px="lg" py="md" style={{ borderBottom: "1px solid var(--mantine-color-gray-2)", backgroundColor: "var(--mantine-color-gray-0)" }}>
-              <Tabs.Tab
-                value="belum"
-                px="xl"
-                rightSection={
-                  belumDijadwalkan.length > 0 && (
-                    <Badge size="xs" color="orange" variant="filled" radius="xl">
-                      {belumDijadwalkan.length}
-                    </Badge>
-                  )
-                }
-              >
-                Belum Dijadwalkan
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="dijadwalkan"
-                px="xl"
-                rightSection={
-                  sudahDijadwalkan.length > 0 && (
-                    <Badge size="xs" color="teal" variant="filled" radius="xl">
-                      {sudahDijadwalkan.length}
-                    </Badge>
-                  )
-                }
-              >
-                Dijadwalkan
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="selesai"
-                px="xl"
-                rightSection={
-                  selesaiDijadwalkan.length > 0 && (
-                    <Badge size="xs" color="indigo" variant="filled" radius="xl">
-                      {selesaiDijadwalkan.length}
-                    </Badge>
-                  )
-                }
-              >
-                Selesai
-              </Tabs.Tab>
-            </Tabs.List>
+          <Tabs.List mb="xl">
+            <Tabs.Tab
+              value="belum"
+              px="md"
+              leftSection={
+                <Badge size="xs" circle color="var(--gs-warning)" fw={700}>
+                  {belumDijadwalkan.length}
+                </Badge>
+              }
+            >
+              Belum Dijadwalkan
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="dijadwalkan"
+              px="md"
+              leftSection={
+                <Badge size="xs" circle color="var(--gs-success)" fw={700}>
+                  {sudahDijadwalkan.length}
+                </Badge>
+              }
+            >
+              Dijadwalkan
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="selesai"
+              px="md"
+              leftSection={
+                <Badge size="xs" circle color="var(--gs-primary)" fw={700}>
+                  {selesaiDijadwalkan.length}
+                </Badge>
+              }
+            >
+              Selesai
+            </Tabs.Tab>
+          </Tabs.List>
 
           <Tabs.Panel value="belum">
             <DataTable<PendaftaranUjian>
+              title="Daftar Mahasiswa (Belum Dijadwalkan)"
               data={belumDijadwalkan}
               columns={pendaftaranColumns}
               loading={isLoadingPendaftaran}
-              noCard
             />
           </Tabs.Panel>
           <Tabs.Panel value="dijadwalkan">
             <DataTable<PendaftaranUjian>
+              title="Daftar Jadwal Ujian (Dijadwalkan)"
               data={sudahDijadwalkan}
               columns={ujianColumns}
               loading={isLoadingPendaftaran}
-              noCard
             />
           </Tabs.Panel>
           <Tabs.Panel value="selesai">
             <DataTable<PendaftaranUjian>
+              title="Daftar Ujian (Selesai)"
               data={selesaiDijadwalkan}
               columns={ujianColumns}
               loading={isLoadingPendaftaran}
-              noCard
             />
           </Tabs.Panel>
         </Tabs>
-      </Paper>
       </Stack>
 
       {/* ---- Schedule / Edit Form Modal ---- */}
@@ -720,17 +733,28 @@ export default function PenjadwalanUjianPage() {
         }}
         title={
           <Stack gap={4}>
-            <Text fw={700} size="xl" lts={-0.5}>
-              {editingUjianId ? "Edit Jadwal Ujian" : "Buat Jadwal Ujian"}
+            <Text fw={800} size="xl" lts={-0.5} className="text-gs-text-primary tracking-tight">
+              {editingUjianId ? "EDIT JADWAL UJIAN" : "BUAT JADWAL UJIAN"}
             </Text>
-            <Text size="xs" c="dimmed" fw={500}>
+            <Text size="xs" c="dimmed" fw={700}>
               Lengkapi informasi jadwal dan dewan penguji
             </Text>
           </Stack>
         }
-        size="lg"
+        size="1100px"
         centered
+        radius="lg"
         scrollAreaComponent={ScrollArea.Autosize}
+        styles={{
+          header: {
+            borderBottom: "1px solid var(--gs-border)",
+            paddingBottom: "var(--mantine-spacing-md)",
+            marginBottom: "var(--mantine-spacing-md)",
+          },
+          body: {
+            paddingTop: 0,
+          },
+        }}
       >
         {isLoadingForm && (
           <Center py="xl">
@@ -739,50 +763,55 @@ export default function PenjadwalanUjianPage() {
         )}
 
         {!isLoadingForm && selectedItem && (
-          <Stack gap="md">
-            <Paper
-              p="lg"
-              radius="lg"
+          <Grid gutter="xl" align="flex-start">
+            <Grid.Col span={{ base: 12, lg: 7 }}>
+              <Stack gap="md">
+                <Paper
               withBorder
-              bg="var(--mantine-color-gray-0)"
-              style={{ borderColor: "var(--mantine-color-gray-2)" }}
+              radius="md"
+              p="md"
+              mb="sm"
+              bg="var(--gs-bg-overlay)"
+              className="border-gs-border"
             >
-              <Grid gutter="md">
-                <Grid.Col span={6}>
-                  <Stack gap={2}>
+              <Grid gutter="lg">
+                <Grid.Col span={{ base: 12, sm: 6 }}>
+                  <Stack gap={4}>
                     <Text size="xs" tt="uppercase" fw={700} c="dimmed" lts={0.5}>
                       Mahasiswa
                     </Text>
-                    <Text size="sm" fw={600}>
-                      {selectedItem.mahasiswa?.user?.nama}
+                    <Text size="sm" fw={700} className="text-gs-text-primary">
+                      {selectedItem.mahasiswa?.user?.nama || selectedItem.mahasiswa?.nama || "-"}
                     </Text>
                   </Stack>
                 </Grid.Col>
-                <Grid.Col span={6}>
-                  <Stack gap={2}>
+                <Grid.Col span={{ base: 12, sm: 6 }}>
+                  <Stack gap={4}>
                     <Text size="xs" tt="uppercase" fw={700} c="dimmed" lts={0.5}>
                       Jenis Ujian
                     </Text>
-                    <Text size="sm" fw={600}>
-                      {selectedItem.jenisUjian?.namaJenis}
+                    <Text size="sm" fw={700} className="text-gs-text-primary">
+                      {selectedItem.jenisUjian?.namaJenis || "-"}
                     </Text>
                   </Stack>
                 </Grid.Col>
                 <Grid.Col span={12}>
-                  <Divider variant="dashed" my="xs" />
-                  <Stack gap={2}>
+                  <Stack gap={4}>
                     <Text size="xs" tt="uppercase" fw={700} c="dimmed" lts={0.5}>
                       Judul Penelitian
                     </Text>
-                    <Text size="sm" fw={500} lineClamp={2} style={{ lineHeight: 1.5 }}>
-                      {selectedItem.rancanganPenelitian?.judulPenelitian}
+                    <Text size="sm" fw={700} className="text-gs-text-primary" style={{ fontStyle: "italic", lineHeight: 1.5 }}>
+                      &quot;{selectedItem.rancanganPenelitian?.judulPenelitian || "-"}&quot;
                     </Text>
                   </Stack>
                 </Grid.Col>
               </Grid>
             </Paper>
 
-            <Divider label="Informasi Jadwal" labelPosition="left" />
+            <Divider 
+              label={<Text size="xs" fw={800} tt="uppercase" className="text-gs-primary" lts={1}>Informasi Jadwal</Text>} 
+              labelPosition="left" 
+            />
 
             <Grid gutter="sm">
               <Grid.Col span={12}>
@@ -791,6 +820,7 @@ export default function PenjadwalanUjianPage() {
                   type="date"
                   value={formTanggal}
                   onChange={(e) => setFormTanggal(e.currentTarget.value)}
+                  radius="md"
                   required
                 />
               </Grid.Col>
@@ -801,6 +831,7 @@ export default function PenjadwalanUjianPage() {
                   data={TIME_OPTIONS}
                   value={formWaktuMulai}
                   onChange={setFormWaktuMulai}
+                  radius="md"
                   required
                 />
               </Grid.Col>
@@ -811,6 +842,7 @@ export default function PenjadwalanUjianPage() {
                   data={TIME_OPTIONS}
                   value={formWaktuSelesai}
                   onChange={setFormWaktuSelesai}
+                  radius="md"
                   required
                 />
               </Grid.Col>
@@ -822,12 +854,16 @@ export default function PenjadwalanUjianPage() {
                   value={formRuanganId}
                   onChange={setFormRuanganId}
                   searchable
+                  radius="md"
                   required
                 />
               </Grid.Col>
             </Grid>
 
-            <Divider label="Dewan Penguji" labelPosition="left" />
+            <Divider 
+              label={<Text size="xs" fw={800} tt="uppercase" className="text-gs-primary" lts={1}>Dewan Penguji</Text>} 
+              labelPosition="left" 
+            />
             <Grid gutter="sm">
               <Grid.Col span={6}>
                 <Select
@@ -837,6 +873,7 @@ export default function PenjadwalanUjianPage() {
                   value={formKetuaPenguji}
                   onChange={setFormKetuaPenguji}
                   searchable
+                  radius="md"
                   required
                 />
               </Grid.Col>
@@ -848,6 +885,7 @@ export default function PenjadwalanUjianPage() {
                   value={formSekretaris}
                   onChange={setFormSekretaris}
                   searchable
+                  radius="md"
                   required
                 />
               </Grid.Col>
@@ -859,6 +897,7 @@ export default function PenjadwalanUjianPage() {
                   value={formPenguji1}
                   onChange={setFormPenguji1}
                   searchable
+                  radius="md"
                   required
                 />
               </Grid.Col>
@@ -870,27 +909,82 @@ export default function PenjadwalanUjianPage() {
                   value={formPenguji2}
                   onChange={setFormPenguji2}
                   searchable
+                  radius="md"
                   required
                 />
               </Grid.Col>
             </Grid>
 
-            <Group justify="flex-end" mt="xl" pt="md" style={{ borderTop: "1px solid var(--mantine-color-gray-2)" }}>
-              <Button variant="subtle" color="gray" onClick={closeForm} radius="md">
-                Batal
+            <Group justify="flex-end" mt="md" pt="md" style={{ borderTop: "1px solid var(--gs-border)" }}>
+              <Button variant="subtle" color="var(--gs-text-muted)" onClick={closeForm} radius="md" fw={700}>
+                BATAL
               </Button>
               <Button
-                color="indigo"
+                className="bg-gs-primary hover:bg-gs-primary-hover"
                 onClick={handleSubmitSchedule}
                 loading={isCreating || isUpdating}
                 radius="md"
                 px="xl"
+                fw={700}
               >
-                {editingUjianId ? "Simpan Perubahan" : "Jadwalkan Ujian"}
+                {editingUjianId ? "SIMPAN PERUBAHAN" : "JADWALKAN UJIAN"}
               </Button>
             </Group>
           </Stack>
-        )}
+        </Grid.Col>
+
+        <Grid.Col span={{ base: 12, lg: 5 }}>
+          <Stack gap="sm">
+            <Text size="xs" fw={800} tt="uppercase" className="text-gs-primary" lts={1}>
+              Jadwal Terdaftar pada {formTanggal ? new Date(formTanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' }) : "Hari Ini"}
+            </Text>
+            
+            {!formTanggal ? (
+              <Paper p="xl" withBorder radius="md" ta="center" bg="var(--gs-bg-overlay)" className="border-gs-border border-dashed">
+                <Text size="xs" c="dimmed">Pilih tanggal terlebih dahulu untuk melihat jadwal yang sudah terdaftar.</Text>
+              </Paper>
+            ) : filteredJadwal.length === 0 ? (
+              <Paper p="xl" withBorder radius="md" ta="center" bg="var(--gs-bg-overlay)" className="border-gs-border border-dashed">
+                <Text size="xs" c="dimmed">Tidak ada jadwal ujian lain pada hari ini. Anda bebas menentukan waktu.</Text>
+              </Paper>
+            ) : (
+              <ScrollArea h={560} offsetScrollbars>
+                <Stack gap="xs" pr="sm">
+                  {filteredJadwal.map(p => (
+                    <Paper key={p.id} p="sm" withBorder radius="md" bg="var(--gs-bg-overlay)" className="border-gs-border">
+                      <Group justify="space-between" mb={4} wrap="nowrap">
+                        <Text size="xs" fw={800} className="text-gs-text-primary">
+                          {p.ujian?.waktuMulai ? new Date(p.ujian.waktuMulai).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-"} 
+                          {" - "} 
+                          {p.ujian?.waktuSelesai ? new Date(p.ujian.waktuSelesai).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-"}
+                        </Text>
+                        <Badge size="xs" color="gray" variant="light" radius="sm">
+                          {p.ujian?.ruangan?.namaRuangan || "Tanpa Ruang"}
+                        </Badge>
+                      </Group>
+                      <Text size="xs" fw={700} lineClamp={1} className="text-gs-text-primary">{p.mahasiswa?.user?.nama}</Text>
+                      <Text size="10px" c="dimmed" lineClamp={1}>{p.jenisUjian?.namaJenis}</Text>
+                      
+                      {p.ujian?.pengujiUjians && p.ujian.pengujiUjians.length > 0 && (
+                        <Group gap={4} mt={6}>
+                          {(p.ujian.pengujiUjians as PengujiUjian[]).map(penguji => (
+                            <Tooltip key={penguji.id} label={`${penguji.dosen?.user?.nama} (${penguji.peran})`}>
+                              <Badge size="xs" variant="dot" color="dark" style={{ textTransform: 'none', paddingLeft: 4, paddingRight: 4 }}>
+                                {penguji.dosen?.user?.nama?.split(' ')[0]}
+                              </Badge>
+                            </Tooltip>
+                          ))}
+                        </Group>
+                      )}
+                    </Paper>
+                  ))}
+                </Stack>
+              </ScrollArea>
+            )}
+          </Stack>
+        </Grid.Col>
+      </Grid>
+    )}
       </Modal>
     </Container>
   );

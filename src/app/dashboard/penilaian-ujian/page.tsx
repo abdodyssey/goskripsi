@@ -211,11 +211,11 @@ export default function PenilaianUjianPage() {
                     backgroundColor: "var(--mantine-color-gray-4)",
                   }}
                 />
-                <Text size="10px" fw={800} c="dimmed" tt="uppercase" lts={0.5}>
+                <Text size="10px" fw={600} c="dimmed" tt="uppercase" lts={0.5}>
                   Jadwal Ujian
                 </Text>
               </Group>
-              <Text size="xs" fw={700} pl={12}>
+              <Text size="xs" fw={600} pl={12}>
                 {row.jadwalUjian
                   ? new Date(row.jadwalUjian).toLocaleDateString("id-ID", {
                       day: "numeric",
@@ -232,14 +232,14 @@ export default function PenilaianUjianPage() {
                   h={6}
                   style={{
                     borderRadius: "50%",
-                    backgroundColor: "var(--mantine-color-indigo-5)",
+                    backgroundColor: "var(--gs-primary)",
                   }}
                 />
-                <Text size="10px" fw={800} c="indigo.7" tt="uppercase" lts={0.5}>
+                <Text size="10px" fw={700} className="text-gs-primary" tt="uppercase" lts={0.5}>
                   Hari & Jam
                 </Text>
               </Group>
-              <Text size="xs" fw={700} c="indigo.9" pl={12}>
+              <Text size="xs" fw={800} className="text-gs-text-primary" pl={12}>
                 {row.hariUjian || "-"}, {jam}
               </Text>
             </Box>
@@ -260,9 +260,11 @@ export default function PenilaianUjianPage() {
       header: "Peran Saya",
       render: (row) => (
         <Badge 
-          variant="light" 
-          color="indigo" 
+          variant="filled" 
+          className="bg-gs-primary"
           size="sm" 
+          radius="sm"
+          fw={700}
           style={{ whiteSpace: "normal", height: "auto", padding: "4px 8px", textAlign: "center" }}
         >
           {getMyRole(row)}
@@ -294,8 +296,8 @@ export default function PenilaianUjianPage() {
               <>
                 <Menu.Divider />
                 <Menu.Item 
-                  color="indigo"
-                  leftSection={<IconPlayerPlay size={16} stroke={1.5} />} 
+                  className="text-gs-primary"
+                  leftSection={<IconPlayerPlay size={16} stroke={1.5} className="text-gs-primary" />} 
                   component={Link}
                   href={`/dashboard/penilaian-ujian/ujian/${row.id}`}
                 >
@@ -337,8 +339,8 @@ export default function PenilaianUjianPage() {
               <>
                 <Menu.Divider />
                 <Menu.Item 
-                  color="indigo"
-                  leftSection={<IconPlayerPlay size={16} stroke={1.5} />} 
+                  className="text-gs-primary"
+                  leftSection={<IconPlayerPlay size={16} stroke={1.5} className="text-gs-primary" />} 
                   component={Link}
                   href={`/dashboard/penilaian-ujian/ujian/${row.id}`}
                 >
@@ -372,7 +374,7 @@ export default function PenilaianUjianPage() {
       notifications.show({
         title: "Gagal",
         message: "Gagal mendownload PDF jadwal",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     } finally {
       setDownloading(false);
@@ -383,7 +385,7 @@ export default function PenilaianUjianPage() {
   if (!isDosen && !canViewAll) {
     return (
       <Container size="xl" pt="md">
-        <Text c="red">
+        <Text className="text-gs-danger" fw={700}>
           Hanya Dosen atau Staf Administrasi yang memiliki akses ke halaman ini.
         </Text>
       </Container>
@@ -420,8 +422,8 @@ export default function PenilaianUjianPage() {
           setSelectedUjian(null);
         }}
         title={
-          <Text fw={700} size="lg">
-            Detail Informasi Ujian
+          <Text fw={800} size="lg" className="text-gs-text-primary tracking-tight">
+            DETAIL INFORMASI UJIAN
           </Text>
         }
         size="70rem"
@@ -429,7 +431,7 @@ export default function PenilaianUjianPage() {
         radius="lg"
         styles={{
           header: {
-            borderBottom: "1px solid var(--mantine-color-default-border)",
+            borderBottom: "1px solid var(--gs-border)",
             paddingBottom: "var(--mantine-spacing-md)",
             marginBottom: "var(--mantine-spacing-md)",
           },
@@ -445,8 +447,8 @@ export default function PenilaianUjianPage() {
               radius="md"
               p="md"
               mb="lg"
-              bg="gray.0"
-              className="dark:bg-slate-900/40"
+              bg="var(--gs-bg-overlay)"
+              className="border-gs-border"
             >
               <Stack gap="lg">
                 <Group justify="space-between" align="flex-start">
@@ -455,12 +457,12 @@ export default function PenilaianUjianPage() {
                       size="xs"
                       c="dimmed"
                       tt="uppercase"
-                      fw={800}
+                      fw={700}
                       lts={0.5}
                     >
                       Mahasiswa
                     </Text>
-                    <Text size="sm" fw={700}>
+                    <Text size="sm" fw={700} className="text-gs-text-primary">
                       {selectedUjian.pendaftaranUjian?.mahasiswa?.user?.nama ||
                         "-"}
                     </Text>
@@ -469,17 +471,17 @@ export default function PenilaianUjianPage() {
                       {selectedUjian.pendaftaranUjian?.mahasiswa?.nim || "-"}
                     </Text>
                   </Stack>
-                  <Badge color="indigo" variant="filled" size="md">
+                  <Badge className="bg-gs-primary" variant="filled" size="md" radius="sm" fw={700}>
                     {selectedUjian.pendaftaranUjian?.jenisUjian?.namaJenis ||
                       "-"}
                   </Badge>
                 </Group>
 
                 <Stack gap={4}>
-                  <Text size="xs" c="dimmed" tt="uppercase" fw={800} lts={0.5}>
+                  <Text size="xs" c="dimmed" tt="uppercase" fw={700} lts={0.5}>
                     Judul Penelitian
                   </Text>
-                  <Text size="sm" fw={600} style={{ fontStyle: "italic" }}>
+                  <Text size="sm" fw={700} className="text-gs-text-primary" style={{ fontStyle: "italic" }}>
                     &quot;
                     {selectedUjian.pendaftaranUjian?.rancanganPenelitian
                       ?.judulPenelitian || "-"}
@@ -491,19 +493,19 @@ export default function PenilaianUjianPage() {
 
             <Paper withBorder radius="md" p="md" mb="lg">
               <Text
-                size="sm"
-                fw={700}
+                size="xs"
+                fw={800}
                 mb="md"
-                c="indigo.7"
-                lts={0.5}
+                className="text-gs-text-primary"
+                lts={1}
                 tt="uppercase"
               >
-                Jadwal & Lokasi
+                JADWAL & LOKASI
               </Text>
               <Grid gutter="md">
                 <Grid.Col span={4}>
                   <Stack gap={2}>
-                    <Text size="xs" fw={700} c="dimmed" tt="uppercase">
+                    <Text size="xs" fw={600} c="dimmed" tt="uppercase">
                       Hari
                     </Text>
                     <Text size="sm" fw={600}>
@@ -516,7 +518,7 @@ export default function PenilaianUjianPage() {
                     <Text size="xs" fw={700} c="dimmed" tt="uppercase">
                       Tanggal
                     </Text>
-                    <Text size="sm" fw={600}>
+                    <Text size="sm" fw={700} className="text-gs-text-primary">
                       {selectedUjian.jadwalUjian
                         ? new Date(
                             selectedUjian.jadwalUjian,
@@ -534,7 +536,7 @@ export default function PenilaianUjianPage() {
                     <Text size="xs" fw={700} c="dimmed" tt="uppercase">
                       Waktu
                     </Text>
-                    <Text size="sm" fw={600}>
+                    <Text size="sm" fw={700} className="text-gs-text-primary">
                       {selectedUjian.waktuMulai
                         ? `${new Date(selectedUjian.waktuMulai).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} - ${selectedUjian.waktuSelesai ? new Date(selectedUjian.waktuSelesai).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "?"}`
                         : "-"}
@@ -547,7 +549,7 @@ export default function PenilaianUjianPage() {
                       <Text size="xs" fw={700} c="dimmed" tt="uppercase">
                         Ruangan:
                       </Text>
-                      <Badge variant="dot" color="indigo" size="sm">
+                      <Badge variant="outline" color="var(--gs-primary)" size="sm" radius="sm" fw={700}>
                         {selectedUjian.ruangan.namaRuangan}
                       </Badge>
                     </Group>
@@ -561,13 +563,13 @@ export default function PenilaianUjianPage() {
               selectedUjian.pengujiUjians.length > 0 && (
                 <Stack gap="xs">
                   <Text
-                    size="sm"
-                    fw={700}
-                    c="indigo.7"
-                    lts={0.5}
+                    size="xs"
+                    fw={800}
+                    className="text-gs-primary"
+                    lts={1}
                     tt="uppercase"
                   >
-                    Dewan Penguji
+                    DEWAN PENGUJI
                   </Text>
                   <Grid gutter="sm">
                     {selectedUjian.pengujiUjians.map((p, i) => (
@@ -576,18 +578,18 @@ export default function PenilaianUjianPage() {
                           p="sm"
                           radius="md"
                           withBorder
-                          className="dark:bg-slate-900/40"
+                          className=""
                         >
                           <Text
                             size="xs"
                             c="dimmed"
                             tt="uppercase"
-                            fw={800}
+                            fw={700}
                             lts={0.5}
                           >
                             {PERAN_LABELS[p.peran] || p.peran}
                           </Text>
-                          <Text size="sm" fw={600}>
+                          <Text size="sm" fw={700} className="text-gs-text-primary">
                             {p.dosen?.user?.nama || p.dosen?.nama || "-"}
                           </Text>
                         </Paper>
@@ -601,31 +603,31 @@ export default function PenilaianUjianPage() {
             {selectedUjian.nilaiDifinalisasi && selectedUjian.penilaians && (
               <Stack gap="xs">
                 <Text
-                  size="sm"
-                  fw={700}
-                  c="green.7"
-                  lts={0.5}
+                  size="xs"
+                  fw={800}
+                  className="text-gs-success-text"
+                  lts={1}
                   tt="uppercase"
                 >
-                  Hasil Penilaian Akhir
+                  HASIL PENILAIAN AKHIR
                 </Text>
                 
-                <Paper withBorder radius="md" p="md" bg="green.0">
+                <Paper withBorder radius="lg" p="xl" bg="var(--gs-success-bg)" style={{ borderColor: 'var(--gs-success-border)' }}>
                   <Group justify="space-between">
                     <Stack gap={0}>
-                      <Text size="xs" c="dimmed" tt="uppercase" fw={800}>Status Kelulusan</Text>
-                      <Badge size="lg" color={selectedUjian.hasil === 'lulus' ? 'green' : 'red'}>
+                      <Text size="10px" c="dimmed" tt="uppercase" fw={700} lts={0.5}>Status Kelulusan</Text>
+                      <Badge size="lg" variant="filled" className={selectedUjian.hasil === 'lulus' ? 'bg-gs-success' : 'bg-gs-danger'} radius="sm" fw={800}>
                         {(selectedUjian.hasil || 'TIDAK LULUS').toUpperCase()}
                       </Badge>
                     </Stack>
                     <Group gap="xl">
                       <Stack gap={0} align="flex-end">
-                        <Text size="xs" c="dimmed" tt="uppercase" fw={800}>Nilai Akhir</Text>
-                        <Text fw={800} size="xl" c="green.9">{Number(selectedUjian.nilaiAkhir || 0).toFixed(2)}</Text>
+                        <Text size="10px" c="dimmed" tt="uppercase" fw={700} lts={0.5}>Nilai Akhir</Text>
+                        <Text fw={800} size="xl" className="text-gs-success-text">{Number(selectedUjian.nilaiAkhir || 0).toFixed(2)}</Text>
                       </Stack>
                       <Stack gap={0} align="flex-end">
-                        <Text size="xs" c="dimmed" tt="uppercase" fw={800}>Indeks</Text>
-                        <Text fw={800} size="xl" c="green.9">{selectedUjian.nilaiHuruf || 'E'}</Text>
+                        <Text size="10px" c="dimmed" tt="uppercase" fw={700} lts={0.5}>Indeks</Text>
+                        <Text fw={800} size="xl" className="text-gs-success-text">{selectedUjian.nilaiHuruf || 'E'}</Text>
                       </Stack>
                     </Group>
                   </Group>
@@ -662,7 +664,7 @@ export default function PenilaianUjianPage() {
                               <Table.Td key={pIdx} ta="center" style={{ fontSize: '12px' }}>
                                 {(score && !(isBimbingan && isP1orP2)) ? (
                                   <Stack gap={0}>
-                                    <Text size="xs" fw={700}>{score.nilai}</Text>
+                                    <Text size="xs" fw={600}>{score.nilai}</Text>
                                     <Text size="10px" c="dimmed">{bobot}%</Text>
                                   </Stack>
                                 ) : (
@@ -684,23 +686,23 @@ export default function PenilaianUjianPage() {
               <Paper withBorder radius="md" p="md">
                 <Text
                   size="sm"
-                  fw={700}
+                  fw={800}
                   mb="xs"
-                  c="orange.7"
+                  className="text-gs-warning-text"
                   lts={0.5}
                   tt="uppercase"
                 >
-                  Catatan & Revisi
+                  CATATAN & REVISI
                 </Text>
                 {selectedUjian.catatan && (
                   <Box mb="xs">
-                    <Text size="xs" c="dimmed" fw={700}>CATATAN PENJADWALAN:</Text>
+                    <Text size="xs" c="dimmed" fw={600}>CATATAN PENJADWALAN:</Text>
                     <Text size="sm" lh={1.4}>{selectedUjian.catatan}</Text>
                   </Box>
                 )}
                 {selectedUjian.catatanRevisi && (
                   <Box>
-                    <Text size="xs" c="dimmed" fw={700}>CATATAN REVISI PENGUJI:</Text>
+                    <Text size="xs" c="dimmed" fw={600}>CATATAN REVISI PENGUJI:</Text>
                     <Text size="sm" lh={1.4}>{selectedUjian.catatanRevisi}</Text>
                   </Box>
                 )}

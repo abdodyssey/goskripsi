@@ -12,11 +12,14 @@ import {
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
+import { IconUser, IconUsers } from "@tabler/icons-react";
 import { mahasiswaService } from "@/features/mahasiswa/api/mahasiswa.service";
+import { Badge } from "@mantine/core";
 
 interface DosenOption {
   id: string | number;
   nama: string;
+  bimbinganCount?: number;
 }
 
 interface SetPembimbingModalProps {
@@ -54,13 +57,13 @@ export function SetPembimbingModal({
     setIsLoading(true);
     try {
       const response = await mahasiswaService.getDosens();
-      setDosenList(response.data);
+      setDosenList(response);
     } catch (error) {
       console.error("Fetch Dosen Error:", error);
       notifications.show({
         title: "Gagal",
         message: "Gagal mengambil data dosen",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     } finally {
       setIsLoading(false);
@@ -80,7 +83,7 @@ export function SetPembimbingModal({
       notifications.show({
         title: "Berhasil",
         message: "Dosen Pembimbing berhasil diperbarui",
-        color: "green",
+        color: "var(--gs-success)",
       });
       onSuccess();
       onClose();
@@ -89,17 +92,35 @@ export function SetPembimbingModal({
       notifications.show({
         title: "Gagal",
         message: "Gagal memperbarui dosen pembimbing",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const dosenOptions = dosenList.map((d) => ({
+  const dosenOptions = (dosenList || []).map((d) => ({
     value: d.id.toString(),
     label: d.nama || "-",
+    bimbinganCount: d.bimbinganCount || 0,
   }));
+
+  const renderSelectOption = ({ option, checked }: any) => {
+    const count = option.bimbinganCount || 0;
+    const color = count >= 10 ? "var(--gs-danger)" : count >= 5 ? "var(--gs-warning)" : "var(--gs-success)";
+
+    return (
+      <Group justify="space-between" wrap="nowrap" w="100%">
+        <Stack gap={0}>
+          <Text size="sm" fw={500}>{option.label}</Text>
+          {checked && <Text size="xs" c="dimmed">Terpilih</Text>}
+        </Stack>
+        <Badge variant="light" color={color} size="sm" radius="sm" fw={700}>
+          {count} Mhs
+        </Badge>
+      </Group>
+    );
+  };
 
   return (
     <Modal
@@ -122,8 +143,13 @@ export function SetPembimbingModal({
             data={dosenOptions}
             searchable
             clearable
+            renderOption={renderSelectOption}
+            leftSection={<IconUser size={16} />}
             value={p1}
             onChange={setP1}
+            styles={{
+              option: { padding: "8px 12px" }
+            }}
           />
 
           <Select
@@ -132,20 +158,27 @@ export function SetPembimbingModal({
             data={dosenOptions}
             searchable
             clearable
+            renderOption={renderSelectOption}
+            leftSection={<IconUser size={16} />}
             value={p2}
             onChange={setP2}
+            styles={{
+              option: { padding: "8px 12px" }
+            }}
           />
 
           <Group justify="flex-end" mt="xl">
-            <Button variant="outline" onClick={onClose} color="gray">
-              Batal
+            <Button variant="outline" onClick={onClose} color="var(--gs-text-secondary)" radius="md" fw={700}>
+              BATAL
             </Button>
             <Button
               onClick={handleSubmit}
               loading={isSubmitting}
-              color="indigo"
+              className="bg-gs-primary hover:bg-gs-primary-hover"
+              radius="md"
+              fw={700}
             >
-              Simpan Perubahan
+              SIMPAN PERUBAHAN
             </Button>
           </Group>
         </Stack>

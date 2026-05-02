@@ -9,9 +9,7 @@ import {
   Button,
   Stack,
   Modal,
-  ScrollArea,
   ActionIcon,
-  Tooltip,
   Paper,
   TextInput,
   Select,
@@ -19,7 +17,6 @@ import {
   Menu,
   rem,
   Center,
-  Loader,
   ThemeIcon,
 } from "@mantine/core";
 import { PageHeader } from "@/components/PageHeader/PageHeader";
@@ -36,6 +33,8 @@ import {
   IconMail,
   IconUser,
   IconShieldLock,
+  IconCheck,
+  IconX,
 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
@@ -43,6 +42,8 @@ import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import { apiClient } from "@/lib/api-client";
 import { useState } from "react";
+import { ActionIconButton } from "@/components/ui/action-icon-button";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface User {
   id: number;
@@ -51,7 +52,9 @@ interface User {
   email: string;
   role: string;
   roleId: number;
-  createdAt: string;
+  status?: string;
+  prodiId?: number;
+  prodiName?: string;
 }
 
 export default function UserManagementPage() {
@@ -64,15 +67,20 @@ export default function UserManagementPage() {
   const user = userResponse?.user;
   const roles = user?.roles || userResponse?.roles || [];
   const isSuperAdmin = roles.includes("superadmin");
+  const isAdmin = roles.includes("admin");
+  const isKaprodi = roles.includes("kaprodi");
+  const isSekprodi = roles.includes("sekprodi");
+  const canManageUsers = isSuperAdmin || isAdmin || isKaprodi || isSekprodi;
+  const lockedProdiId = !isSuperAdmin ? user?.prodiId : null;
 
   // ---- Queries ----
   const { data: usersResponse, isLoading } = useQuery({
     queryKey: ["users-list", search],
     queryFn: async () => {
-      const res = await apiClient.get(`/users?search=${search}`);
+      const res = await apiClient.get(`/users?search=${search}&limit=5000`);
       return res.data;
     },
-    enabled: isAuthenticated && isSuperAdmin,
+    enabled: isAuthenticated && canManageUsers,
   });
 
   const { data: rolesResponse } = useQuery({
@@ -81,7 +89,16 @@ export default function UserManagementPage() {
       const res = await apiClient.get("/roles");
       return res.data;
     },
-    enabled: isAuthenticated && isSuperAdmin,
+    enabled: isAuthenticated && canManageUsers,
+  });
+
+  const { data: prodiResponse } = useQuery({
+    queryKey: ["prodi-list"],
+    queryFn: async () => {
+      const res = await apiClient.get("/prodi");
+      return res.data;
+    },
+    enabled: isAuthenticated && canManageUsers,
   });
 
   // ---- Mutations ----
@@ -97,7 +114,7 @@ export default function UserManagementPage() {
       notifications.show({
         title: "Berhasil",
         message: `User berhasil ${editingUser ? "diperbarui" : "dibuat"}`,
-        color: "teal",
+        color: "var(--gs-success)",
       });
       close();
     },
@@ -105,7 +122,7 @@ export default function UserManagementPage() {
       notifications.show({
         title: "Gagal",
         message: error.response?.data?.message || "Terjadi kesalahan",
-        color: "red",
+        color: "var(--gs-danger)",
       });
     },
   });
@@ -119,7 +136,7 @@ export default function UserManagementPage() {
       notifications.show({
         title: "Berhasil",
         message: "User berhasil dihapus",
-        color: "teal",
+        color: "var(--gs-success)",
       });
     },
   });
@@ -132,6 +149,8 @@ export default function UserManagementPage() {
       email: "",
       password: "",
       role_id: "",
+      status: "aktif",
+      prodi_id: "",
     },
     validate: {
       username: (val) => (val.length < 3 ? "Username terlalu pendek" : null),
@@ -144,6 +163,9 @@ export default function UserManagementPage() {
   const handleOpenCreate = () => {
     setEditingUser(null);
     form.reset();
+    if (lockedProdiId) {
+      form.setFieldValue("prodi_id", String(lockedProdiId));
+    }
     open();
   };
 
@@ -154,8 +176,13 @@ export default function UserManagementPage() {
       nama: u.nama,
       email: u.email,
       role_id: String(u.roleId),
+      status: u.status || "aktif",
+      prodi_id: u.prodiId ? String(u.prodiId) : "",
       password: "", // Reset password only if provided
     });
+    if (lockedProdiId) {
+      form.setFieldValue("prodi_id", String(lockedProdiId));
+    }
     open();
   };
 
@@ -164,105 +191,113 @@ export default function UserManagementPage() {
       title: "Hapus User",
       children: (
         <Text size="sm">
-          Apakah Anda yakin ingin menghapus user <b>{u.nama}</b>? Tindakan ini akan menghapus data terkait mahasiswa/dosen jika ada.
+          Apakah Anda yakin ingin menghapus user <b>{u.nama}</b>? Tindakan ini
+          akan menghapus data terkait mahasiswa/dosen jika ada.
         </Text>
       ),
       labels: { confirm: "Hapus", cancel: "Batal" },
-      confirmProps: { color: "red" },
+      confirmProps: { color: "var(--gs-danger)" },
       onConfirm: () => deleteMutation.mutate(u.id),
     });
   };
 
-  const roleOptions = (rolesResponse?.data || []).map((r: any) => ({
-    value: String(r.id),
-    label: r.name.toUpperCase(),
+  const roleOptions = (rolesResponse?.data || [])
+    .filter((r: any) =>
+      isSuperAdmin
+        ? true
+        : ["mahasiswa", "dosen"].includes(String(r.name).toLowerCase()),
+    )
+    .map((r: any) => ({
+      value: String(r.id),
+      label: r.name.toUpperCase(),
+    }));
+
+  const statusOptions = [
+    { value: "aktif", label: "AKTIF" },
+    { value: "tidak_aktif", label: "TIDAK AKTIF" },
+  ];
+
+  const prodiOptions = (prodiResponse?.data || []).map((p: any) => ({
+    value: String(p.id),
+    label: p.namaProdi || p.nama || p.namaProdi || p.name,
   }));
 
   const columns: DataTableColumn<User>[] = [
     {
-      header: "User",
+      header: "Nama & Username",
       render: (row) => (
-        <Group gap="sm">
-          <Paper withBorder radius="xl" w={40} h={40}>
-            <Center h="100%">
-              <IconUser size={20} stroke={1.5} color="var(--mantine-color-indigo-6)" />
-            </Center>
-          </Paper>
-          <Stack gap={0}>
-            <Text size="sm" fw={700}>{row.nama}</Text>
-            <Text size="xs" c="dimmed">@{row.username}</Text>
-          </Stack>
-        </Group>
+        <Stack gap={0}>
+          <Text size="sm" fw={700} className="text-gs-text-primary">
+            {row.nama || "-"}
+          </Text>
+          <Text size="xs" className="text-gs-text-muted">
+            @{row.username}
+          </Text>
+        </Stack>
       ),
     },
     {
       header: "Email",
       render: (row) => (
-        <Group gap={4}>
-          <IconMail size={14} color="gray" />
-          <Text size="sm">{row.email}</Text>
-        </Group>
+        <Text size="sm" className="text-gs-text-secondary" fw={500}>
+          {row.email}
+        </Text>
       ),
     },
     {
       header: "Role",
       render: (row) => {
-        const colors: Record<string, string> = {
-          superadmin: "red",
-          admin: "orange",
-          sekprodi: "indigo",
-          kaprodi: "blue",
-          dosen: "teal",
-          mahasiswa: "slate",
-        };
         return (
-          <Badge variant="light" color={colors[row.role.toLowerCase()] || "gray"} radius="sm">
+          <Badge
+            variant="light"
+            color="dark"
+            radius="sm"
+            fw={700}
+            size="xs"
+            className="text-gs-text-primary"
+          >
             {row.role.toUpperCase()}
           </Badge>
         );
       },
     },
     {
+      header: "Status",
+      render: (row) => <StatusBadge status={row.status || "aktif"} />,
+    },
+    {
       header: "Aksi",
       textAlign: "right",
-      width: 80,
+      width: 100,
       render: (row) => (
-        <Menu shadow="md" width={200} position="bottom-end">
-          <Menu.Target>
-            <ActionIcon variant="subtle" color="gray">
-              <IconDotsVertical size={18} />
-            </ActionIcon>
-          </Menu.Target>
-
-          <Menu.Dropdown>
-            <Menu.Label>Manajemen</Menu.Label>
-            <Menu.Item
-              leftSection={<IconEdit style={{ width: rem(14), height: rem(14) }} />}
-              onClick={() => handleOpenEdit(row)}
-            >
-              Edit User
-            </Menu.Item>
-            <Menu.Divider />
-            <Menu.Label color="red">Bahaya</Menu.Label>
-            <Menu.Item
-              color="red"
-              leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
-              onClick={() => handleDelete(row)}
-            >
-              Hapus User
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
+        <Group gap={4} justify="flex-end">
+          <ActionIconButton
+            icon={IconEdit}
+            tooltip="Edit Akun User"
+            onClick={() => handleOpenEdit(row)}
+          />
+          <ActionIconButton
+            icon={IconTrash}
+            tooltip="Hapus User"
+            color="var(--gs-danger)"
+            onClick={() => handleDelete(row)}
+          />
+        </Group>
       ),
     },
   ];
 
   if (isLoadingProfile || !isAuthenticated) return null;
-  if (!isSuperAdmin) {
+  if (!canManageUsers) {
     return (
       <Container size="xl" pt="xl">
-        <Alert color="red" title="Akses Ditolak" icon={<IconShieldLock />}>
-          Hanya Super Admin yang dapat mengakses halaman manajemen user.
+        <Alert
+          color="var(--gs-danger)"
+          title="Akses Ditolak"
+          icon={<IconShieldLock size={24} />}
+        >
+          Hanya Admin, Kaprodi, Sekprodi, atau Super Admin yang dapat mengakses
+          halaman manajemen user.
         </Alert>
       </Container>
     );
@@ -280,43 +315,59 @@ export default function UserManagementPage() {
         ]}
         rightSection={
           <Button
-            leftSection={<IconUserPlus size={18} />}
+            leftSection={<IconUserPlus size={18} stroke={1.5} />}
             onClick={handleOpenCreate}
-            color="indigo"
+            className="bg-gs-primary hover:bg-gs-primary-hover"
             radius="md"
+            fw={700}
           >
-            Tambah User Baru
+            TAMBAH USER BARU
           </Button>
         }
       />
 
-      <Paper withBorder radius="lg" p="md" mt="xl" bg="gray.0" className="dark:bg-dark-7">
-        <Group justify="space-between" mb="md">
+      <DataTable<User>
+        data={usersResponse?.data || []}
+        columns={columns}
+        loading={isLoading}
+        title="Daftar Pengguna Sistem"
+        description="Manajemen seluruh akun pengguna, hak akses, dan kredensial login"
+        rightSection={
           <TextInput
             placeholder="Cari nama, username, atau email..."
-            leftSection={<IconSearch size={16} stroke={1.5} />}
+            leftSection={
+              <IconSearch
+                size={18}
+                stroke={1.5}
+                className="text-gs-text-muted"
+              />
+            }
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={350}
             radius="md"
+            variant="filled"
+            styles={{
+              input: {
+                backgroundColor: "var(--gs-bg-overlay)",
+                border: "1px solid var(--gs-border)",
+              },
+            }}
           />
-        </Group>
-
-        <DataTable<User>
-          data={usersResponse?.data || []}
-          columns={columns}
-          loading={isLoading}
-          noCard
-        />
-      </Paper>
+        }
+      />
 
       {/* ---- Form Modal ---- */}
       <Modal
         opened={opened}
         onClose={close}
         title={
-          <Text fw={700} size="lg">
-            {editingUser ? "Edit User" : "Tambah User Baru"}
+          <Text
+            fw={800}
+            size="lg"
+            className="text-gs-text-primary tracking-tight"
+          >
+            {editingUser ? "EDIT USER" : "TAMBAH USER BARU"}
           </Text>
         }
         radius="lg"
@@ -336,7 +387,7 @@ export default function UserManagementPage() {
               label="Username"
               placeholder="Masukkan username"
               required
-              disabled={!!editingUser}
+              // allow editing username
               leftSection={<IconLock size={16} />}
               {...form.getInputProps("username")}
             />
@@ -354,8 +405,31 @@ export default function UserManagementPage() {
               required
               {...form.getInputProps("role_id")}
             />
+            <Select
+              label="Program Studi"
+              placeholder="Pilih program studi (opsional)"
+              data={prodiOptions}
+              disabled={!isSuperAdmin}
+              description={
+                !isSuperAdmin
+                  ? "Program studi dikunci sesuai akun login."
+                  : undefined
+              }
+              {...form.getInputProps("prodi_id")}
+            />
+            <Select
+              label="Status Akun"
+              placeholder="Pilih status"
+              data={statusOptions}
+              required
+              {...form.getInputProps("status")}
+            />
             <PasswordInput
-              label={editingUser ? "Ganti Password (Kosongkan jika tidak diubah)" : "Password"}
+              label={
+                editingUser
+                  ? "Ganti Password (Kosongkan jika tidak diubah)"
+                  : "Password"
+              }
               placeholder="Masukkan password"
               required={!editingUser}
               leftSection={<IconShieldLock size={16} />}
@@ -363,16 +437,23 @@ export default function UserManagementPage() {
             />
 
             <Group justify="flex-end" mt="xl">
-              <Button variant="subtle" onClick={close} color="gray">
-                Batal
+              <Button
+                variant="subtle"
+                onClick={close}
+                color="var(--gs-text-muted)"
+                radius="md"
+                fw={700}
+              >
+                BATAL
               </Button>
               <Button
                 type="submit"
                 loading={saveMutation.isPending}
-                color="indigo"
+                className="bg-gs-primary hover:bg-gs-primary-hover"
                 radius="md"
+                fw={700}
               >
-                {editingUser ? "Simpan Perubahan" : "Buat User"}
+                {editingUser ? "SIMPAN PERUBAHAN" : "BUAT USER"}
               </Button>
             </Group>
           </Stack>
@@ -383,15 +464,34 @@ export default function UserManagementPage() {
 }
 
 function Alert({ children, title, color, icon }: any) {
+  const isDanger = color.includes("danger") || color === "red";
+  const bgColor = isDanger ? "var(--gs-danger-bg)" : "var(--gs-bg-overlay)";
+  const borderColor = isDanger ? "var(--gs-danger-border)" : "var(--gs-border)";
+  const textColor = isDanger
+    ? "var(--gs-danger-text)"
+    : "var(--gs-text-primary)";
   return (
-    <Paper withBorder p="xl" radius="lg" bg={`${color}.0`}>
+    <Paper withBorder p="xl" radius="lg" bg={bgColor} style={{ borderColor }}>
       <Group>
-        <ThemeIcon size={40} radius="md" color={color} variant="light">
+        <ThemeIcon
+          size={48}
+          radius="md"
+          className={isDanger ? "bg-gs-danger" : "bg-gs-primary"}
+          variant="filled"
+        >
           {icon}
         </ThemeIcon>
         <Stack gap={2}>
-          <Text fw={700} c={`${color}.9`}>{title}</Text>
-          <Text size="sm">{children}</Text>
+          <Text
+            fw={800}
+            className="text-gs-text-primary"
+            style={{ color: textColor }}
+          >
+            {title}
+          </Text>
+          <Text size="sm" className="text-gs-text-secondary">
+            {children}
+          </Text>
         </Stack>
       </Group>
     </Paper>

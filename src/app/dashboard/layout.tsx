@@ -11,11 +11,21 @@ import {
   Burger,
   Stack,
   Box,
+  Affix,
+  Paper,
+  ThemeIcon,
+  Button,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { NavbarNested } from "@/components/NavbarNested/NavbarNested";
 import { useMantineColorScheme } from "@mantine/core";
-import { IconSun, IconMoon, IconAlertCircle } from "@tabler/icons-react";
+import {
+  IconSun,
+  IconMoon,
+  IconAlertCircle,
+  IconMinus,
+} from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -27,6 +37,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [mounted, setMounted] = useState(false);
+  const [isAlertMinimized, setIsAlertMinimized] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -66,7 +77,7 @@ export default function DashboardLayout({
           justifyContent: "center",
         }}
       >
-        <Loader color="indigo.9" size="lg" />
+        <Loader color="var(--gs-primary)" size="lg" />
       </Container>
     );
   }
@@ -91,35 +102,10 @@ export default function DashboardLayout({
       <AppShell.Header
         className="transition-all duration-300 border-b border-border"
         style={{
-          borderBottom: "1px solid var(--mantine-color-default-border)",
+          borderBottom: "1px solid var(--gs-border)",
         }}
       >
         <Stack gap={0} w="100%">
-          {isDefaultPassword && (
-            <Box
-              bg="red.7"
-              py={4}
-              px="xl"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <IconAlertCircle size={16} color="white" />
-              <Text size="xs" fw={600} c="white">
-                Anda masih menggunakan kata sandi default. Segera ganti kata
-                sandi Anda demi keamanan akun.{" "}
-                <Link
-                  href="/dashboard/profile"
-                  style={{ color: "white", textDecoration: "underline" }}
-                >
-                  Ganti di sini
-                </Link>
-              </Text>
-            </Box>
-          )}
           <Group h={64} px="xl" justify="space-between">
             <Group gap="lg">
               <Burger
@@ -127,32 +113,15 @@ export default function DashboardLayout({
                 onClick={toggle}
                 hiddenFrom="sm"
                 size="sm"
-                color="indigo"
+                color="var(--gs-primary)"
               />
               <Text
                 size="sm"
-                fw={700}
-                className="text-slate-900 dark:text-slate-100 uppercase tracking-widest"
+                fw={800}
+                className="text-gs-text-primary uppercase tracking-widest"
               >
-                Dashboard
+                DASHBOARD
               </Text>
-            </Group>
-
-            <Group gap="xs">
-              <ActionIcon
-                onClick={() => toggleColorScheme()}
-                variant="light"
-                color="indigo"
-                size="lg"
-                aria-label="Toggle color scheme"
-                radius="md"
-              >
-                {colorScheme === "dark" ? (
-                  <IconSun size={20} stroke={1.5} />
-                ) : (
-                  <IconMoon size={20} stroke={1.5} />
-                )}
-              </ActionIcon>
             </Group>
           </Group>
         </Stack>
@@ -160,7 +129,7 @@ export default function DashboardLayout({
 
       <AppShell.Navbar
         style={{
-          borderRight: "1px solid var(--mantine-color-default-border)",
+          borderRight: "1px solid var(--gs-border)",
           boxShadow: isMobile && opened ? "var(--mantine-shadow-xl)" : "none",
           maxWidth: isMobile ? 280 : undefined,
         }}
@@ -174,6 +143,94 @@ export default function DashboardLayout({
         </div>
         <ProfileCompletionModal />
       </AppShell.Main>
+
+      {isDefaultPassword && (
+        <Affix position={{ bottom: 24, right: 24 }} zIndex={1000}>
+          {isAlertMinimized ? (
+            <Tooltip
+              label="Peringatan Keamanan"
+              position="left"
+              withArrow
+              radius="md"
+            >
+              <ActionIcon
+                onClick={() => setIsAlertMinimized(false)}
+                variant="filled"
+                size={54}
+                radius="xl"
+                className="bg-gs-danger shadow-[0_10px_30px_rgba(0,0,0,0.1)] hover:scale-110 transition-transform duration-300 animate-in zoom-in-50"
+              >
+                <IconAlertCircle size={28} />
+              </ActionIcon>
+            </Tooltip>
+          ) : (
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+              <Paper
+                withBorder
+                p="md"
+                radius="xl"
+                className="w-full max-w-[320px] bg-white border-gs-danger-border shadow-[0_20px_50px_rgba(0,0,0,0.1)]"
+              >
+                <Group
+                  justify="space-between"
+                  align="flex-start"
+                  mb="xs"
+                  wrap="nowrap"
+                >
+                  <Group gap="md" wrap="nowrap" align="center">
+                    <ThemeIcon
+                      color="var(--gs-danger)"
+                      variant="light"
+                      size="lg"
+                      radius="lg"
+                      className="bg-gs-danger-bg"
+                    >
+                      <IconAlertCircle
+                        size={20}
+                        className="text-gs-danger-text"
+                      />
+                    </ThemeIcon>
+                    <Text fw={800} size="sm" className="text-gs-text-primary">
+                      KEAMANAN AKUN
+                    </Text>
+                  </Group>
+                  <ActionIcon
+                    variant="subtle"
+                    color="var(--gs-text-muted)"
+                    size="sm"
+                    radius="md"
+                    onClick={() => setIsAlertMinimized(true)}
+                    className="hover:bg-gs-bg-hover"
+                  >
+                    <IconMinus size={16} />
+                  </ActionIcon>
+                </Group>
+
+                <Stack gap={10} mt="xs">
+                  <Text size="xs" c="dimmed" fw={500} lh={1.5}>
+                    Anda masih menggunakan kata sandi default. Segera perbarui
+                    kata sandi Anda.
+                  </Text>
+                  <Link
+                    href="/dashboard/profile#keamanan"
+                    className="no-underline"
+                  >
+                    <Button
+                      variant="filled"
+                      className="bg-gs-danger hover:bg-gs-danger-hover font-bold tracking-tight transition-all"
+                      size="xs"
+                      fullWidth
+                      radius="md"
+                    >
+                      GANTI PASSWORD
+                    </Button>
+                  </Link>
+                </Stack>
+              </Paper>
+            </div>
+          )}
+        </Affix>
+      )}
     </AppShell>
   );
 }

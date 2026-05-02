@@ -16,6 +16,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { useMasterData } from "../hooks/use-master-data";
 import { useState } from "react";
+import { ActionIconButton } from "@/components/ui/action-icon-button";
 
 interface Field {
   name: string;
@@ -33,6 +34,7 @@ interface MasterDataListProps {
     label: string;
     render?: (val: any) => React.ReactNode;
   }[];
+  data?: any[];
 }
 
 export function MasterDataList({
@@ -40,9 +42,19 @@ export function MasterDataList({
   title,
   fields,
   columns,
+  data: customData,
 }: MasterDataListProps) {
-  const { data, isLoading, create, update, remove, isCreating, isUpdating } =
-    useMasterData(entity);
+  const {
+    data: fetchedData,
+    isLoading,
+    create,
+    update,
+    remove,
+    isCreating,
+    isUpdating,
+  } = useMasterData(entity);
+
+  const data = customData || fetchedData;
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedId, setSelectedId] = useState<string | number | null>(null);
 
@@ -68,7 +80,8 @@ export function MasterDataList({
           g[1].toUpperCase(),
         );
         acc[field.name] =
-          item[field.name] !== undefined ? item[field.name] : item[camelName];
+          (item[field.name] ?? item[camelName]) ??
+          (field.type === "checkbox" ? false : "");
         return acc;
       }, {} as any),
     );
@@ -139,21 +152,18 @@ export function MasterDataList({
                     </Table.Td>
                   ))}
                   <Table.Td>
-                    <Group gap="xs" wrap="nowrap">
-                      <ActionIcon
-                        variant="subtle"
-                        color="blue"
+                    <Group gap={4} wrap="nowrap" justify="flex-end">
+                      <ActionIconButton
+                        icon={IconEdit}
+                        tooltip="Edit Data"
                         onClick={() => handleEdit(item)}
-                      >
-                        <IconEdit size={16} />
-                      </ActionIcon>
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
+                      />
+                      <ActionIconButton
+                        icon={IconTrash}
+                        tooltip="Hapus Data"
+                        color="var(--gs-danger)"
                         onClick={() => handleDelete(item.id)}
-                      >
-                        <IconTrash size={16} />
-                      </ActionIcon>
+                      />
                     </Group>
                   </Table.Td>
                 </Table.Tr>

@@ -97,7 +97,7 @@ export function MahasiswaBimbinganList({ onlyPA = false }: { onlyPA?: boolean })
           onClick={() => handleShowStudentProfile(row)}
         >
           <Tooltip label="Klik untuk lihat profil">
-            <Text size="sm" fw={700} c="indigo.7">
+            <Text size="sm" fw={700} className="text-gs-primary">
               {row.nama || row.user?.nama || "-"}
             </Text>
           </Tooltip>
@@ -132,14 +132,14 @@ export function MahasiswaBimbinganList({ onlyPA = false }: { onlyPA?: boolean })
         const isP2 = p2Id?.toString() === currentLecturerId;
 
         let label = "Dosen PA";
-        let color = "teal";
+        let color = "var(--gs-success)";
 
         if (isP1) {
           label = "Pembimbing 1";
-          color = "blue";
+          color = "var(--gs-primary)";
         } else if (isP2) {
           label = "Pembimbing 2";
-          color = "cyan";
+          color = "var(--gs-primary)";
         }
 
         return (
@@ -149,7 +149,7 @@ export function MahasiswaBimbinganList({ onlyPA = false }: { onlyPA?: boolean })
             radius="sm"
             tt="uppercase"
             fz={10}
-            fw={800}
+            fw={600}
           >
             {label}
           </Badge>
@@ -171,11 +171,11 @@ export function MahasiswaBimbinganList({ onlyPA = false }: { onlyPA?: boolean })
         return (
           <Badge
             variant="dot"
-            color={status === "aktif" ? "teal" : "gray"}
+            color={status === "aktif" ? "var(--gs-success)" : "var(--gs-text-muted)"}
             radius="xl"
             tt="uppercase"
             fz={10}
-            fw={800}
+            fw={700}
           >
             {status}
           </Badge>
@@ -223,7 +223,7 @@ export function MahasiswaBimbinganList({ onlyPA = false }: { onlyPA?: boolean })
             <Stack align="center" gap="sm">
               <IconUsers
                 size={40}
-                color="var(--mantine-color-slate-3)"
+                color="var(--gs-border-strong)"
                 stroke={1.5}
               />
               <Text c="dimmed" size="sm" fw={500}>
