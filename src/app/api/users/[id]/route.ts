@@ -58,7 +58,7 @@ export async function DELETE(
     if (!user.roles.includes("superadmin")) {
       const targetUser = await prisma.user.findUnique({
         where: { id: Number(id) },
-        select: { prodiId: true },
+        select: { prodiId: true } as any,
       });
       if (targetUser && user.prodiId && targetUser.prodiId !== user.prodiId) {
         return NextResponse.json({ message: "Forbidden" }, { status: 403 });
