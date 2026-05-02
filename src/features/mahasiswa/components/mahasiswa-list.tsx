@@ -311,7 +311,7 @@ export function MahasiswaList() {
                   clearable
                   radius="md"
                   data={
-                    dosensData?.data?.map((d) => ({
+                    (dosensData as any[])?.map((d) => ({
                       value: d.id.toString(),
                       label: d.nama || "-",
                     })) || []
