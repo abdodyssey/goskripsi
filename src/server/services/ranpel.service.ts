@@ -46,8 +46,8 @@ const PENGAJUAN_RANPEL_SELECT = {
       id: true,
       nim: true,
       user: { select: { id: true, nama: true, email: true } },
-      prodi: { select: { id: true, namaProdi: true } },
-      peminatan: { select: { id: true, namaPeminatan: true } },
+      prodi: { select: { id: true, namaProdi: true, fakultasId: true } },
+      peminatan: { select: { id: true, namaPeminatan: true, prodiId: true } },
       dosenPaRel: {
         select: {
           id: true,
@@ -109,6 +109,55 @@ export class RanpelService {
       where.mahasiswa = {
         prodiId,
       };
+    }
+
+    try {
+      const [list, total] = await Promise.all([
+        prisma.pengajuanRancanganPenelitian.findMany({
+          where,
+          skip,
+          take,
+          select: PENGAJUAN_RANPEL_SELECT,
+          orderBy: { tanggalPengajuan: "desc" },
+        }),
+        prisma.pengajuanRancanganPenelitian.count({ where }),
+      ]);
+
+      return {
+        data: list.map((p) => this.transformPengajuan(p)),
+        meta: createPaginationMeta(total, Math.floor(skip / take) + 1, take),
+      };
+    } catch (error: any) {
+      console.error("[RanpelService] getAllPengajuan error:", error.message);
+      if (error.message.includes("relationLoadStrategy") || error.message.includes("Query engine")) {
+        return await this.getAllPengajuanWithoutStrategy(params);
+      }
+      throw error;
+    }
+  }
+
+  private async getAllPengajuanWithoutStrategy(params: {
+    userId?: string;
+    roles?: string[];
+    skip?: number;
+    take?: number;
+    prodiId?: number | null;
+  }) {
+    const { userId, roles = [], skip = 0, take = 10, prodiId } = params;
+    const where: any = {};
+
+    const isManagement = roles.some((r) =>
+      ["admin", "superadmin", "kaprodi", "sekprodi"].includes(r),
+    );
+
+    if (userId && roles.includes("dosen") && !isManagement) {
+      if (!isNaN(Number(userId))) {
+        where.mahasiswa = { dosenPa: Number(userId) };
+      }
+    }
+
+    if (isManagement && !roles.includes("superadmin") && prodiId) {
+      where.mahasiswa = { prodiId };
     }
 
     const [list, total] = await Promise.all([
@@ -384,6 +433,42 @@ export class RanpelService {
     if (!mahasiswaId || isNaN(Number(mahasiswaId)))
       return { data: [], meta: createPaginationMeta(0, 1, take) };
 
+    const where = { mahasiswaId: Number(mahasiswaId) };
+
+    try {
+      const [list, total] = await Promise.all([
+        prisma.pengajuanRancanganPenelitian.findMany({
+          where,
+          skip,
+          take,
+          select: PENGAJUAN_RANPEL_SELECT,
+          orderBy: { id: "desc" },
+        }),
+        prisma.pengajuanRancanganPenelitian.count({ where }),
+      ]);
+
+      return {
+        data: list.map((p) => this.transformPengajuan(p)),
+        meta: createPaginationMeta(total, Math.floor(skip / take) + 1, take),
+      };
+    } catch (error: any) {
+      console.error("[RanpelService] getPengajuanByMahasiswa error:", error.message);
+      
+      // Fallback for relationLoadStrategy error or other Prisma query issues
+      if (error.message.includes("relationLoadStrategy") || error.message.includes("Query engine")) {
+        console.log("[RanpelService] Attempting fallback without strategy...");
+        return await this.getPengajuanByMahasiswaWithoutStrategy(params);
+      }
+      throw error;
+    }
+  }
+
+  private async getPengajuanByMahasiswaWithoutStrategy(params: {
+    mahasiswaId: string;
+    skip?: number;
+    take?: number;
+  }) {
+    const { mahasiswaId, skip = 0, take = 10 } = params;
     const where = { mahasiswaId: Number(mahasiswaId) };
 
     const [list, total] = await Promise.all([

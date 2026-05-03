@@ -28,10 +28,17 @@ export async function GET(
 
     return NextResponse.json({ ...result, success: true });
   } catch (error: any) {
-    console.error("ERROR in GET /api/ranpel/mahasiswa/[id]:", error);
+    console.error("ERROR in GET /api/ranpel/mahasiswa/[id]:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code
+    });
+
     return NextResponse.json({ 
       message: error.message || "Unknown Error", 
       success: false,
+      error: error.message,
       stack: process.env.NODE_ENV === "development" ? error.stack : undefined 
     }, { status: 500 });
   }
