@@ -21,11 +21,18 @@ apiClient.interceptors.request.use((config) => {
 
 // Interceptor untuk handle BigInt agar tidak pecah di UI
 apiClient.interceptors.response.use((response) => {
-  const transformBigInt = (obj: unknown): unknown => {
+  const transformBigInt = (obj: any): any => {
     if (obj === null || obj === undefined) return obj;
     if (typeof obj === "bigint") return obj.toString();
     if (Array.isArray(obj)) return obj.map(transformBigInt);
     if (typeof obj === "object") {
+      // Don't recurse into common built-in objects that are not plain objects
+      if (obj instanceof Date || obj instanceof Blob || obj instanceof File) return obj;
+      
+      // Check if it's a plain object or something else
+      const proto = Object.getPrototypeOf(obj);
+      if (proto !== null && proto !== Object.prototype) return obj;
+
       return Object.fromEntries(
         Object.entries(obj).map(([k, v]) => [k, transformBigInt(v)]),
       );

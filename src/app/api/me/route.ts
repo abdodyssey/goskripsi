@@ -30,14 +30,13 @@ export async function GET(request: Request) {
     
     return NextResponse.json(profile);
   } catch (error: any) {
-    // Keeping a single clean error log for production monitoring
-    console.error(`[API] /api/me error: ${error.message}`);
+    console.error(`[API] /api/me error:`, error);
 
     return NextResponse.json(
       { 
-        message: "Internal Server Error", 
+        message: error.message || "Internal Server Error", 
         success: false,
-        error: process.env.NODE_ENV === "development" ? error.message : undefined
+        error: error.message
       },
       { status: 500 },
     );

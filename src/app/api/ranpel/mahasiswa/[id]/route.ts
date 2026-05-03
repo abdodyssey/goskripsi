@@ -28,8 +28,12 @@ export async function GET(
 
     return NextResponse.json({ ...result, success: true });
   } catch (error: any) {
-    console.error("ERROR in GET /api/ranpel/mahasiswa/[id]:", error.message);
-    return NextResponse.json({ message: error.message, success: false }, { status: 500 });
+    console.error("ERROR in GET /api/ranpel/mahasiswa/[id]:", error);
+    return NextResponse.json({ 
+      message: error.message || "Unknown Error", 
+      success: false,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined 
+    }, { status: 500 });
   }
 }
 
