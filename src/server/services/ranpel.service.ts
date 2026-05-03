@@ -433,59 +433,92 @@ export class RanpelService {
     if (!mahasiswaId || isNaN(Number(mahasiswaId)))
       return { data: [], meta: createPaginationMeta(0, 1, take) };
 
-    const where = { mahasiswaId: Number(mahasiswaId) };
+    const mId = Number(mahasiswaId);
 
     try {
-      const [list, total] = await Promise.all([
-        prisma.pengajuanRancanganPenelitian.findMany({
-          where,
-          skip,
-          take,
-          select: PENGAJUAN_RANPEL_SELECT,
-          orderBy: { id: "desc" },
+      // Optimization: Fetch student data once since it's the same for all rows
+      // This reduces join complexity which often causes issues in production
+      const [m, [list, total]] = await Promise.all([
+        prisma.mahasiswa.findUnique({
+          where: { id: mId },
+          select: PENGAJUAN_RANPEL_SELECT.mahasiswa.select
         }),
-        prisma.pengajuanRancanganPenelitian.count({ where }),
+        Promise.all([
+          prisma.pengajuanRancanganPenelitian.findMany({
+            where: { mahasiswaId: mId },
+            skip,
+            take,
+            select: {
+              ...PENGAJUAN_RANPEL_SELECT,
+              mahasiswa: false // Don't join here, we have it already
+            },
+            orderBy: { id: "desc" },
+          }),
+          prisma.pengajuanRancanganPenelitian.count({ where: { mahasiswaId: mId } }),
+        ])
       ]);
 
+      if (!m) {
+        console.warn(`[RanpelService] Mahasiswa with ID ${mId} not found`);
+        return { data: [], meta: createPaginationMeta(0, 1, take) };
+      }
+
+      // Merge student data back into each pengajuan object
+      const transformedData = list.map((p) => {
+        const fullPengajuan = { ...p, mahasiswa: m };
+        return this.transformPengajuan(fullPengajuan);
+      });
+
       return {
-        data: list.map((p) => this.transformPengajuan(p)),
+        data: transformedData,
         meta: createPaginationMeta(total, Math.floor(skip / take) + 1, take),
       };
     } catch (error: any) {
-      console.error("[RanpelService] getPengajuanByMahasiswa error:", error.message);
+      console.error("[RanpelService] getPengajuanByMahasiswa error:", {
+        message: error.message,
+        code: error.code,
+        meta: error.meta
+      });
       
-      // Fallback for relationLoadStrategy error or other Prisma query issues
-      if (error.message.includes("relationLoadStrategy") || error.message.includes("Query engine")) {
-        console.log("[RanpelService] Attempting fallback without strategy...");
-        return await this.getPengajuanByMahasiswaWithoutStrategy(params);
-      }
-      throw error;
+      // Fallback for any Prisma error that might be environment-specific
+      console.log("[RanpelService] Attempting simple fallback...");
+      return await this.getPengajuanByMahasiswaSimple(params);
     }
   }
 
-  private async getPengajuanByMahasiswaWithoutStrategy(params: {
+  /**
+   * Extremely simple fallback that avoids most joins to ensure data visibility
+   */
+  private async getPengajuanByMahasiswaSimple(params: {
     mahasiswaId: string;
     skip?: number;
     take?: number;
   }) {
     const { mahasiswaId, skip = 0, take = 10 } = params;
-    const where = { mahasiswaId: Number(mahasiswaId) };
+    const mId = Number(mahasiswaId);
 
-    const [list, total] = await Promise.all([
-      prisma.pengajuanRancanganPenelitian.findMany({
-        where,
-        skip,
-        take,
-        select: PENGAJUAN_RANPEL_SELECT,
-        orderBy: { id: "desc" },
-      }),
-      prisma.pengajuanRancanganPenelitian.count({ where }),
-    ]);
+    try {
+      const [list, total] = await Promise.all([
+        prisma.pengajuanRancanganPenelitian.findMany({
+          where: { mahasiswaId: mId },
+          skip,
+          take,
+          include: {
+            rancanganPenelitian: true,
+          },
+          orderBy: { id: "desc" },
+        }),
+        prisma.pengajuanRancanganPenelitian.count({ where: { mahasiswaId: mId } }),
+      ]);
 
-    return {
-      data: list.map((p) => this.transformPengajuan(p)),
-      meta: createPaginationMeta(total, Math.floor(skip / take) + 1, take),
-    };
+      return {
+        data: list.map(p => this.transformPengajuan(p)),
+        meta: createPaginationMeta(total, Math.floor(skip / take) + 1, take),
+      };
+    } catch (err: any) {
+      console.error("[RanpelService] Simple fallback also failed:", err.message);
+      throw err;
+    }
   }
 
   async getPengajuanById(id: string) {

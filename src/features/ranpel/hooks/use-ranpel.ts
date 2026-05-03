@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ranpelService } from "../api/ranpel.service";
 import { CreateRanpelFormValues } from "../schemas/ranpel.schema";
@@ -11,6 +12,16 @@ export const useRanpelByMahasiswa = (mahasiswaId?: string) => {
     queryFn: () => ranpelService.getPengajuanByMahasiswa(mahasiswaId as string),
     enabled: !!mahasiswaId,
   });
+
+  // Debug logging for production
+  useEffect(() => {
+    if (pengajuanQuery.data) {
+      console.log("[useRanpelByMahasiswa] Data received:", pengajuanQuery.data);
+    }
+    if (pengajuanQuery.error) {
+      console.error("[useRanpelByMahasiswa] Error:", pengajuanQuery.error);
+    }
+  }, [pengajuanQuery.data, pengajuanQuery.error]);
 
   // Mutation to create ranpel
   const createMutation = useMutation({
