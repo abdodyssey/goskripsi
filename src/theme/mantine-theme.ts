@@ -61,7 +61,6 @@ export const theme = createTheme({
     fontFamily: 'Inter, sans-serif',
     sizes: {
       h1: {
-        fontFamily: 'Inter, sans-serif',
         fontSize: 'clamp(1.375rem, 2vw, 1.625rem)',
         fontWeight: '700',
         lineHeight: '1.35',
