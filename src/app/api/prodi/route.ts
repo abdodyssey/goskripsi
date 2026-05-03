@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { prodiService } from "@/server/services/prodi.service";
 import { getAuthUser } from "@/lib/auth-helper";

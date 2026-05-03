@@ -3,6 +3,8 @@ import { getAuthUser } from "@/lib/auth-helper";
 import { prisma } from "@/lib/prisma";
 import { pdfService } from "@/server/services/pdf.service";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   const user = await getAuthUser(request);
   if (!user)

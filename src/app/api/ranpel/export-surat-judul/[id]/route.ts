@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+export const dynamic = 'force-dynamic';
 import { ranpelService } from "@/server/services/ranpel.service";
 import { getAuthUser } from "@/lib/auth-helper";
 import { prisma } from "@/lib/prisma";

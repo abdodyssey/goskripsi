@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { perbaikanJudulService } from "@/server/services/perbaikan-judul.service";
 import { getAuthUser } from "@/lib/auth-helper";

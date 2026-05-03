@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY?.trim());
+const resend = new Resend(process.env.RESEND_API_KEY?.trim() || "re_placeholder");
 
 export class MailService {
   private from = "GoSkripsi <notifikasi@rafanovation.cloud>";

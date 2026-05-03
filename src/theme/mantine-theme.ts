@@ -115,7 +115,7 @@ export const theme = createTheme({
         fw: 500,
         size: "sm",
       },
-      styles: (_, { variant }) => ({
+      styles: (_: any, { variant }: any) => ({
         root: {
           ...(variant === 'filled' && {
             backgroundColor: 'var(--gs-primary)',
