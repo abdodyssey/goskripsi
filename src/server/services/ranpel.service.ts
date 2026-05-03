@@ -448,10 +448,10 @@ export class RanpelService {
             where: { mahasiswaId: mId },
             skip,
             take,
-            select: {
-              ...PENGAJUAN_RANPEL_SELECT,
-              mahasiswa: false // Don't join here, we have it already
-            },
+            select: (() => {
+              const { mahasiswa: _, ...rest } = PENGAJUAN_RANPEL_SELECT as any;
+              return rest;
+            })(),
             orderBy: { id: "desc" },
           }),
           prisma.pengajuanRancanganPenelitian.count({ where: { mahasiswaId: mId } }),
